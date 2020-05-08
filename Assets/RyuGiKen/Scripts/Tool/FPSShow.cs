@@ -42,7 +42,7 @@ namespace RyuGiKen.Tools
         void FPS()//显示FPS
         {
             FrameCount += 1;
-            passTime += Time.deltaTime;
+            passTime += Time.unscaledDeltaTime;//Time.deltaTime;
 
             if (passTime > fixTime)
             {
