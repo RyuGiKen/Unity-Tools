@@ -14,10 +14,16 @@ namespace RyuGiKen.Tools
         public bool hide = true;//默认隐藏
         public Text FPSText;
         float passTime;
+        float deltaTime = 0;
         float m_FPS;
         int FrameCount;
         public float fixTime = 1;
         public KeyCode hideKey = KeyCode.F7;
+
+        [Header("根据帧数自动切换画质(连续10s)")]
+        public bool autoAdjustQualityLevel = false;//根据帧数自动切换画质
+        public int adjustMinFPS = 20;
+        public int adjustMaxFPS = 50;
         private void Start()
         {
             if (FPSText == null)
@@ -38,8 +44,33 @@ namespace RyuGiKen.Tools
                 FPSText.enabled = !hide;
                 FPS();
             }
+            if (autoAdjustQualityLevel && m_FPS < adjustMinFPS)//自动降低画质
+            {
+                if (deltaTime <= 0)
+                    deltaTime -= Time.deltaTime;
+                else
+                    deltaTime = 0;
+                if (deltaTime <= -10)
+                {
+                    QualitySettings.DecreaseLevel();
+                }
+            }
+            else if (autoAdjustQualityLevel && m_FPS > adjustMaxFPS)//自动提高画质
+            {
+                if (deltaTime >= 0)
+                    deltaTime += Time.deltaTime;
+                else
+                    deltaTime = 0;
+                if (deltaTime >= 10)
+                {
+                    QualitySettings.IncreaseLevel();
+                }
+            }
         }
-        void FPS()//显示FPS
+        /// <summary>
+        /// 显示FPS
+        /// </summary>
+        void FPS()
         {
             FrameCount += 1;
             passTime += Time.unscaledDeltaTime;//Time.deltaTime;
@@ -47,7 +78,7 @@ namespace RyuGiKen.Tools
             if (passTime > fixTime)
             {
                 m_FPS = Mathf.RoundToInt(FrameCount / passTime);
-                FPSText.text = "FPS  " + m_FPS.ToString();
+                FPSText.text = "FPS  " + m_FPS.ToString() + "  " + QualitySettings.GetQualityLevel().ToString();
                 passTime = 0.0f;
                 FrameCount = 0;
             }

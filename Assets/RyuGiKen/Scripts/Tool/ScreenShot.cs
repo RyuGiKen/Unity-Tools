@@ -17,7 +17,10 @@ namespace RyuGiKen.Tools
         {
             if (Input.GetKeyDown(ScreenShotKey) && Application.isPlaying)
             {
-                ScreenCapture.CaptureScreenshot(fileName + ".png");
+                if (fileName != "")
+                    ScreenCapture.CaptureScreenshot(fileName + ".png");
+                else
+                    ScreenCapture.CaptureScreenshot(Application.productName + ".png");
             }
         }
     }

@@ -10,6 +10,220 @@ using Object = UnityEngine.Object;
 /// </summary>
 namespace RyuGiKen
 {
+    public static class ValueAdjust
+    {
+        /// <summary>
+        /// 调整循环范围(当前值，最小值，最大值，循环周期)
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        public static float SetRange(float num, float min, float max, float period)
+        {
+            float numAdjusted = num;
+            if (num > max)
+                numAdjusted -= period;
+            else if (num < min)
+                numAdjusted += period;
+            return numAdjusted;
+        }
+        /// <summary>
+        /// 直角坐标转换成极坐标系
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public static Vector2 RectToPolar(Vector2 pos)
+        {
+            float Distance = 0, Angle = 0;
+            Distance = Mathf.Sqrt(pos.x * pos.x + pos.y * pos.y);
+            if (Distance == 0)
+            { Angle = 0; }
+            else
+            { Angle = Mathf.Atan2(pos.y, pos.x) / Mathf.Deg2Rad; }
+
+            while (Angle < 0)
+            { Angle += 360; }
+
+            return new Vector2(Angle, Distance);
+        }
+        /// <summary>
+        /// 极坐标转换成直角坐标系
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <param name="dis"></param>
+        /// <returns></returns>
+        public static Vector2 PolarToRect(float angle, float dis)
+        {
+            Vector2 rectpos;
+            rectpos.x = dis * Mathf.Cos(angle * Mathf.Deg2Rad);
+            rectpos.y = dis * Mathf.Sin(angle * Mathf.Deg2Rad);
+            return rectpos;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减；
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="n"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static float Progress(float x, float n, float a, float b)//(参数，递增减系数正负1，x最小值，x最大值)
+        {
+            float temp;
+            if (a == b)
+            { return 0; }
+            else if (a > b)
+            {
+                temp = a;
+                a = b;
+                b = temp;
+            }
+            if (x < a)
+            { x = a; }
+            if (x > b)
+            { x = b; }
+            if (n < 0)
+            {
+                return (x - b) / (a - b);//输出[-1,0]
+            }
+            else
+            {
+                return (x - a) / (b - a);//输出[0,1]
+            }
+        }
+        /// <summary>
+        /// 汉字整数数字显示（最大正负9999）；
+        /// </summary>
+        public static string NumShowCN(float N)//汉字数字显示
+        {
+            float num;
+            string NumZ = "";
+            string RoundD = "";//汉字数字千位
+            string RoundC = "";//汉字数字百位
+            string RoundB = "";//汉字数字十位
+            string RoundA = "";//汉字数字个位
+            int D = 0;//数字千位
+            int C = 0;//数字百位
+            int B = 0;//数字十位
+            int A = 0;//数字个位
+
+            if (N < 0)
+            { num = -N; }
+            else
+            { num = N; }
+            if (num < 1)
+            {
+                RoundD = "";
+                RoundC = "";
+                RoundB = "";
+                RoundA = "零";
+            }
+            else if (num > 9999)
+            {
+                RoundD = "九千";
+                RoundC = "九百";
+                RoundB = "九十";
+                RoundA = "九";
+            }
+            else
+            {
+                //数字千位
+                if (num > 999)
+                {
+                    D = Mathf.FloorToInt(num / 1000);
+                    switch (D)
+                    {
+                        case 1: RoundD = "一千"; break;
+                        case 2: RoundD = "二千"; break;
+                        case 3: RoundD = "三千"; break;
+                        case 4: RoundD = "四千"; break;
+                        case 5: RoundD = "五千"; break;
+                        case 6: RoundD = "六千"; break;
+                        case 7: RoundD = "七千"; break;
+                        case 8: RoundD = "八千"; break;
+                        case 9: RoundD = "九千"; break;
+                        default: RoundD = ""; break;
+                    }
+                }
+                //数字百位
+                if (num > 99)
+                {
+                    C = Mathf.FloorToInt((num - D * 1000) / 100);
+                    switch (C)
+                    {
+                        case 1: RoundC = "一百"; break;
+                        case 2: RoundC = "二百"; break;
+                        case 3: RoundC = "三百"; break;
+                        case 4: RoundC = "四百"; break;
+                        case 5: RoundC = "五百"; break;
+                        case 6: RoundC = "六百"; break;
+                        case 7: RoundC = "七百"; break;
+                        case 8: RoundC = "八百"; break;
+                        case 9: RoundC = "九百"; break;
+                        default: RoundC = ""; break;
+                    }
+                }
+                //数字十位
+                if (num > 9)
+                {
+                    B = Mathf.FloorToInt((num - D * 1000 - C * 100) / 10);
+                    switch (B)
+                    {
+                        case 1: RoundB = "一十"; break;
+                        case 2: RoundB = "二十"; break;
+                        case 3: RoundB = "三十"; break;
+                        case 4: RoundB = "四十"; break;
+                        case 5: RoundB = "五十"; break;
+                        case 6: RoundB = "六十"; break;
+                        case 7: RoundB = "七十"; break;
+                        case 8: RoundB = "八十"; break;
+                        case 9: RoundB = "九十"; break;
+                        default: RoundB = ""; break;
+                    }
+                }
+                //数字个位
+                A = Mathf.FloorToInt(num - D * 1000 - C * 100 - B * 10);
+                switch (A)
+                {
+                    case 1: RoundA = "一"; break;
+                    case 2: RoundA = "二"; break;
+                    case 3: RoundA = "三"; break;
+                    case 4: RoundA = "四"; break;
+                    case 5: RoundA = "五"; break;
+                    case 6: RoundA = "六"; break;
+                    case 7: RoundA = "七"; break;
+                    case 8: RoundA = "八"; break;
+                    case 9: RoundA = "九"; break;
+                    default: RoundA = ""; break;
+                }
+
+                if (D == 0 && C == 0 && B == 1)
+                {
+                    RoundB = "十";
+                }
+                else if (C > 0 && B == 0 && A > 0)
+                {
+                    RoundB = "零";
+                }
+                else if (D > 0 && C == 0 && B > 0)
+                {
+                    RoundC = "零";
+                }
+                else if (D > 0 && C == 0 && B == 0 && A > 0)
+                {
+                    RoundC = "零";
+                }
+            }
+            NumZ = RoundD + RoundC + RoundB + RoundA;
+            if (N < 0)
+                NumZ = "负" + NumZ;
+
+            //Debug.Log(NumZ);
+            return NumZ;
+        }
+    }
     public struct HSVColor
     {
         [Tooltip("色调[0，360]")] public float Hue;
