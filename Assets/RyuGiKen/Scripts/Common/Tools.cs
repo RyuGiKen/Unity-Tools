@@ -94,6 +94,44 @@ namespace RyuGiKen
             }
         }
         /// <summary>
+        /// 输出"00:00:00"
+        /// </summary>
+        /// <param name="time">秒</param>
+        /// <param name="digit">位数</param>
+        /// <param name="ShowMillisecond">显示毫秒</param>
+        /// <returns></returns>
+        public static string ShowTime(float time, int digit = 3, bool ShowMillisecond = false)
+        {
+            string sTime = "";
+            string sign = "";
+            if (time < 0)
+            {
+                time = Mathf.Abs(time);
+                sign = "-";
+            }
+            switch (digit)
+            {
+                default:
+                case 1:
+                    sTime = time.ToString("0");
+                    break;
+                case 2:
+                    sTime = ((int)(time / 60)).ToString(time / 60 < 100 ? "D2" : "") + ":" + ((int)(time % 60)).ToString("D2");
+                    break;
+                case 3:
+                    sTime = ((int)(time / 3600)).ToString(time / 3600 < 100 ? "D2" : "") + ":" + ((int)(time / 60) % 60).ToString("D2") + ":" + ((int)(time % 60)).ToString("D2");
+                    break;
+                case 4:
+                    sTime = ((int)(time / (3600 * 24))).ToString("D2") + ":" + ((int)(time / 3600) % 60).ToString("D2") + ":" + ((int)(time / 60) % 60).ToString("D2") + ":" + ((int)(time % 60)).ToString("D2");
+                    break;
+            }
+            if (ShowMillisecond)
+            {
+                sTime += ":" + ((int)((time - (int)time) * 1000)).ToString("D3");
+            }
+            return sign + sTime;
+        }
+        /// <summary>
         /// 汉字整数数字显示（最大正负9999）；
         /// </summary>
         public static string NumShowCN(float N)//汉字数字显示
