@@ -72,5 +72,62 @@ namespace RyuGiKen.Tools
             playing = false;
             mTime = 0;
         }
+        /// <summary>
+        /// 停止抖动、立刻归位
+        /// </summary>
+        public void StopAndReturnImmediately()
+        {
+            playing = false;
+            mTime = 0;
+            this.transform.localPosition = originPos;
+        }
+        /// <summary>
+        /// 抖动一定时间后停止、立刻归位
+        /// </summary>
+        /// <param name="time"></param>
+        public void PlayAndStopReturnImmediatelyWait(float time)
+        {
+            playing = true;
+            mTime = 0;
+            StopAllCoroutines();
+            StartCoroutine(WaitForStopAndReturnImmediately(time));
+        }
+        IEnumerator WaitForStopAndReturnImmediately(float time)
+        {
+            yield return new WaitForSeconds(time);
+            StopAndReturnImmediately();
+        }
+        /// <summary>
+        /// 抖动一定时间后停止、归位
+        /// </summary>
+        /// <param name="time"></param>
+        public void PlayAndStopReturnWait(float time)
+        {
+            playing = true;
+            mTime = 0;
+            StopAllCoroutines();
+            StartCoroutine(WaitForStopAndReturn(time));
+        }
+        IEnumerator WaitForStopAndReturn(float time)
+        {
+            yield return new WaitForSeconds(time);
+            StopAndReturn();
+        }
+        /// <summary>
+        /// 抖动一定时间后停止、不归位
+        /// </summary>
+        /// <param name="time"></param>
+        public void PlayAndStopWait(float time)
+        {
+            playing = true;
+            mTime = 0;
+            StopAllCoroutines();
+            StartCoroutine(WaitForStop(time));
+        }
+        IEnumerator WaitForStop(float time)
+        {
+            yield return new WaitForSeconds(time);
+            Stop();
+        }
     }
 }

@@ -11,19 +11,19 @@ namespace RyuGiKen.Tools
     [DisallowMultipleComponent]
     public class FPSShow : MonoBehaviour
     {
-        public bool hide = true;//默认隐藏
+        [Tooltip("隐藏")] public bool hide = true;//默认隐藏
         public Text FPSText;
         float passTime;
         float deltaTime = 0;
         float m_FPS;
         int FrameCount;
-        public float fixTime = 1;
-        public KeyCode hideKey = KeyCode.F7;
+        [Tooltip("统计时间")] public float fixTime = 1;
+        [Tooltip("切换按键")] public KeyCode hideKey = KeyCode.F7;
 
         [Header("根据帧数自动切换画质(连续10s)")]
         public bool autoAdjustQualityLevel = false;//根据帧数自动切换画质
-        public int adjustMinFPS = 20;
-        public int adjustMaxFPS = 50;
+        [Tooltip("最小帧数")] public int adjustMinFPS = 20;
+        [Tooltip("最大帧数")] public int adjustMaxFPS = 50;
         private void Start()
         {
             if (FPSText == null)
