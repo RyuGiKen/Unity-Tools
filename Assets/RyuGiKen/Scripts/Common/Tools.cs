@@ -13,6 +13,37 @@ namespace RyuGiKen
     public static class ValueAdjust
     {
         /// <summary>
+        /// 精确到小数点后几位（值，位数）
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="digits">位数</param>
+        /// <returns></returns>
+        public static float Round(this float value, int digits)
+        {
+            //return Mathf.Round(value * Mathf.Pow(10, digits)) * Mathf.Pow(0.1f, digits);
+            return float.Parse(value.ToString("f" + digits));
+        }
+        /// <summary>
+        /// 精确到小数点后几位（值，位数）
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="digits">位数</param>
+        /// <returns></returns>
+        public static Vector2 Round(this Vector2 value, int digits)
+        {
+            return new Vector2(Round(value.x, digits), Round(value.y, digits));
+        }
+        /// <summary>
+        /// 精确到小数点后几位（值，位数）
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="digits">位数</param>
+        /// <returns></returns>
+        public static Vector3 Round(this Vector3 value, int digits)
+        {
+            return new Vector3(Round(value.x, digits), Round(value.y, digits), Round(value.z, digits));
+        }
+        /// <summary>
         /// 调整循环范围(当前值，最小值，最大值，循环周期)
         /// </summary>
         /// <param name="num"></param>
