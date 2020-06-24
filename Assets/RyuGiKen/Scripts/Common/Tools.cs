@@ -10,8 +10,76 @@ using Object = UnityEngine.Object;
 /// </summary>
 namespace RyuGiKen
 {
+    /// <summary>
+    /// 对象调整
+    /// </summary>
+    public static class ObjectAdjust
+    {
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetActive(this GameObject[] GO, bool active)
+        {
+            foreach (var item in GO)
+            {
+                item.SetActive(active);
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetActive<T>(this T[] GO, bool active) where T : Component
+        {
+            foreach (var item in GO)
+            {
+                item.gameObject.SetActive(active);
+            }
+        }
+    }
+    /// <summary>
+    /// 数值调整
+    /// </summary>
     public static class ValueAdjust
     {
+        /// <summary>
+        /// 输出y=(k*（x + b）^2) + a；
+        /// </summary>
+        public static float Quadratic(float X, float k, float b, float a)
+        {
+            return (X + b) * (X + b) * k + a;
+        }
+        /// <summary>
+        /// 输出y=√（（x+b）/ k）；
+        /// </summary>
+        public static float Square(float X, float b, float k)
+        {
+            return Mathf.Sqrt(Mathf.Abs((X + b) / k));
+        }
+        /// <summary>
+        /// 判定是否在一定误差范围内约等于目标值
+        /// </summary>
+        /// <param name="CurrentValue"></param>
+        /// <param name="TargetValue"></param>
+        /// <param name="ErrorRange"></param>
+        /// <returns></returns>
+        public static bool JudgeRange(float CurrentValue, float TargetValue, float ErrorRange)
+        {
+            if (CurrentValue >= (TargetValue - ErrorRange * 0.5f))
+            {
+                if (CurrentValue <= (TargetValue + ErrorRange * 0.5f))
+                    return true;
+                else
+                    return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
         /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
@@ -293,6 +361,9 @@ namespace RyuGiKen
             return NumZ;
         }
     }
+    /// <summary>
+    /// 颜色（HSV模式）
+    /// </summary>
     public struct HSVColor
     {
         [Tooltip("色调[0，360]")] public float Hue;
@@ -338,6 +409,9 @@ namespace RyuGiKen
             return ToVector4().ToString();
         }
     }
+    /// <summary>
+    /// 颜色调整
+    /// </summary>
     public static class ColorAdjust
     {
         /// <summary>
