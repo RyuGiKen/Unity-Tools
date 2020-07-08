@@ -39,6 +39,30 @@ namespace RyuGiKen
                 item.gameObject.SetActive(active);
             }
         }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetActive(this List<GameObject> GO, bool active)
+        {
+            foreach (var item in GO)
+            {
+                item.SetActive(active);
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetActive<T>(this List<T> GO, bool active) where T : Component
+        {
+            foreach (var item in GO)
+            {
+                item.gameObject.SetActive(active);
+            }
+        }
     }
     /// <summary>
     /// 数值调整
@@ -46,8 +70,152 @@ namespace RyuGiKen
     public static class ValueAdjust
     {
         /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <returns></returns>
+        public static Vector3 Lerp(Vector3 A, Vector3 B, float step, Vector3 NormalSpeed)
+        {
+            if ((B - A).magnitude <= NormalSpeed.magnitude * step)
+                return B;
+            else if (NormalSpeed.magnitude == 0 || step == 0)
+                return A;
+            return new Vector3(Lerp(A.x, B.x, step, NormalSpeed.x), Lerp(A.y, B.y, step, NormalSpeed.y), Lerp(A.z, B.z, step, NormalSpeed.z));
+        }
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s，超出差值范围时的速度/s，差值范围）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <param name="PlusSpeed ">超出差值范围时的速度/s</param>
+        /// <param name="setSpeedRange">差值范围</param>
+        /// <returns></returns>
+        public static Vector3 Lerp(Vector3 A, Vector3 B, float step, Vector3 NormalSpeed, Vector3 PlusSpeed, float setSpeedRange = 0)
+        {
+            if ((B - A).magnitude <= NormalSpeed.magnitude * step)
+                return B;
+            else if (NormalSpeed.magnitude == 0 || step == 0)
+                return A;
+            return new Vector3(Lerp(A.x, B.x, step, NormalSpeed.x, PlusSpeed.x, setSpeedRange), Lerp(A.y, B.y, step, NormalSpeed.y, PlusSpeed.y, setSpeedRange), Lerp(A.z, B.z, step, NormalSpeed.z, PlusSpeed.z, setSpeedRange));
+        }
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s，超出差值范围时的速度/s，差值范围）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <param name="PlusSpeed ">超出差值范围时的速度/s</param>
+        /// <param name="setSpeedRange">差值范围</param>
+        /// <returns></returns>
+        public static Vector3 Lerp(Vector3 A, Vector3 B, float step, float NormalSpeed = 1f, float PlusSpeed = 1f, float setSpeedRange = 0)
+        {
+            if ((B - A).magnitude <= NormalSpeed * step)
+                return B;
+            else if (NormalSpeed == 0 || step == 0)
+                return A;
+            Vector3 speed = (B - A).normalized * NormalSpeed;
+            Vector3 plusSpeed = (B - A).normalized * PlusSpeed;
+            return new Vector3(Lerp(A.x, B.x, step, speed.x, plusSpeed.x, setSpeedRange), Lerp(A.y, B.y, step, speed.y, plusSpeed.y, setSpeedRange), Lerp(A.z, B.z, step, speed.z, plusSpeed.z, setSpeedRange));
+        }
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <returns></returns>
+        public static Vector2 Lerp(Vector2 A, Vector2 B, float step, Vector2 NormalSpeed)
+        {
+            if ((B - A).magnitude <= NormalSpeed.magnitude * step)
+                return B;
+            else if (NormalSpeed.magnitude == 0 || step == 0)
+                return A;
+            return new Vector2(Lerp(A.x, B.x, step, NormalSpeed.x), Lerp(A.y, B.y, step, NormalSpeed.y));
+        }
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s，超出差值范围时的速度/s，差值范围）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <param name="PlusSpeed ">超出差值范围时的速度/s</param>
+        /// <param name="setSpeedRange">差值范围</param>
+        /// <returns></returns>
+        public static Vector2 Lerp(Vector2 A, Vector2 B, float step, Vector2 NormalSpeed, Vector2 PlusSpeed, float setSpeedRange = 0)
+        {
+            if ((B - A).magnitude <= NormalSpeed.magnitude * step)
+                return B;
+            else if (NormalSpeed.magnitude == 0 || step == 0)
+                return A;
+            return new Vector2(Lerp(A.x, B.x, step, NormalSpeed.x, PlusSpeed.x, setSpeedRange), Lerp(A.y, B.y, step, NormalSpeed.y, PlusSpeed.y, setSpeedRange));
+        }
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s，超出差值范围时的速度/s，差值范围）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <param name="PlusSpeed ">超出差值范围时的速度/s</param>
+        /// <param name="setSpeedRange">差值范围</param>
+        /// <returns></returns>
+        public static Vector2 Lerp(Vector2 A, Vector2 B, float step, float NormalSpeed = 1f, float PlusSpeed = 1f, float setSpeedRange = 0)
+        {
+            if ((B - A).magnitude <= NormalSpeed * step)
+                return B;
+            else if (NormalSpeed == 0 || step == 0)
+                return A;
+            Vector2 speed = (B - A).normalized * NormalSpeed;
+            Vector2 plusSpeed = (B - A).normalized * PlusSpeed;
+            return new Vector2(Lerp(A.x, B.x, step, speed.x, plusSpeed.x, setSpeedRange), Lerp(A.y, B.y, step, speed.y, plusSpeed.y, setSpeedRange));
+        }
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s，超出差值范围时的速度/s，差值范围）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <param name="PlusSpeed ">超出差值范围时的速度/s</param>
+        /// <param name="setSpeedRange">差值范围</param>
+        /// <returns></returns>
+        public static float Lerp(float A, float B, float step, float NormalSpeed = 1f, float PlusSpeed = 1f, float setSpeedRange = 0)
+        {
+            if (NormalSpeed == 0 || step == 0)
+                return A;
+            float speed = Mathf.Abs(NormalSpeed);
+            if (setSpeedRange != 0)
+            {
+                if (PlusSpeed == 0)
+                    PlusSpeed = speed;
+                setSpeedRange = Mathf.Abs(setSpeedRange) * 0.5f;
+                if (A > B + setSpeedRange || A < B - setSpeedRange)
+                    speed = Mathf.Abs(PlusSpeed);
+            }
+            if (A > B + speed * step)
+                A -= speed * step;
+            else if (A < B - speed * step)
+                A += speed * step;
+            else
+                A = B;
+            return A;
+        }
+        /// <summary>
         /// 输出y=(k*（x + b）^2) + a；
         /// </summary>
+        /// <param name="X"></param>
+        /// <param name="k"></param>
+        /// <param name="b"></param>
+        /// <param name="a"></param>
+        /// <returns></returns>
         public static float Quadratic(float X, float k, float b, float a)
         {
             return (X + b) * (X + b) * k + a;
@@ -55,30 +223,75 @@ namespace RyuGiKen
         /// <summary>
         /// 输出y=√（（x+b）/ k）；
         /// </summary>
+        /// <param name="X"></param>
+        /// <param name="b"></param>
+        /// <param name="k"></param>
+        /// <returns></returns>
         public static float Square(float X, float b, float k)
         {
             return Mathf.Sqrt(Mathf.Abs((X + b) / k));
         }
         /// <summary>
-        /// 判定是否在一定误差范围内约等于目标值
+        /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
         /// </summary>
-        /// <param name="CurrentValue"></param>
-        /// <param name="TargetValue"></param>
-        /// <param name="ErrorRange"></param>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="TargetValue">目标值</param>
+        /// <param name="ErrorRange">误差范围</param>
         /// <returns></returns>
-        public static bool JudgeRange(float CurrentValue, float TargetValue, float ErrorRange)
+        public static bool JudgeRange(this float CurrentValue, float TargetValue, float ErrorRange)
         {
-            if (CurrentValue >= (TargetValue - ErrorRange * 0.5f))
+            if (ErrorRange < 0)
+                ErrorRange = -ErrorRange;
+            if (CurrentValue >= (TargetValue - ErrorRange * 0.5f) && CurrentValue <= (TargetValue + ErrorRange * 0.5f))
             {
-                if (CurrentValue <= (TargetValue + ErrorRange * 0.5f))
-                    return true;
-                else
-                    return false;
+                return true;
             }
             else
             {
                 return false;
             }
+        }
+        /// <summary>
+        /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
+        /// </summary>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="TargetValue">目标值</param>
+        /// <param name="ErrorRange">误差范围</param>
+        /// <returns></returns>
+        public static bool JudgeRange(this Vector2 CurrentValue, Vector2 TargetValue, Vector2 ErrorRange)
+        {
+            if (JudgeRange(CurrentValue.x, TargetValue.x, ErrorRange.x) && JudgeRange(CurrentValue.y, TargetValue.y, ErrorRange.y))
+                return true;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
+        /// </summary>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="TargetValue">目标值</param>
+        /// <param name="ErrorRange">误差范围</param>
+        /// <returns></returns>
+        public static bool JudgeRange(this Vector3 CurrentValue, Vector2 TargetValue, Vector2 ErrorRange)
+        {
+            if (JudgeRange(CurrentValue.x, TargetValue.x, ErrorRange.x) && JudgeRange(CurrentValue.y, TargetValue.y, ErrorRange.y))
+                return true;
+            else
+                return false;
+        }
+        /// <summary>
+        /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
+        /// </summary>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="TargetValue">目标值</param>
+        /// <param name="ErrorRange">误差范围</param>
+        /// <returns></returns>
+        public static bool JudgeRange(this Vector3 CurrentValue, Vector3 TargetValue, Vector3 ErrorRange)
+        {
+            if (JudgeRange(CurrentValue.x, TargetValue.x, ErrorRange.x) && JudgeRange(CurrentValue.y, TargetValue.y, ErrorRange.y) && JudgeRange(CurrentValue.z, TargetValue.z, ErrorRange.z))
+                return true;
+            else
+                return false;
         }
         /// <summary>
         /// 精确到小数点后几位（值，位数）
@@ -114,10 +327,10 @@ namespace RyuGiKen
         /// <summary>
         /// 调整循环范围(当前值，最小值，最大值，循环周期)
         /// </summary>
-        /// <param name="num"></param>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        /// <param name="period"></param>
+        /// <param name="num">当前值</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="period">循环周期</param>
         /// <returns></returns>
         public static float SetRange(float num, float min, float max, float period)
         {
@@ -129,7 +342,7 @@ namespace RyuGiKen
             return numAdjusted;
         }
         /// <summary>
-        /// 直角坐标转换成极坐标系
+        /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
         /// </summary>
         /// <param name="pos"></param>
         /// <returns></returns>
@@ -179,10 +392,7 @@ namespace RyuGiKen
                 a = b;
                 b = temp;
             }
-            if (x < a)
-            { x = a; }
-            if (x > b)
-            { x = b; }
+            x = Mathf.Clamp(x, a, b);
             if (n < 0)
             {
                 return (x - b) / (a - b);//输出[-1,0]
