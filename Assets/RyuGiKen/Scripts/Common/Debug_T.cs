@@ -10,12 +10,18 @@ namespace RyuGiKen.Tools
     [DisallowMultipleComponent]
     public class Debug_T : MonoBehaviour
     {
-        public static bool Enable = true;
-        void LateUpdate()
+        [Tooltip("允许收录")] public static bool CanAdd = true;
+        [Tooltip("允许打印")] public static bool CanPrint = false;
+        public static string Path = Application.streamingAssetsPath;
+        private void Awake()
+        {
+            Clear();
+        }
+        private void LateUpdate()
         {
             if (Input.GetKeyDown(KeyCode.F5))//切换是否打印日志
             {
-                Enable = !Enable;
+                CanPrint = !CanPrint;
             }
             if (Input.GetKeyDown(KeyCode.F6))//清空日志
             {
@@ -28,9 +34,9 @@ namespace RyuGiKen.Tools
         /// <param name="Content"></param>
         public static void Log(string Content)
         {
-            if (Enable)
+            if (CanPrint && Content != "" && Content != null)
             {
-                StreamWriter sw = new StreamWriter(Application.streamingAssetsPath + "/Log.txt", true);
+                StreamWriter sw = new StreamWriter(Path + "/Log.txt", true);
                 string fileTitle = "[" + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff") + "]";
                 sw.WriteLine(fileTitle);
                 //开始写入
@@ -46,7 +52,10 @@ namespace RyuGiKen.Tools
         /// </summary>
         public static void Clear()
         {
-            File.WriteAllText(Application.streamingAssetsPath + "/Log.txt", string.Empty);
+            bool originEnable = CanPrint;
+            CanPrint = false;//清空前需暂停打印
+            File.WriteAllText(Path + "/Log.txt", string.Empty);
+            CanPrint = originEnable;
         }
     }
 }
