@@ -361,12 +361,60 @@ namespace RyuGiKen
             return new Vector2(Angle, Distance);
         }
         /// <summary>
-        /// 极坐标转换成直角坐标系
+        /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
         /// </summary>
-        /// <param name="angle"></param>
-        /// <param name="dis"></param>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
         /// <returns></returns>
-        public static Vector2 PolarToRect(float angle, float dis)
+        public static Vector2 RectToPolar(float X, float Y)
+        {
+            return RectToPolar(new Vector2(X, Y));
+        }
+        /// <summary>
+        /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
+        /// </summary>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
+        /// <param name="Angle"></param>
+        /// <param name="Distance"></param>
+        /// <returns></returns>
+        public static Vector2 RectToPolar(float X, float Y, out float Angle, out float Distance)
+        {
+            Vector2 Pos = RectToPolar(new Vector2(X, Y));
+            Angle = Pos.x;
+            Distance = Pos.y;
+            return Pos;
+        }
+        /// <summary>
+        /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
+        /// </summary>
+        /// <param name="XY"></param>
+        /// <param name="Angle"></param>
+        /// <param name="Distance"></param>
+        /// <returns></returns>
+        public static Vector2 RectToPolar(Vector2 XY, out float Angle, out float Distance)
+        {
+            Vector2 Pos = RectToPolar(XY);
+            Angle = Pos.x;
+            Distance = Pos.y;
+            return Pos;
+        }
+        /// <summary>
+        /// 极坐标转换成直角坐标系 Vector2(角度（0，360）, 距离)
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public static Vector2 PolarToRect(Vector2 pos)
+        {
+            return PolarToRect(pos.x, pos.y);
+        }
+        /// <summary>
+        /// 极坐标转换成直角坐标系(角度（0，360）, 距离)
+        /// </summary>
+        /// <param name="angle">角度（0，360）</param>
+        /// <param name="dis">距离</param>
+        /// <returns></returns>
+        public static Vector2 PolarToRect(float angle, float dis = 1f)
         {
             Vector2 rectpos;
             rectpos.x = dis * Mathf.Cos(angle * Mathf.Deg2Rad);
