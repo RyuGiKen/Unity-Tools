@@ -70,6 +70,15 @@ namespace RyuGiKen
     public static class ValueAdjust
     {
         /// <summary>
+        /// 找出字符串中第一个数字的序号
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        public static int FindIndexOfNumInString(this string number)
+        {
+            return number.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+        }
+        /// <summary>
         ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s）
         /// </summary>
         /// <param name="A">当前值</param>
