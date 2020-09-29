@@ -63,6 +63,93 @@ namespace RyuGiKen
                 item.gameObject.SetActive(active);
             }
         }
+        /// <summary>
+        /// 数组转列表，转组件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static List<T> ToList<T>(this GameObject[] array) where T : Component
+        {
+            List<T> list = new List<T>();
+            for (int i = 0; i < array.Length; i++)
+                if (array[i].GetComponent<T>())
+                    list.Add(array[i].GetComponent<T>());
+                else
+                    list.Add(null);
+            return list;
+        }
+        /// <summary>
+        /// 列表转数组，转组件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static T[] ToArray<T>(this List<GameObject> list) where T : Component
+        {
+            T[] array = new T[list.Count];
+            for (int i = 0; i < array.Length; i++)
+                if (list[i].GetComponent<T>())
+                    array[i] = list[i].GetComponent<T>();
+            return array;
+        }
+        /// <summary>
+        /// 转组件
+        /// </summary>
+        /// <param name="m_List"></param>
+        /// <returns></returns>
+        public static List<T> ToComponent<T>(this List<Component> m_List) where T : Component
+        {
+            List<T> list = new List<T>();
+            for (int i = 0; i < m_List.Count; i++)
+                if (m_List[i].GetComponent<T>())
+                    list.Add(m_List[i].GetComponent<T>());
+                else
+                    list.Add(null);
+            return list;
+        }
+        /// <summary>
+        /// 转组件
+        /// </summary>
+        /// <param name="m_Array"></param>
+        /// <returns></returns>
+        public static T[] ToComponent<T>(this Component[] m_Array) where T : Component
+        {
+            T[] array = new T[m_Array.Length];
+            for (int i = 0; i < array.Length; i++)
+                if (m_Array[i].GetComponent<T>())
+                    array[i] = m_Array[i].GetComponent<T>();
+            return array;
+        }
+        /// <summary>
+        /// 转对象
+        /// </summary>
+        /// <param name="m_List"></param>
+        /// <returns></returns>
+        public static List<GameObject> ToGameObject<T>(this List<T> m_List) where T : Component
+        {
+            List<GameObject> list = new List<GameObject>();
+            for (int i = 0; i < m_List.Count; i++)
+                if (m_List[i].gameObject)
+                    list.Add(m_List[i].gameObject);
+                else
+                    list.Add(null);
+            return list;
+        }
+        /// <summary>
+        /// 转对象
+        /// </summary>
+        /// <param name="m_Array"></param>
+        /// <returns></returns>
+        public static GameObject[] ToGameObject<T>(this T[] m_Array) where T : Component
+        {
+            GameObject[] array = new GameObject[m_Array.Length];
+            for (int i = 0; i < array.Length; i++)
+                if (m_Array[i].gameObject)
+                    array[i] = m_Array[i].gameObject;
+            return array;
+        }
     }
     /// <summary>
     /// 数值调整
