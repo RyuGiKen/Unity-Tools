@@ -23,7 +23,7 @@ namespace RyuGiKen.Tools
             if (audioSource != null && canPlay)
                 if (otherClip.Length > 0 && (!audioSource.isPlaying || Input.GetKeyUp(KeyCode.PageDown) || Input.GetKeyUp(KeyCode.PageUp)))//切换音乐
                 {
-                    int randomNum = Random.Range(0, otherClip.Length - 1);
+                    int randomNum = Random.Range(0, otherClip.Length);
                     if (Input.GetKeyUp(KeyCode.PageUp))
                         randomNum--;
                     if (Input.GetKeyUp(KeyCode.PageDown))
@@ -32,7 +32,8 @@ namespace RyuGiKen.Tools
                         randomNum = otherClip.Length - 1;
                     else if (randomNum >= otherClip.Length)
                         randomNum = 0;
-                    audioSource.clip = otherClip[randomNum]; audioSource.Play();
+                    audioSource.clip = otherClip[randomNum]; 
+                    audioSource.Play();
                 }
         }
     }

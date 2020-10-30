@@ -157,6 +157,143 @@ namespace RyuGiKen
     public static class ValueAdjust
     {
         /// <summary>
+        /// 数组转列表
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static List<T> ToList<T>(this T[] array)
+        {
+            List<T> list = new List<T>();
+            for (int i = 0; i < array.Length; i++)
+                list.Add(array[i]);
+            return list;
+        }
+        /// <summary>
+        /// 列表转数组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static T[] ToArray<T>(this List<T> list)
+        {
+            return list.ToArray();
+        }
+        /// <summary>
+        /// 随机多选多(数组，取值量，是否重复)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="count">取值量</param>
+        /// <param name="repetition">是否重复</param>
+        /// <returns></returns>
+        public static T[] GetRandomValues<T>(T[] array, int count = 1, bool repetition = false)
+        {
+            count = Clamp(count, 1, array.Length);
+            T[] temp = new T[array.Length];
+            T[] result = new T[count];
+            int end = array.Length - 1;
+            for (int i = 0; i < array.Length; i++)
+            {
+                temp[i] = array[i];
+            }
+            for (int i = 0; i < count; i++)
+            {
+                int random = Random.Range(0, end + 1);
+                result[i] = temp[random];
+                if (!repetition)
+                {
+                    //将区间最后一个数赋值到取到的数上,取值区间-1，取走的值不能被再取。
+                    temp[random] = temp[end];
+                    end--;
+                }
+            }
+            //Debug.Log(PrintArray(result));
+            return result;
+        }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="newline">换行</param>
+        /// <returns></returns>
+        public static string PrintArray<T>(T[] array, bool newline = false)
+        {
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                str += "  [" + i + "] ";
+                if (array[i] != null)
+                    str += array[i].ToString();
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static string PrintArray<T>(T[][] array)
+        {
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                for (int j = 0; j < array[i].Length; j++)
+                {
+                    str += "  [" + i + "][" + j + "] ";
+                    if (array[i][j] != null)
+                        str += array[i][j].ToString();
+                }
+                str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印列表元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="newline">换行</param>
+        /// <returns></returns>
+        public static string PrintArray<T>(List<T> list, bool newline = false)
+        {
+            string str = "";
+            for (int i = 0; i < list.Count; i++)
+            {
+                str += "  [" + i + "] ";
+                if (list[i] != null)
+                    str += list[i].ToString();
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印列表元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static string PrintArray<T>(List<List<T>> list)
+        {
+            string str = "";
+            for (int i = 0; i < list.Count; i++)
+            {
+                for (int j = 0; j < list[i].Count; j++)
+                {
+                    str += "  [" + i + "][" + j + "] ";
+                    if (list[i][j] != null)
+                        str += list[i][j].ToString();
+                }
+                str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
         /// 找出字符串中第一个数字的序号
         /// </summary>
         /// <param name="number"></param>
@@ -326,6 +463,82 @@ namespace RyuGiKen
         public static float Square(float X, float b, float k)
         {
             return Mathf.Sqrt(Mathf.Abs((X + b) / k));
+        }
+        /// <summary>
+        /// 限位。返回[0，1]
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static float Clamp(float value)
+        {
+            float result = 0;
+            if (value < 0)
+                result = 0;
+            else if (value > 1)
+                result = 1;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static float Clamp(this float value, float min)
+        {
+            float result = 0;
+            if (value < min)
+                result = min;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int Clamp(this int value, int min)
+        {
+            int result = 0;
+            if (value < min)
+                result = min;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static float Clamp(this float value, float min, float max)
+        {
+            float result = 0;
+            if (value < min)
+                result = min;
+            else if (value > max)
+                result = max;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int Clamp(this int value, int min, int max)
+        {
+            int result = 0;
+            if (value < min)
+                result = min;
+            else if (value > max)
+                result = max;
+            else
+                result = value;
+            return result;
         }
         /// <summary>
         /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
