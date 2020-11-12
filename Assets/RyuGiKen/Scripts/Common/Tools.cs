@@ -16,6 +16,19 @@ namespace RyuGiKen
     public static class ObjectAdjust
     {
         /// <summary>
+        /// GameObject设置活动状态
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="active"></param>
+        public static void SetActive(this Component component, bool active)
+        {
+            try
+            {
+                component.gameObject.SetActive(active);
+            }
+            catch { }
+        }
+        /// <summary>
         /// 批量设置活动状态
         /// </summary>
         /// <param name="GO"></param>
@@ -61,6 +74,30 @@ namespace RyuGiKen
             foreach (var item in GO)
             {
                 item.gameObject.SetActive(active);
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void BehaviourSetEnable<T>(this T[] GO, bool active) where T : Behaviour
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void BehaviourSetEnable<T>(this List<T> GO, bool active) where T : Behaviour
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
             }
         }
         /// <summary>
