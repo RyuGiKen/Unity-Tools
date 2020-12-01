@@ -502,6 +502,28 @@ namespace RyuGiKen
             return Mathf.Sqrt(Mathf.Abs((X + b) / k));
         }
         /// <summary>
+        /// 字符串转浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float ToFloat(this string num)
+        {
+            float result = 0;
+            float.TryParse(num, out result);
+            return result;
+        }
+        /// <summary>
+        /// 字符串转整数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static int ToInteger(this string num)
+        {
+            int result = 0;
+            int.TryParse(num, out result);
+            return result;
+        }
+        /// <summary>
         /// 限位。返回[0，1]
         /// </summary>
         /// <param name="value"></param>
@@ -768,33 +790,63 @@ namespace RyuGiKen
             return rectpos;
         }
         /// <summary>
-        /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减；
+        /// 交换AB值
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="n"></param>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns></returns>
-        public static float Progress(float x, float n, float a, float b)//(参数，递增减系数正负1，x最小值，x最大值)
+        /// <param name="valueA">输入A值</param>
+        /// <param name="valueB">输入B值</param>
+        /// <param name="outputA">输出A值</param>
+        /// <param name="outputB">输出B值</param>
+        public static void Exchange<T>(T valueA, T valueB, out T outputA, out T outputB)
         {
-            float temp;
-            if (a == b)
+            outputA = valueB;
+            outputB = valueA;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[-1，1]
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[-1，1]</returns>
+        public static float ToPercentPlusMinus01(float value, float min, float max, float n = 1, bool limit = true)
+        {
+            if (min == max)
             { return 0; }
-            else if (a > b)
+            else
+                return ToPercent01(value, min, max, n, limit) * 2 - 1;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static float ToPercent01(float value, float min, float max, float n = 1, bool limit = true)
+        {
+            float result;
+            if (min == max)
+            { return 0; }
+            else if (min > max)
             {
-                temp = a;
-                a = b;
-                b = temp;
+                Exchange(min, max, out min, out max);
             }
-            x = Mathf.Clamp(x, a, b);
             if (n < 0)
             {
-                return (x - b) / (a - b);//输出[-1,0]
+                result = (value - max) * 1f / (min - max);//输出[1,0]
             }
             else
             {
-                return (x - a) / (b - a);//输出[0,1]
+                result = (value - min) * 1f / (max - min);//输出[0,1]
             }
+            if (limit)
+                return Clamp(result);
+            else
+                return result;
         }
         /// <summary>
         /// 输出"00:00:00"
