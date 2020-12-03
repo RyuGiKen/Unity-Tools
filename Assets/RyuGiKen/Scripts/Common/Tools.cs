@@ -194,6 +194,69 @@ namespace RyuGiKen
     public static class ValueAdjust
     {
         /// <summary>
+        /// 二维坐标转三维坐标
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3 ToVector3(this Vector2 value)
+        {
+            return value;
+        }
+        /// <summary>
+        /// 二维坐标数组转三维坐标数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3[] ToVector3(this Vector2[] value)
+        {
+            Vector3[] result = new Vector3[value.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = value[i];
+            }
+            return result;
+        }
+        /// <summary>
+        /// x,y,z数组转三维坐标数组
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <returns></returns>
+        public static Vector3[] ToVector3(float[] x, float[] y, float[] z)
+        {
+            Vector3[] result = new Vector3[Mathf.Min(x.Length, y.Length, z.Length)];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new Vector3(x[i], y[i], z[i]);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 三维坐标转二维坐标
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector2 ToVector2(this Vector3 value)
+        {
+            return value;
+        }
+        /// <summary>
+        /// x,y数组转二维坐标数组
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static Vector2[] ToVector2(float[] x, float[] y)
+        {
+            Vector2[] result = new Vector2[Mathf.Min(x.Length, y.Length)];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new Vector2(x[i], y[i]);
+            }
+            return result;
+        }
+        /// <summary>
         /// 数组转列表
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -600,6 +663,28 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 判定是否在范围内
+        /// </summary>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="MinValue">最小值</param>
+        /// <param name="MaxValue">最大值</param>
+        /// <returns></returns>
+        public static bool InRange(this float CurrentValue, float MinValue, float MaxValue)
+        {
+            if (MinValue > MaxValue)
+            {
+                Exchange(MinValue, MaxValue, out MinValue, out MaxValue);
+            }
+            if (CurrentValue >= MinValue && CurrentValue <= MaxValue)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        /// <summary>
         /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
         /// </summary>
         /// <param name="CurrentValue">当前值</param>
@@ -802,6 +887,106 @@ namespace RyuGiKen
             outputB = valueA;
         }
         /// <summary>
+        /// 取连续数组内特定值在一定范围内的平均值
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="index">取值序号(-1为全部)</param>
+        /// <param name="size">平滑范围</param>
+        /// <param name="startIndex">开始序号</param>
+        /// <param name="endIndex">结束序号</param>
+        /// <returns></returns>
+        public static float GetAverage(float[] array, int index = -1, int size = 1, int startIndex = -1, int endIndex = -1)
+        {
+            float result = 0;
+            float sum = 0;
+            if (startIndex == -1 && endIndex == -1)
+            {
+                startIndex = 0;
+                endIndex = array.Length - 1;
+            }
+            else
+            {
+                if (startIndex > endIndex)
+                {
+                    Exchange(startIndex, endIndex, out startIndex, out endIndex);
+                }
+                startIndex = Clamp(startIndex, 0, array.Length - 1);
+                endIndex = Clamp(endIndex, 0, array.Length - 1);
+            }
+            if (index == -1)//全部求平均
+            {
+                for (int i = startIndex; i < endIndex + 1; i++)
+                {
+                    sum += array[i];
+                }
+                result = sum * 1f / (endIndex + 1 - startIndex);
+            }
+            else//指定序号附近
+            {
+                if (index < startIndex || index > endIndex)
+                    return float.NaN;
+                size = Mathf.Abs(size);
+                int count = 0;
+                for (int i = 0; i <= size; i++)
+                {
+                    if (i == 0)
+                    {
+                        sum += array[index];
+                        count++;
+                    }
+                    else if (index - i >= startIndex && index + i <= endIndex)
+                    {
+                        sum += array[index - i] + array[index + i];
+                        count += 2;
+                    }
+                }
+                result = sum * 1f / count;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 取平均值
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="startIndex">开始序号</param>
+        /// <param name="endIndex">结束序号</param>
+        /// <returns></returns>
+        public static Vector2 GetAverage(Vector2[] array, int startIndex = -1, int endIndex = -1)
+        {
+            Vector2 Max = Vector2.zero;
+            return ToVector2(GetAverage(ToVector3(array), startIndex, endIndex));
+        }
+        /// <summary>
+        /// 取平均值
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="startIndex">开始序号</param>
+        /// <param name="endIndex">结束序号</param>
+        /// <returns></returns>
+        public static Vector3 GetAverage(Vector3[] array, int startIndex = -1, int endIndex = -1)
+        {
+            Vector3 Max = Vector3.zero;
+            if (startIndex == -1 && endIndex == -1)
+            {
+                startIndex = 0;
+                endIndex = array.Length - 1;
+            }
+            else
+            {
+                startIndex = Clamp(startIndex, 0, array.Length - 1);
+                endIndex = Clamp(endIndex, 0, array.Length - 1);
+                if (startIndex > endIndex)
+                {
+                    Exchange(startIndex, endIndex, out startIndex, out endIndex);
+                }
+            }
+            for (int i = startIndex; i < endIndex + 1; i++)
+            {
+                Max += array[i];
+            }
+            return Max * 1f / (endIndex + 1 - startIndex);
+        }
+        /// <summary>
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
         /// <param name="value">参数</param>
@@ -887,16 +1072,20 @@ namespace RyuGiKen
             return sign + sTime;
         }
         /// <summary>
-        /// 汉字整数数字显示（最大正负9999）；
+        /// 汉字整数数字显示（最大正负99999）
         /// </summary>
-        public static string NumShowCN(float N)//汉字数字显示
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string NumShowCN(this float N)//汉字数字显示
         {
             float num;
-            string NumZ = "";
+            string NumZ = "";//结果
+            string RoundE = "";//汉字数字万位
             string RoundD = "";//汉字数字千位
             string RoundC = "";//汉字数字百位
             string RoundB = "";//汉字数字十位
             string RoundA = "";//汉字数字个位
+            int E = 0;//数字万位
             int D = 0;//数字千位
             int C = 0;//数字百位
             int B = 0;//数字十位
@@ -908,13 +1097,15 @@ namespace RyuGiKen
             { num = N; }
             if (num < 1)
             {
+                RoundE = "";
                 RoundD = "";
                 RoundC = "";
                 RoundB = "";
                 RoundA = "零";
             }
-            else if (num > 9999)
+            else if (num > 99999)
             {
+                RoundE = "九万";
                 RoundD = "九千";
                 RoundC = "九百";
                 RoundB = "九十";
@@ -922,10 +1113,28 @@ namespace RyuGiKen
             }
             else
             {
+                //数字万位
+                if (num > 9999)
+                {
+                    E = Mathf.FloorToInt(num / 10000);
+                    switch (E)
+                    {
+                        case 1: RoundE = "一万"; break;
+                        case 2: RoundE = "二万"; break;
+                        case 3: RoundE = "三万"; break;
+                        case 4: RoundE = "四万"; break;
+                        case 5: RoundE = "五万"; break;
+                        case 6: RoundE = "六万"; break;
+                        case 7: RoundE = "七万"; break;
+                        case 8: RoundE = "八万"; break;
+                        case 9: RoundE = "九万"; break;
+                        default: RoundE = ""; break;
+                    }
+                }
                 //数字千位
                 if (num > 999)
                 {
-                    D = Mathf.FloorToInt(num / 1000);
+                    D = Mathf.FloorToInt((num - E * 10000) / 1000);
                     switch (D)
                     {
                         case 1: RoundD = "一千"; break;
@@ -943,7 +1152,7 @@ namespace RyuGiKen
                 //数字百位
                 if (num > 99)
                 {
-                    C = Mathf.FloorToInt((num - D * 1000) / 100);
+                    C = Mathf.FloorToInt((num - E * 10000 - D * 1000) / 100);
                     switch (C)
                     {
                         case 1: RoundC = "一百"; break;
@@ -961,7 +1170,7 @@ namespace RyuGiKen
                 //数字十位
                 if (num > 9)
                 {
-                    B = Mathf.FloorToInt((num - D * 1000 - C * 100) / 10);
+                    B = Mathf.FloorToInt((num - E * 10000 - D * 1000 - C * 100) / 10);
                     switch (B)
                     {
                         case 1: RoundB = "一十"; break;
@@ -977,7 +1186,7 @@ namespace RyuGiKen
                     }
                 }
                 //数字个位
-                A = Mathf.FloorToInt(num - D * 1000 - C * 100 - B * 10);
+                A = Mathf.FloorToInt(num - E * 10000 - D * 1000 - C * 100 - B * 10);
                 switch (A)
                 {
                     case 1: RoundA = "一"; break;
@@ -992,27 +1201,29 @@ namespace RyuGiKen
                     default: RoundA = ""; break;
                 }
 
-                if (D == 0 && C == 0 && B == 1)
+                if (E == 0 && D == 0 && C == 0 && B == 1)
                 {
                     RoundB = "十";
+                }
+                else if (E > 0 && D == 0 && C > 0 && B == 0 && A > 0)
+                {
+                    RoundD = "零";
+                    RoundB = "零";
                 }
                 else if (C > 0 && B == 0 && A > 0)
                 {
                     RoundB = "零";
                 }
-                else if (D > 0 && C == 0 && B > 0)
+                else if ((D > 0 && C == 0 && B > 0) || (D > 0 && C == 0 && B == 0 && A > 0))
                 {
                     RoundC = "零";
                 }
-                else if (D > 0 && C == 0 && B == 0 && A > 0)
+                else if ((E > 0 && D == 0 && C == 0 && B == 0 && A > 0) || (E > 0 && D == 0 && C == 0 && B > 0) || (E > 0 && D == 0 && C > 0))
                 {
-                    RoundC = "零";
+                    RoundD = "零";
                 }
             }
-            NumZ = RoundD + RoundC + RoundB + RoundA;
-            if (N < 0)
-                NumZ = "负" + NumZ;
-
+            NumZ = (N < 0 ? "负" : "") + RoundE + RoundD + RoundC + RoundB + RoundA;
             //Debug.Log(NumZ);
             return NumZ;
         }
