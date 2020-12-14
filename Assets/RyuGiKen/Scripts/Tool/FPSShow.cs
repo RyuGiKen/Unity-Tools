@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +20,7 @@ namespace RyuGiKen.Tools
         [Tooltip("统计时间")] public float fixTime = 1;
         [Tooltip("切换按键")] public KeyCode hideKey = KeyCode.F7;
         [Tooltip("不受时间缩放影响")] public bool UnscaledDeltaTime = true;
+        [Tooltip("打印平均帧率日志")] public bool FPSLog = false;
         [Header("根据帧数自动切换画质(连续10s)")]
         [Tooltip("根据帧数自动切换画质")] public bool autoAdjustQualityLevel = false;
         [Tooltip("帧率超范围计时")] static float deltaTime = 0;
@@ -56,6 +58,8 @@ namespace RyuGiKen.Tools
                 {
                     hide = !hide;
                 }
+                if (hide)
+                    FPSLog = true;
                 FPSText.enabled = !hide;
                 ShowFPS();
             }
@@ -97,11 +101,21 @@ namespace RyuGiKen.Tools
                 FPSText.text = "FPS  " + m_FPS.ToString() + "  L" + QualitySettings.GetQualityLevel().ToString();
                 passTime = 0.0f;
                 FrameCount = 0;
+                if (FPSLog)
+                {
+                    try
+                    {
+                        Data_FPS.Add(m_FPS);
+                    }
+                    catch { }
+                }
             }
+            //FPSText.text = "FPS  " + Mathf.RoundToInt(1.0f / deltaTime).ToString();
         }
         public static void AdjustQualityLevel(bool isRise)
         {
             deltaTime = 0;
+            QualitySettings.vSyncCount = 0;
             if (isRise)
             {
                 QualitySettings.IncreaseLevel();
@@ -110,6 +124,34 @@ namespace RyuGiKen.Tools
             {
                 QualitySettings.DecreaseLevel();
             }
+        }
+        public static string Path = Application.streamingAssetsPath;
+        static StreamWriter sw;
+        [Tooltip("记录")] public static List<float> Data_FPS = new List<float>();
+        public static void Log()
+        {
+            try
+            {
+                sw = new StreamWriter(Path + "/FpsRecord.txt", true);
+                for (int i = 0; i < 2; i++)
+                    if (Data_FPS.Count > 2)
+                        Data_FPS.RemoveAt(0);
+                string info = "[FPS]" + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " \t" + Data_FPS.Count + "平均：" + ValueAdjust.GetAverage(Data_FPS.ToArray()).ToString("F2");
+                //Debug.Log(ValueAdjust.PrintArray(Data_FPS.ToArray()));
+                Debug.Log(info);
+                //开始写入
+                sw.WriteLine(info + "\r\n");
+                //清空缓冲区
+                sw.Flush();
+                //关闭流
+                sw.Close();
+            }
+            catch { }
+        }
+        private void OnDisable()
+        {
+            if (Data_FPS.Count > 1 && FPSLog)
+                Log();
         }
     }
 }
