@@ -257,6 +257,122 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 二维坐标数组批量设置单轴值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type">XY</param>
+        /// <returns></returns>
+        public static Vector2[] SetVectorValue(Vector2[] array, float[] value, string type)
+        {
+            Vector2[] result = new Vector2[array.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = array[i];
+                if (i < value.Length)
+                {
+                    switch (type)
+                    {
+                        case "x":
+                        case "X":
+                            result[i].x = value[i];
+                            break;
+                        case "y":
+                        case "Y":
+                            result[i].y = value[i];
+                            break;
+                    }
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 三维坐标数组批量设置单轴值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type">XYZ</param>
+        /// <returns></returns>
+        public static Vector3[] SetVectorValue(Vector3[] array, float[] value, string type)
+        {
+            Vector3[] result = new Vector3[array.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = array[i];
+                if (i < value.Length)
+                {
+                    switch (type)
+                    {
+                        case "x":
+                        case "X":
+                            result[i].x = value[i];
+                            break;
+                        case "y":
+                        case "Y":
+                            result[i].y = value[i];
+                            break;
+                        case "z":
+                        case "Z":
+                            result[i].z = value[i];
+                            break;
+                    }
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 二维坐标数组转单轴值数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type">XY</param>
+        /// <returns></returns>
+        public static float[] GetVectorValue(this Vector2[] value, string type)
+        {
+            float[] result = new float[value.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                switch (type)
+                {
+                    case "x":
+                    case "X":
+                        result[i] = value[i].x;
+                        break;
+                    case "y":
+                    case "Y":
+                        result[i] = value[i].y;
+                        break;
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 三维坐标数组转单轴值数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type">XYZ</param>
+        /// <returns></returns>
+        public static float[] GetVectorValue(this Vector3[] value, string type)
+        {
+            float[] result = new float[value.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                switch (type)
+                {
+                    case "x":
+                    case "X":
+                        result[i] = value[i].x;
+                        break;
+                    case "y":
+                    case "Y":
+                        result[i] = value[i].y;
+                        break;
+                    case "z":
+                    case "Z":
+                        result[i] = value[i].z;
+                        break;
+                }
+            }
+            return result;
+        }
+        /// <summary>
         /// 数组转列表
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -873,6 +989,72 @@ namespace RyuGiKen
             rectpos.x = dis * Mathf.Cos(angle * Mathf.Deg2Rad);
             rectpos.y = dis * Mathf.Sin(angle * Mathf.Deg2Rad);
             return rectpos;
+        }
+        /// <summary>
+        /// 平滑处理
+        /// </summary>
+        /// <param name="array">数据</param>
+        /// <param name="size">平滑范围</param>
+        /// <param name="iterations">插值倍数（1为原数量）</param>
+        /// <param name="outputIteration">输出插值扩充后的数据</param>
+        /// <returns></returns>
+        public static float[] Smoothing(float[] array, int size = 1, int iterations = 1, bool outputIteration = false)
+        {
+            if (iterations < 1)
+                iterations = 1;
+            int count = (array.Length - 1) * iterations + 1;//扩充后数组长度
+            float[] result = new float[array.Length];
+            float[] resultLong = new float[count];
+            if (iterations == 1)
+            {
+                for (int i = 0; i < result.Length; i++)
+                {
+                    if (i == 0 || i == array.Length - 1)
+                        result[i] = array[i];
+                    else
+                        result[i] = GetAverage(array, i, size);
+                }
+                return result;
+            }
+            else
+            {
+                float[] array2 = new float[count];//值
+                //float[] index = new float[count];//缩短序号
+                int lastIndex = 0;//上一个关键点序号
+                for (int i = 0; i < count; i++)
+                {
+                    //index[i] = i * 1f / iterations;
+                    if (i % iterations == 0)//关键点
+                    {
+                        lastIndex = i / iterations;
+                        array2[i] = array[i / iterations];
+                    }
+                    else//插值
+                    {
+                        array2[i] = array[lastIndex] + ((array[lastIndex + 1] - array[lastIndex]) / iterations * (i % iterations));
+                    }
+                }
+                resultLong = Smoothing(array2, size, 1);
+                if (outputIteration)
+                {
+                    return resultLong;
+                }
+                else
+                {
+                    List<float> value = new List<float>();
+                    for (int i = 0; i < count; i += iterations)
+                    {
+                        //if (Mathf.RoundToInt(resultLong[i].x) == resultLong[i].x)
+                        //{
+                        //    result[j] = resultLong[i];
+                        //    j++;
+                        //}
+                        value.Add(resultLong[i]);
+                    }
+                    result = ToArray(value);
+                    return result;
+                }
+            }
         }
         /// <summary>
         /// 交换AB值

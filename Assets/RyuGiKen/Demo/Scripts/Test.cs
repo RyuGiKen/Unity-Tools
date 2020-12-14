@@ -12,6 +12,7 @@ public class Test : MonoBehaviour
     public Dropdown FullScreenToggle;
     public bool PrintOnScreen;
     public List<string> PrintData;
+    [SerializeField] LineRenderer[] lineRenderers;
     void Awake()
     {
         instance = this;
@@ -20,6 +21,7 @@ public class Test : MonoBehaviour
     {
         ShowSystemInfo();
         Invoke(nameof(UpdateResolutionInput), 2f);
+        SmoothingLines();
     }
 
     void Update()
@@ -53,6 +55,10 @@ public class Test : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.C))
         {
             PrintOnScreen = !PrintOnScreen;
+        }
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            SmoothingLines();
         }
 
         m_Text[0].text = "";
@@ -160,6 +166,52 @@ public class Test : MonoBehaviour
                 Invoke(nameof(UpdateResolutionInput), 0.5f);
                 ShowScreenInfo();
             }
+        }
+    }
+    void SmoothingLines()
+    {
+        float[][] result = new float[lineRenderers.Length][];
+        int count = 100;
+        for (int i = 0; i < lineRenderers.Length; i++)
+        {
+            result[i] = new float[count];
+            lineRenderers[i].positionCount = count;
+        }
+        for (int i = 0; i < count; i++)
+        {
+            lineRenderers[0].SetPosition(i, new Vector3(i, Random.Range(0f, 10f), 0));
+            result[0][i] = lineRenderers[0].GetPosition(i).y;
+        }
+
+        int size = 10;
+
+        result[1] = ValueAdjust.Smoothing(result[0], 1);
+        result[2] = ValueAdjust.Smoothing(ValueAdjust.Smoothing(result[0], 1), 1);
+        result[3] = ValueAdjust.Smoothing(result[0], 5, size, true);
+        float[] index = new float[(count - 1) * size + 1];
+        for (int i = 0; i < (count - 1) * size + 1; i++)
+        {
+            index[i] = i * 1f / size;
+        }
+        result[4] = ValueAdjust.Smoothing(result[0], 5, size);
+
+        lineRenderers[3].positionCount = (count - 1) * size + 1;
+        for (int j = 1; j < 5; j++)
+            for (int i = 0; i < count; i++)
+            {
+                lineRenderers[j].SetPosition(i, new Vector3(i, result[j][i], 0/*-j*/));
+            }
+        for (int i = 0; i < 5; i++)
+            Debug.Log("Ave" + i + "  " + ValueAdjust.GetAverage(result[i]));
+        //int k = 0;
+        for (int i = 0; i < (count - 1) * size + 1; i++)
+        {
+            lineRenderers[3].SetPosition(i, new Vector3(i * 1f / size, result[3][i], 0));
+            //if (Mathf.RoundToInt(result4[i].x) == result4[i].x)
+            //{
+            //    lineRenderers[4].SetPosition(k, new Vector3(result4[i].x, result4[i].y, -4));
+            //    k++;
+            //}
         }
     }
 }
