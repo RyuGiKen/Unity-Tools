@@ -58,7 +58,7 @@ namespace RyuGiKen.Tools
                 {
                     hide = !hide;
                 }
-                if (hide)
+                if (!hide)
                     FPSLog = true;
                 FPSText.enabled = !hide;
                 ShowFPS();

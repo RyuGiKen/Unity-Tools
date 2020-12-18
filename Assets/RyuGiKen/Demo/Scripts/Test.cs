@@ -13,6 +13,7 @@ public class Test : MonoBehaviour
     public bool PrintOnScreen;
     public List<string> PrintData;
     [SerializeField] LineRenderer[] lineRenderers;
+    public DrawData drawer;
     void Awake()
     {
         instance = this;
@@ -27,6 +28,7 @@ public class Test : MonoBehaviour
     void Update()
     {
         m_Text[1].text = ValueAdjust.ShowTime(Time.time);
+        drawer.RecordData = ValueAdjust.ToList(FPSShow.Data_FPS.ToArray());
     }
     private void LateUpdate()
     {
