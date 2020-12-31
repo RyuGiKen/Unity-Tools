@@ -396,6 +396,79 @@ namespace RyuGiKen
             return list.ToArray();
         }
         /// <summary>
+        /// 乱序排序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="changeSelf">改变原参数</param>
+        /// <returns></returns>
+        public static List<T> RandomSort<T>(this List<T> list, bool changeSelf = true)
+        {
+            if (list == null || list.Count < 1)
+                return null;
+            List<T> result = new List<T>(list);
+            if (!changeSelf)
+            {
+                for (int i = 0; i < list.Count; i++)
+                    result[i] = list[i];
+            }
+            for (int i = 0; i < list.Count; i++)
+            {
+                for (int j = 0; j < list.Count; j++)
+                    if (Random.value > 0.5f && i != j)
+                    {
+                        if (changeSelf)
+                        {
+                            T temp = list[i];
+                            list[i] = list[j];
+                            list[j] = temp;
+                        }
+                        else
+                        {
+                            result[i] = list[j];
+                            result[j] = list[i];
+                        }
+                    }
+            }
+            if (changeSelf)
+                return list;
+            else
+                return result;
+        }
+        /// <summary>
+        /// 乱序排序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="changeSelf">改变原参数</param>
+        /// <returns></returns>
+        public static T[] RandomSort<T>(this T[] array, bool changeSelf = true)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            T[] result = new T[array.Length];
+            if (!changeSelf)
+            {
+                for (int i = 0; i < array.Length; i++)
+                    result[i] = array[i];
+            }
+            for (int i = 0; i < array.Length; i++)
+            {
+                for (int j = 0; j < array.Length; j++)
+                    if (Random.value > 0.5f && i != j)
+                    {
+                        if (changeSelf)
+                            Exchange(array[i], array[j], out array[i], out array[j]);
+                        else
+                            Exchange(array[i], array[j], out result[i], out result[j]);
+                    }
+            }
+            if (changeSelf)
+                return array;
+            else
+                return result;
+        }
+        /// <summary>
         /// 随机多选多(数组，取值量，是否重复)
         /// </summary>
         /// <typeparam name="T"></typeparam>
