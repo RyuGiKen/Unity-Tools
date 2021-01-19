@@ -373,6 +373,48 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 清空空项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static List<T> ClearNullItem<T>(this List<T> list, bool changeSelf = true) where T : Object
+        {
+            List<T> result = new List<T>(list.Count);
+            if (!changeSelf)
+            {
+                for (int i = 0; i < list.Count; i++)
+                    result[i] = list[i];
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    if (result[i] == null)
+                        result.RemoveAt(i);
+                }
+                return result;
+            }
+            else
+            {
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    if (list[i] == null)
+                        list.RemoveAt(i);
+                }
+                return list;
+            }
+        }
+        /// <summary>
+        /// 清空空项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static T[] ClearNullItem<T>(this T[] array) where T : Object
+        {
+            List<T> list = ClearNullItem(ToList(array));
+            array = list.ToArray();
+            return array;
+        }
+        /// <summary>
         /// 数组转列表
         /// </summary>
         /// <typeparam name="T"></typeparam>
