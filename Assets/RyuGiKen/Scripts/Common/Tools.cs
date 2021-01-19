@@ -373,6 +373,36 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 清空重复项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static List<T> ClearRepeatingItem<T>(this List<T> list) where T : Object
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                for (int j = 0; j < list.Count; j++)
+                {
+                    if (i != j && list[i] == list[j])
+                        list[i] = null;
+                }
+            }
+            return ValueAdjust.ClearNullItem(list);
+        }
+        /// <summary>
+        /// 清空重复项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static T[] ClearRepeatingItem<T>(this T[] array) where T : Object
+        {
+            List<T> list = ClearRepeatingItem(ToList(array));
+            array = list.ToArray();
+            return array;
+        }
+        /// <summary>
         /// 清空空项
         /// </summary>
         /// <typeparam name="T"></typeparam>
