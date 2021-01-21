@@ -924,6 +924,22 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 计算数字位数
+        /// </summary>
+        /// <param name="Num"></param>
+        /// <returns></returns>
+        public static int GetNumDigit(this float Num)
+        {
+            int size = 0;//位数
+            float num = Num;
+            while (num >= 1)//获取位数
+            {
+                num /= 10;
+                size++;
+            }
+            return size;
+        }
+        /// <summary>
         /// 判定是否在范围内
         /// </summary>
         /// <param name="CurrentValue">当前值</param>
