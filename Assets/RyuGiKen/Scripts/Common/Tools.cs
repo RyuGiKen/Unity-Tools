@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -10,6 +12,198 @@ using Object = UnityEngine.Object;
 /// </summary>
 namespace RyuGiKen
 {
+    /// <summary>
+    /// 获取文件
+    /// </summary>
+    public static class GetFile
+    {
+        /// <summary>
+        /// 获得指定路径下所有子目录文件名
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="Type">文件类型</param>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfoAll(string path, string Type = "")
+        {
+            if (path == null || path == "")
+                path = Directory.GetCurrentDirectory();
+
+            List<List<FileInfo>> files = new List<List<FileInfo>>();
+            files.Add(GetFileInfos(path, Type));
+            DirectoryInfo root = new DirectoryInfo(path);
+            foreach (DirectoryInfo d in root.GetDirectories())
+            {
+                files.Add(GetFileInfoAll(d.FullName, Type));
+            }
+            List<FileInfo> result = ValueAdjust.ListAddition(files);
+            return result;
+        }
+        /// <summary>
+        /// 获得指定路径下所有子目录文件名
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="Type">文件类型</param>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfoAll(string path, string[] Type)
+        {
+            if (path == null || path == "")
+                path = Directory.GetCurrentDirectory();
+
+            List<List<FileInfo>> files = new List<List<FileInfo>>();
+            files.Add(GetFileInfos(path, Type));
+            DirectoryInfo root = new DirectoryInfo(path);
+            foreach (DirectoryInfo d in root.GetDirectories())
+            {
+                files.Add(GetFileInfoAll(d.FullName, Type));
+            }
+            List<FileInfo> result = ValueAdjust.ListAddition(files);
+            return result;
+        }
+        /// <summary>
+        /// 获得指定路径下所有子目录文件名
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="Type">文件类型</param>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfoAllWithOutType(string path, string[] Type)
+        {
+            if (path == null || path == "")
+                path = Directory.GetCurrentDirectory();
+
+            List<List<FileInfo>> files = new List<List<FileInfo>>();
+            files.Add(GetFileInfosWithOutType(path, Type));
+            DirectoryInfo root = new DirectoryInfo(path);
+            foreach (DirectoryInfo d in root.GetDirectories())
+            {
+                files.Add(GetFileInfoAllWithOutType(d.FullName, Type));
+            }
+            List<FileInfo> result = ValueAdjust.ListAddition(files);
+            return result;
+        }
+        /// <summary>
+        /// 获得指定路径下所有文件名
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="Type">文件类型</param>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfos(string path, string Type = "")
+        {
+            DirectoryInfo root = new DirectoryInfo(path);
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (FileInfo file in root.GetFiles())
+            {
+                if (Type == "")
+                {
+                    files.Add(file);
+                }
+                else if (file.JudgeFileType(Type))
+                {
+                    files.Add(file);
+                }
+            }
+            return files;
+        }
+        /// <summary>
+        /// 获得指定路径下所有文件名
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="Type">文件类型</param>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfos(string path, string[] Type)
+        {
+            DirectoryInfo root = new DirectoryInfo(path);
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (FileInfo file in root.GetFiles())
+            {
+                foreach (string type in Type)
+                {
+                    if (file.JudgeFileType(type))
+                    {
+                        files.Add(file);
+                    }
+                }
+            }
+            return files;
+        }
+        /// <summary>
+        /// 获得指定路径下所有文件名
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="Type">文件类型</param>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfosWithOutType(string path, string[] Type)
+        {
+            DirectoryInfo root = new DirectoryInfo(path);
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (FileInfo file in root.GetFiles())
+            {
+                foreach (string type in Type)
+                {
+                    if (type != "" && type != null && !file.JudgeFileType(type))
+                    {
+                        files.Add(file);
+                    }
+                }
+            }
+            return files;
+        }
+        /// <summary>
+        /// 获得文件名
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        public static List<string> GetFileName<T>(this T[] files) where T : FileSystemInfo
+        {
+            List<string> fileNames = new List<string>();
+            foreach (T file in files)
+            {
+                fileNames.Add(file.Name);
+            }
+            return fileNames;
+        }
+        /// <summary>
+        /// 获得文件路径
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        public static List<string> GetFileFullName<T>(this T[] files) where T : FileSystemInfo
+        {
+            List<string> fileNames = new List<string>();
+            foreach (T file in files)
+            {
+                fileNames.Add(file.FullName);
+            }
+            return fileNames;
+        }
+        /// <summary>
+        /// 从文件名判断类型
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="Type"></param>
+        /// <returns></returns>
+        public static bool JudgeFileType(string name, string Type)
+        {
+            if (name == null || name == "" || Type == null || Type == "")
+                return false;
+            string FileTypeName = name.Substring(name.Length - Type.Length - 1);
+            return FileTypeName.LastIndexOf("." + Type, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+        /// <summary>
+        /// 从文件名判断类型
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="Type"></param>
+        /// <returns></returns>
+        public static bool JudgeFileType(this FileInfo file, string Type)
+        {
+            if (file == null || file.Name == "" || Type == null || Type == "")
+                return false;
+            string FileTypeName = file.Name.Substring(file.Name.Length - Type.Length - 1);
+            return FileTypeName.LastIndexOf("." + Type, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+    }
     /// <summary>
     /// 对象调整
     /// </summary>
@@ -445,6 +639,60 @@ namespace RyuGiKen
             return array;
         }
         /// <summary>
+        /// 列表相加。补充在后。
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list01"></param>
+        /// <param name="list02"></param>
+        /// <returns></returns>
+        public static List<T> ListAddition<T>(this List<List<T>> lists)
+        {
+            List<T> resultList = new List<T>();
+            for (int i = 0; i < lists.Count; i++)
+            {
+                for (int j = 0; j < lists[i].Count; j++)
+                {
+                    resultList.Add(lists[i][j]);
+                }
+            }
+            return resultList;
+        }
+        /// <summary>
+        /// 列表相加。补充在后。
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list01"></param>
+        /// <param name="list02"></param>
+        /// <returns></returns>
+        public static List<T> ListAddition<T>(List<T> list01, List<T> list02)
+        {
+            List<T> resultList = new List<T>();
+            for (int i = 0; i < list01.Count; i++)
+            {
+                resultList.Add(list01[i]);
+            }
+            for (int i = 0; i < list02.Count; i++)
+            {
+                resultList.Add(list02[i]);
+            }
+            return resultList;
+        }
+        /// <summary>
+        /// 列表相加。补充在后。
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list01"></param>
+        /// <param name="list02"></param>
+        /// <returns></returns>
+        public static List<T> AddList<T>(this List<T> list01, List<T> list02)
+        {
+            for (int i = 0; i < list02.Count; i++)
+            {
+                list01.Add(list02[i]);
+            }
+            return list01;
+        }
+        /// <summary>
         /// 数组转列表
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -662,6 +910,28 @@ namespace RyuGiKen
         public static int FindIndexOfNumInString(this string number)
         {
             return number.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+        }
+        /// <summary>
+        /// 是否包含指定字符串
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="value"></param>
+        /// <param name="comparisonType"></param>
+        /// <returns></returns>
+        public static bool Contain(this string source, string value)
+        {
+            return (source.IndexOf(value, StringComparison.Ordinal) >= 0);
+        }
+        /// <summary>
+        /// 是否包含指定字符串（忽略大小写）
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="value"></param>
+        /// <param name="comparisonType"></param>
+        /// <returns></returns>
+        public static bool ContainIgnoreCase(this string source, string value)
+        {
+            return (source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0);
         }
         /// <summary>
         ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s）
