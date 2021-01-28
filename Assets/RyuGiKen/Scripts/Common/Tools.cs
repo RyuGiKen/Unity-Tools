@@ -137,13 +137,18 @@ namespace RyuGiKen
             List<FileInfo> files = new List<FileInfo>();
             foreach (FileInfo file in root.GetFiles())
             {
+                bool EnabledFileType = true;
                 foreach (string type in Type)
                 {
-                    if (type != "" && type != null && !file.JudgeFileType(type))
+                    if (type == "" && type == null)
+                        continue;
+                    if (file.JudgeFileType(type))
                     {
-                        files.Add(file);
+                        EnabledFileType = false;
                     }
                 }
+                if (EnabledFileType)
+                    files.Add(file);
             }
             return files;
         }
