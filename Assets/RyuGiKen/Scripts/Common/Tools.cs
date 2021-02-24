@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -2141,6 +2144,84 @@ namespace RyuGiKen
         {
             Color RGB = ConvertHsvToRgb(HSV.Hue, HSV.Saturation, HSV.Value, HSV.alpha);
             return RGB;
+        }
+    }
+    /// <summary>
+    /// IP地址相关
+    /// </summary>
+    public static class IPInformation
+    {
+        /// <summary>
+        /// IP地址类型
+        /// </summary>
+        public enum IPAddressType
+        {
+            IPv4, IPv6
+        }
+        /// <summary>
+        /// 限制IP地址格式
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public static string LimitIPv4(string ip)
+        {
+            string[] str = ip.Split('.');
+            int[] num = new int[4];
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (i < 4)
+                    int.TryParse(str[i], out num[i]);//能转换整数才读取
+            }
+            for (int i = 0; i < num.Length; i++)
+            {
+                num[i] = ValueAdjust.Clamp(num[i], 0, 255);
+            }
+            string result = num[0] + "." + num[1] + "." + num[2] + "." + num[3];
+            return result;
+        }
+        /// <summary>
+        /// 获取本机IP
+        /// </summary>
+        /// <param name="type">要获取的IP类型</param>
+        /// <returns></returns>
+        public static string GetIP(IPAddressType type = IPAddressType.IPv4)
+        {
+            if (type == IPAddressType.IPv6 && !Socket.OSSupportsIPv6)
+            {
+                return null;
+            }
+
+            string output = "";
+
+            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                NetworkInterfaceType _type1 = NetworkInterfaceType.Wireless80211;
+                NetworkInterfaceType _type2 = NetworkInterfaceType.Ethernet;
+
+                if ((item.NetworkInterfaceType == _type1 || item.NetworkInterfaceType == _type2) && item.OperationalStatus == OperationalStatus.Up)
+                {
+                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                    {
+                        switch (type)
+                        {
+                            default:
+                            case IPAddressType.IPv4:
+                                if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                                {
+                                    output = ip.Address.ToString();
+                                }
+                                break;
+                            case IPAddressType.IPv6:
+                                if (ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                                {
+                                    output = ip.Address.ToString();
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+            return output;
         }
     }
 }
