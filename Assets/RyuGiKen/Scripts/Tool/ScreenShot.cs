@@ -17,11 +17,26 @@ namespace RyuGiKen.Tools
         {
             if (Input.GetKeyDown(ScreenShotKey) && Application.isPlaying)
             {
-                if (fileName != "")
-                    ScreenCapture.CaptureScreenshot(fileName + ".png");
-                else
-                    ScreenCapture.CaptureScreenshot(Application.productName + ".png");
+                PrintScreen();
             }
+        }
+        /// <summary>
+        /// 截图
+        /// </summary>
+        [ContextMenu("截图")]
+        public void PrintScreen()
+        {
+            PrintScreen(fileName);
+        }
+        /// <summary>
+        /// 截图
+        /// </summary>
+        public static void PrintScreen(string fileName)
+        {
+            if (fileName == "" || fileName == null)
+                ScreenCapture.CaptureScreenshot(Application.productName + ".png");
+            else
+                ScreenCapture.CaptureScreenshot(fileName + ".png");
         }
     }
 }

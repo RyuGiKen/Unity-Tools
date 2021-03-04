@@ -68,12 +68,8 @@ namespace RyuGiKen.Tools
         void Rendering()
         {
             Time.timeScale = 0;
-            if (curFrame < 10) { fileName = "0000" + curFrame.ToString() + ".png"; }
-            else if (curFrame < 100) { fileName = "000" + curFrame.ToString() + ".png"; }
-            else if (curFrame < 1000) { fileName = "00" + curFrame.ToString() + ".png"; }
-            else if (curFrame < 10000) { fileName = "0" + curFrame.ToString() + ".png"; }
-            else { fileName = curFrame.ToString() + ".png"; }
-            ScreenCapture.CaptureScreenshot(outPutPath + fileName + ".png");
+            fileName = curFrame.ToString("D" + ValueAdjust.GetNumDigit(renderTime * frameRate));
+            ScreenShot.PrintScreen(outPutPath + fileName);
             Time.timeScale = timeScale; Debug.Log(curFrame);
         }
         /// <summary>
