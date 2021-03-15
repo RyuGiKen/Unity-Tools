@@ -725,6 +725,62 @@ namespace RyuGiKen
             return list.ToArray();
         }
         /// <summary>
+        /// 数组ToString
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static string[] ToStrings<T>(this T[] array)
+        {
+            string[] result = new string[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                result[i] = array[i].ToString();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 列表ToString
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static string[] ToStrings<T>(this List<T> list)
+        {
+            string[] result = new string[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                result[i] = list[i].ToString();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 列表统一赋值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="value"></param>
+        public static void SetListAll<T>(this List<T> list, T value)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i] = value;
+            }
+        }
+        /// <summary>
+        /// 数组统一赋值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="value"></param>
+        public static void SetArrayAll<T>(this T[] array, T value)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = value;
+            }
+        }
+        /// <summary>
         /// 乱序排序
         /// </summary>
         /// <typeparam name="T"></typeparam>
