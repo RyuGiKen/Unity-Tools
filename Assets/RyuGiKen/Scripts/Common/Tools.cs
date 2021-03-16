@@ -2222,12 +2222,12 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string LimitIPv4(string ip)
         {
-            string[] str = ip.Split('.');
+            string[] str = ip.Trim(' ').Split('.');
             int[] num = new int[4];
             for (int i = 0; i < str.Length; i++)
             {
                 if (i < 4)
-                    int.TryParse(str[i], out num[i]);//能转换整数才读取
+                    int.TryParse(str[i].Length > 3 ? str[i].Remove(3) : str[i], out num[i]);//能转换整数才读取
             }
             for (int i = 0; i < num.Length; i++)
             {
@@ -2243,12 +2243,33 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string GetIP(IPAddressType type = IPAddressType.IPv4)
         {
+            return GetIP(out IPAddress address, type);
+        }
+        /// <summary>
+        /// 获取本机IP
+        /// </summary>
+        /// <param name="type">要获取的IP类型</param>
+        /// <returns></returns>
+        public static string GetIP(out IPAddress address, IPAddressType type = IPAddressType.IPv4)
+        {
+            GetIP(out IPAddress[] addresses, type);
+            address = addresses.Length > 0 ? addresses[0] : null;
+            return address == null ? null : address.ToString();
+        }
+        /// <summary>
+        /// 获取本机IP
+        /// </summary>
+        /// <param name="type">要获取的IP类型</param>
+        /// <returns></returns>
+        public static string[] GetIP(out IPAddress[] address, IPAddressType type = IPAddressType.IPv4)
+        {
+            address = null;
             if (type == IPAddressType.IPv6 && !Socket.OSSupportsIPv6)
             {
                 return null;
             }
 
-            string output = "";
+            List<IPAddress> output = new List<IPAddress>();
 
             foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
             {
@@ -2265,20 +2286,33 @@ namespace RyuGiKen
                             case IPAddressType.IPv4:
                                 if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                                 {
-                                    output = ip.Address.ToString();
+                                    output.Add(ip.Address);
                                 }
                                 break;
                             case IPAddressType.IPv6:
                                 if (ip.Address.AddressFamily == AddressFamily.InterNetworkV6)
                                 {
-                                    output = ip.Address.ToString();
+                                    output.Add(ip.Address);
                                 }
                                 break;
                         }
                     }
                 }
             }
-            return output;
+            address = output.ToArray();
+            return output.ToStrings();
+        }
+        ///<summary>
+        /// 传入域名返回对应的IP地址
+        ///</summary>
+        ///<param name="domain">域名</param>
+        ///<returns></returns>
+        public static IPAddress GetIP(string domain)
+        {
+            domain = domain.Replace("http://", "").Replace("https://", "");
+            IPHostEntry hostEntry = Dns.GetHostEntry(domain);
+            IPEndPoint ipEndPoint = new IPEndPoint(hostEntry.AddressList[0], 0);
+            return ipEndPoint.Address;
         }
     }
     /// <summary>
