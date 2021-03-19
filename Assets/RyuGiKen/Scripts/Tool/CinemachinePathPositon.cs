@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
@@ -172,7 +173,7 @@ namespace RyuGiKen.Tools
             else if (AdjustCount < 0)//子对象数量过量，需减少
             {
 
-                int NewCount = this.transform.childCount - Mathf.Abs(AdjustCount);
+                int NewCount = this.transform.childCount - Math.Abs(AdjustCount);
                 for (int i = this.transform.childCount - 1; i >= NewCount; i--)
                 {
                     DestroyImmediate(this.transform.GetChild(i).gameObject);

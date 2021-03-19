@@ -428,7 +428,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector3[] ToVector3(float[] x, float[] y, float[] z)
         {
-            Vector3[] result = new Vector3[Mathf.Min(x.Length, y.Length, z.Length)];
+            Vector3[] result = new Vector3[Math.Min(Math.Min(x.Length, y.Length), z.Length)];
             for (int i = 0; i < result.Length; i++)
             {
                 result[i] = new Vector3(x[i], y[i], z[i]);
@@ -452,7 +452,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector2[] ToVector2(float[] x, float[] y)
         {
-            Vector2[] result = new Vector2[Mathf.Min(x.Length, y.Length)];
+            Vector2[] result = new Vector2[Math.Min(x.Length, y.Length)];
             for (int i = 0; i < result.Length; i++)
             {
                 result[i] = new Vector2(x[i], y[i]);
@@ -1120,14 +1120,14 @@ namespace RyuGiKen
         {
             if (NormalSpeed == 0 || step == 0)
                 return A;
-            float speed = Mathf.Abs(NormalSpeed);
+            float speed = Math.Abs(NormalSpeed);
             if (setSpeedRange != 0)
             {
                 if (PlusSpeed == 0)
                     PlusSpeed = speed;
-                setSpeedRange = Mathf.Abs(setSpeedRange) * 0.5f;
+                setSpeedRange = Math.Abs(setSpeedRange) * 0.5f;
                 if (A > B + setSpeedRange || A < B - setSpeedRange)
-                    speed = Mathf.Abs(PlusSpeed);
+                    speed = Math.Abs(PlusSpeed);
             }
             if (A > B + speed * step)
                 A -= speed * step;
@@ -1158,7 +1158,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float Square(float X, float b, float k)
         {
-            return Mathf.Sqrt(Mathf.Abs((X + b) / k));
+            return Mathf.Sqrt(Math.Abs((X + b) / k));
         }
         /// <summary>
         /// 字符串转浮点数，失败为0
@@ -1280,8 +1280,8 @@ namespace RyuGiKen
         /// 判定是否在范围内
         /// </summary>
         /// <param name="CurrentValue">当前值</param>
-        /// <param name="MinValue">最小值</param>
-        /// <param name="MaxValue">最大值</param>
+        /// <param name="MinValue"></param>
+        /// <param name="MaxValue"></param>
         /// <returns></returns>
         public static bool InRange(this float CurrentValue, float MinValue, float MaxValue)
         {
@@ -1366,10 +1366,11 @@ namespace RyuGiKen
         /// <param name="value">值</param>
         /// <param name="digits">位数</param>
         /// <returns></returns>
-        public static float Round(this float value, int digits)
+        public static float Round(this float value, int digits = 0)
         {
-            //return Mathf.Round(value * Mathf.Pow(10, digits)) * Mathf.Pow(0.1f, digits);
-            return float.Parse(value.ToString("f" + digits));
+            return (float)Math.Round(value, digits);
+            //return (float)(Math.Round(value * Math.Pow(10, digits)) * Math.Pow(0.1f, digits));
+            //return float.Parse(value.ToString("f" + digits));
         }
         /// <summary>
         /// 精确到小数点后几位（值，位数）
@@ -1377,7 +1378,7 @@ namespace RyuGiKen
         /// <param name="value">值</param>
         /// <param name="digits">位数</param>
         /// <returns></returns>
-        public static Vector2 Round(this Vector2 value, int digits)
+        public static Vector2 Round(this Vector2 value, int digits = 0)
         {
             return new Vector2(Round(value.x, digits), Round(value.y, digits));
         }
@@ -1387,7 +1388,7 @@ namespace RyuGiKen
         /// <param name="value">值</param>
         /// <param name="digits">位数</param>
         /// <returns></returns>
-        public static Vector3 Round(this Vector3 value, int digits)
+        public static Vector3 Round(this Vector3 value, int digits = 0)
         {
             return new Vector3(Round(value.x, digits), Round(value.y, digits), Round(value.z, digits));
         }
@@ -1605,7 +1606,7 @@ namespace RyuGiKen
             {
                 if (index < startIndex || index > endIndex)
                     return float.NaN;
-                size = Mathf.Abs(size);
+                size = Math.Abs(size);
                 int count = 0;
                 for (int i = 0; i <= size; i++)
                 {
@@ -1726,7 +1727,7 @@ namespace RyuGiKen
             string sign = "";
             if (time < 0)
             {
-                time = Mathf.Abs(time);
+                time = Math.Abs(time);
                 sign = "-";
             }
             switch (digit)
@@ -2059,8 +2060,8 @@ namespace RyuGiKen
             float delta, min;
             float h = 0, s, v;
 
-            min = Mathf.Min(Mathf.Min(r, g), b);
-            v = Mathf.Max(Mathf.Max(r, g), b);
+            min = Math.Min(Math.Min(r, g), b);
+            v = Math.Max(Math.Max(r, g), b);
             delta = v - min;
 
             if (v == 0)

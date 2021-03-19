@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -97,7 +98,7 @@ namespace RyuGiKen.Tools
 
             if (passTime > fixTime)
             {
-                m_FPS = Mathf.RoundToInt(FrameCount / passTime);
+                m_FPS = (float)Math.Round(FrameCount / passTime);
                 FPSText.text = "FPS  " + m_FPS.ToString() + "  L" + QualitySettings.GetQualityLevel().ToString();
                 passTime = 0.0f;
                 FrameCount = 0;

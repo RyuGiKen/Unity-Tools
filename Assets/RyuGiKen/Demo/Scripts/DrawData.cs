@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -76,11 +77,11 @@ namespace RyuGiKen.Tools
             {
                 result = num.ToString("F0");
             }
-            else if (Mathf.Abs(num) > 0.1f)
+            else if (Math.Abs(num) > 0.1f)
             {
                 result = num.ToString("F3");
             }
-            else if (Mathf.Abs(num) > 0.001f)
+            else if (Math.Abs(num) > 0.001f)
             {
                 result = num.ToString("F3");
             }
