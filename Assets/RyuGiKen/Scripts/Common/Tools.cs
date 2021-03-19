@@ -1259,20 +1259,22 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
-        /// 计算数字位数
+        /// 计算数字位数（取整）
         /// </summary>
         /// <param name="Num"></param>
+        /// <param name="outputMinus">输出符号</param>
         /// <returns></returns>
-        public static int GetNumDigit(this float Num)
+        public static int GetNumDigit(this float Num, bool outputMinus = false)
         {
             int size = 0;//位数
-            float num = Num;
+            float num = Math.Abs(Num);
             while (num >= 1)//获取位数
             {
                 num /= 10;
                 size++;
             }
-            return size;
+            return size * (Num < 0 && outputMinus ? -1 : 1);
+            //return Math.Abs((int)Num).ToString().Length * (Num < 0 ? -1 : 1);
         }
         /// <summary>
         /// 判定是否在范围内
