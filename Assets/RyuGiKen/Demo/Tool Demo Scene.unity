@@ -9046,9 +9046,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 421555103}
+  targetScale: {x: 0, y: 0, z: 0}
+  space: 2
   follower:
   - {fileID: 1905339085}
-  startPosDifferenceValue: []
+  startPosDifferenceValue_World: []
+  startPosDifferenceValue_Self: []
   FollowRotation: 1
   followerRotation: []
 --- !u!65 &1905339082

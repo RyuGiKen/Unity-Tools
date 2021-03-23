@@ -10,9 +10,27 @@ namespace RyuGiKen.Tools
     [AddComponentMenu("RyuGiKen/跟随移动")]
     public class FollowMove : MonoBehaviour
     {
+        public enum FollowMode
+        {
+            /// <summary>
+            /// 全局坐标
+            /// </summary>
+            WorldPositon,
+            /// <summary>
+            /// 局部坐标，跟随缩放
+            /// </summary>
+            LocalPosion,
+            /// <summary>
+            /// 局部坐标，忽略缩放
+            /// </summary>
+            LocalPosionIgnoreScale
+        }
         [Tooltip("目标跟随对象")] public Transform target;
+        [Tooltip("目标初始缩放")] public Vector3 targetScale;
+        [Tooltip("跟随模式")] [SerializeField] FollowMode space = FollowMode.WorldPositon;
         [Tooltip("跟随移动对象")] public Transform[] follower;
-        [Tooltip("全局位置坐标差")] public Vector3[] startPosDifferenceValue;
+        [Tooltip("全局位置坐标差")] public Vector3[] startPosDifferenceValue_World;
+        [Tooltip("局部位置坐标差")] public Vector3[] startPosDifferenceValue_Self;
         [Tooltip("跟随旋转")] public bool FollowRotation;
         [Tooltip("旋转差")] [SerializeField] Quaternion[] followerRotation;
         void Start()
@@ -20,10 +38,13 @@ namespace RyuGiKen.Tools
             if (target != null && follower[0] != null)
             {
                 followerRotation = new Quaternion[follower.Length];
-                startPosDifferenceValue = new Vector3[follower.Length];
+                targetScale = target.localScale;
+                startPosDifferenceValue_World = new Vector3[follower.Length];
+                startPosDifferenceValue_Self = new Vector3[follower.Length];
                 for (int i = 0; i < follower.Length; i++)
                 {
-                    startPosDifferenceValue[i] = follower[i].position - target.position;
+                    startPosDifferenceValue_World[i] = follower[i].position - target.position;
+                    startPosDifferenceValue_Self[i] = target.InverseTransformPoint(follower[i].position);
                     followerRotation[i] = Quaternion.Slerp(follower[i].rotation, target.rotation, 0);
                 }
             }
@@ -34,7 +55,20 @@ namespace RyuGiKen.Tools
             {
                 for (int i = 0; i < follower.Length; i++)
                 {
-                    follower[i].position = target.position + startPosDifferenceValue[i];
+                    switch (space)
+                    {
+                        default:
+                        case FollowMode.WorldPositon:
+                            follower[i].position = target.position + startPosDifferenceValue_World[i];
+                            break;
+                        case FollowMode.LocalPosion:
+                            follower[i].position = target.TransformPoint(startPosDifferenceValue_Self[i]);
+                            break;
+                        case FollowMode.LocalPosionIgnoreScale:
+                            Vector3 LocalPositon = new Vector3(startPosDifferenceValue_Self[i].x / target.localScale.x * targetScale.x, startPosDifferenceValue_Self[i].y / target.localScale.y * targetScale.y, startPosDifferenceValue_Self[i].z / target.localScale.z * targetScale.z);
+                            follower[i].position = target.TransformPoint(LocalPositon);
+                            break;
+                    }
                     if (FollowRotation)
                     {
                         follower[i].rotation = target.rotation * followerRotation[i];

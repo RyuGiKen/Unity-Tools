@@ -23,7 +23,7 @@ public class LogOnBuild : IPreprocessBuildWithReport, IPostprocessBuildWithRepor
 		FileStream file = new FileStream(VersionFileFullName, FileMode.OpenOrCreate);
 		file.Close();
 
-		//File.WriteAllText(VersionFileFullName, RyuGiKen.Tools.Version.LogVersionDate());
+		File.WriteAllText(VersionFileFullName, RyuGiKen.Version.LogVersionDate());
 	}
 	public void OnPostprocessBuild(BuildReport report)
 	{
