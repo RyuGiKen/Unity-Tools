@@ -974,7 +974,26 @@ namespace RyuGiKen
         /// <returns></returns>
         public static int FindIndexOfNumInString(this string number)
         {
-            return number.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+            return number.IndexOfAny("0123456789".ToCharArray());
+        }
+        /// <summary>
+        /// 找出字符串中第一个字母的序号
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int FindIndexOfLetterInString(this string str)
+        {
+            //return str.IndexOfAny("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".ToCharArray());
+            byte[] tempbyte = System.Text.Encoding.ASCII.GetBytes(str);
+            for (int i = 0; i < str.Length; i++)
+            {
+                byte by = tempbyte[i];
+                if ((by >= 65) && (by <= 90) || ((by >= 97) && (by <= 122)))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
         /// <summary>
         /// 是否包含指定字符串
@@ -1164,10 +1183,11 @@ namespace RyuGiKen
         /// 字符串转浮点数，失败为0
         /// </summary>
         /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
-        public static float ToFloat(this string num)
+        public static float ToFloat(this string num, float FailValue = 0)
         {
-            float result = 0;
+            float result = FailValue;
             float.TryParse(num, out result);
             return result;
         }
@@ -1175,10 +1195,11 @@ namespace RyuGiKen
         /// 字符串转整数，失败为0
         /// </summary>
         /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
-        public static int ToInteger(this string num)
+        public static int ToInteger(this string num, int FailValue = 0)
         {
-            int result = 0;
+            int result = FailValue;
             int.TryParse(num, out result);
             return result;
         }
