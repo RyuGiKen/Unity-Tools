@@ -12,7 +12,51 @@ namespace RyuGiKen
 	[RequireComponent(typeof(Text))]
 	public class Version : MonoBehaviour
 	{
-		public static Version instance;
+		/// <summary>
+		/// 版本号位数
+		/// </summary>
+		const int Length = 2;
+		public static int VersionLength { get { return Length < 1 ? 1 : Length; } }
+		/// <summary>
+		/// 测试版标识
+		/// </summary>
+		public const string DebugSign = "beta";
+		/// <summary>
+		/// 发布版标识
+		/// </summary>
+		public const string ReleaseSign = "v";
+		public const VersionSignType SignType = VersionSignType.SamePrefixAndOnlyDebugPostfix;
+		/// <summary>
+		/// 版本号标识
+		/// </summary>
+		public enum VersionSignType
+		{
+			/// <summary>
+			/// 无标识
+			/// </summary>
+			None,
+			/// <summary>
+			/// 统一前缀
+			/// </summary>
+			SamePrefix,
+			/// <summary>
+			/// 前缀，自动识别发布版测试版
+			/// </summary>
+			BothPrefix,
+			/// <summary>
+			/// 仅测试版有后缀，发布版无后缀
+			/// </summary>
+			OnlyDebugPostfix,
+			/// <summary>
+			/// 后缀，自动识别发布版测试版
+			/// </summary>
+			BothPostfix,
+			/// <summary>
+			/// 统一前缀。仅测试版有后缀
+			/// </summary>
+			SamePrefixAndOnlyDebugPostfix,
+		}
+
 		public string versionNumber = "b1.0.0";
 		void Awake()
 		{
@@ -38,30 +82,93 @@ namespace RyuGiKen
 		/// <param name="number"></param>
 		public static string SetVersionNumber(string number)
 		{
-			string versionNumber = number.Trim(' ');//移除空格
-													//第一位字母
-			string type = "b";
-			if (versionNumber.Length != 0)
+			string versionNumber;
+			if (string.IsNullOrEmpty(number))
+				versionNumber = "";
+			else
+				versionNumber = number.Trim(' ');//移除空格
+			int FirstNum = versionNumber.FindIndexOfNumInString();//找出第一位数字
+			int FirstLetterBehindNum = (FirstNum >= 0 ? versionNumber.Remove(0, FirstNum) : versionNumber).FindIndexOfLetterInString();//找出数字部分后第一位字母
+			string type = "";
+			switch (SignType)//前缀
 			{
-				if (versionNumber.Substring(0, 1) == "v" || versionNumber.Substring(0, 1) == "V")
-					type = "v";
+				case VersionSignType.BothPrefix:
+					type = DebugSign;
+					if (versionNumber.Length > 0)
+					{
+						if ((FirstNum < 0 ? versionNumber : versionNumber.Substring(0, FirstNum)).ContainIgnoreCase(ReleaseSign))
+							type = ReleaseSign;
+					}
+					break;
+				case VersionSignType.SamePrefix:
+				case VersionSignType.SamePrefixAndOnlyDebugPostfix:
+					type = ReleaseSign;
+					break;
 			}
 			//数字部分
-			int index = ValueAdjust.FindIndexOfNumInString(versionNumber);//找出第一位数字
-																		  //Debug.Log(index);
+			string NumPart;
 			string[] num;
-			if (index > 0)
-				num = versionNumber.Remove(0, index).Split('.');//移除第一位数字前的部分
+			//移除第一位数字前的部分
+			if (FirstNum >= 0 && FirstLetterBehindNum >= 0)
+				NumPart = versionNumber.Substring(FirstNum, FirstLetterBehindNum);
+			else if (FirstNum >= 0)
+				NumPart = versionNumber.Substring(FirstNum);
 			else
-				num = versionNumber.Split('.');
-			int[] ver = new int[3];
+				NumPart = versionNumber;
+			num = NumPart.Split('.');
+			int[] ver = new int[VersionLength];
 			for (int i = 0; i < num.Length; i++)
 			{
 				//Debug.Log(num[i]);
-				if (i < 3)//三位版本号
+				if (i < VersionLength)
 					int.TryParse(num[i], out ver[i]);//能转换整数才读取
+				else
+					break;
 			}
-			versionNumber = type + ver[0] + "." + ver[1] + "." + ver[2];
+			switch (SignType)//后缀
+			{
+				case VersionSignType.BothPostfix:
+					if (versionNumber.Substring(FirstNum < 0 ? 0 : FirstNum).ContainIgnoreCase(ReleaseSign))
+						type = ReleaseSign;
+					else
+						type = DebugSign;
+					break;
+				case VersionSignType.OnlyDebugPostfix:
+				case VersionSignType.SamePrefixAndOnlyDebugPostfix:
+					if (FirstLetterBehindNum >= 0)
+						type = DebugSign;
+					break;
+			}
+			switch (SignType)//前缀
+			{
+				case VersionSignType.SamePrefix:
+				case VersionSignType.BothPrefix:
+				case VersionSignType.SamePrefixAndOnlyDebugPostfix:
+					versionNumber = type;
+					break;
+				case VersionSignType.None:
+				case VersionSignType.BothPostfix:
+				case VersionSignType.OnlyDebugPostfix:
+					versionNumber = "";
+					break;
+			}
+			for (int i = 0; i < ver.Length; i++)
+			{
+				if (i == 0) //第一位
+					versionNumber += ver[0];
+				else
+					versionNumber += "." + ver[i];
+			}
+			switch (SignType)//后缀
+			{
+				case VersionSignType.OnlyDebugPostfix:
+				case VersionSignType.BothPostfix:
+					versionNumber += type;
+					break;
+				case VersionSignType.SamePrefixAndOnlyDebugPostfix:
+					versionNumber += DebugSign;
+					break;
+			}
 			return versionNumber;
 		}
 		/// <summary>
