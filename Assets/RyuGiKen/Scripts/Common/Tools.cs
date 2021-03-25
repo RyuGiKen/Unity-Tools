@@ -904,6 +904,52 @@ namespace RyuGiKen
                 return result;
         }
         /// <summary>
+        /// 随机抽取
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="excludeNull">排除空项</param>
+        /// <returns></returns>
+        public static T GetRandomItem<T>(this T[] array, bool excludeNull = false)
+        {
+            if (array == null || array.Length < 1)
+                return default(T);
+            T result;
+            if (excludeNull)
+            {
+                T[] temp = array.ClearNullItem();
+                result = temp[Random.Range(0, temp.Length - 1)];
+            }
+            else
+            {
+                result = array[Random.Range(0, array.Length - 1)];
+            }
+            return result;
+        }
+        /// <summary>
+        /// 随机抽取
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="excludeNull">排除空项</param>
+        /// <returns></returns>
+        public static T GetRandomItem<T>(this List<T> list, bool excludeNull = false)
+        {
+            if (list == null || list.Count < 1)
+                return default(T);
+            T result;
+            if (excludeNull)
+            {
+                T[] temp = list.ToArray().ClearNullItem();
+                result = temp[Random.Range(0, temp.Length - 1)];
+            }
+            else
+            {
+                result = list[Random.Range(0, list.Count - 1)];
+            }
+            return result;
+        }
+        /// <summary>
         /// 随机多选多(数组，取值量，是否重复)
         /// </summary>
         /// <typeparam name="T"></typeparam>
