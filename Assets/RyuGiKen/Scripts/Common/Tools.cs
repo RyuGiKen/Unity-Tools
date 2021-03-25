@@ -583,11 +583,13 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<T> ClearRepeatingItem<T>(this List<T> list) where T : Object
         {
+            if (list == null || list.Count < 1)
+                return null;
             for (int i = 0; i < list.Count; i++)
             {
                 for (int j = 0; j < list.Count; j++)
                 {
-                    if (i != j && list[i] == list[j])
+                    if (i != j && list[i] && list[j] && list[i] == list[j])
                         list[i] = null;
                 }
             }
@@ -599,20 +601,50 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static T[] ClearRepeatingItem<T>(this T[] array) where T : Object
+        public static T[] ClearRepeatingItem<T>(this T[] array)
         {
-            List<T> list = ClearRepeatingItem(ToList(array));
-            array = list.ToArray();
-            return array;
+            if (array == null || array.Length < 1)
+                return null;
+            T[] temp = array.ClearNullItem();
+            if (temp == null || temp.Length < 1)
+                return null;
+            List<T> result = new List<T>();
+            result.Add(temp[0]);
+            for (int i = 1; i < temp.Length; i++)
+            {
+                bool Repeating = false;
+                for (int j = 0; j < result.Count; j++)
+                {
+                    if (array is UnityEngine.Object[])
+                    {
+                        if ((temp[i] as Object) == (result[j] as Object))
+                        {
+                            Repeating = true;
+                            break;
+                        }
+                    }
+                    else if (temp[i].Equals(result[j]))
+                    {
+                        Repeating = true;
+                        break;
+                    }
+                }
+                if (!Repeating)
+                    result.Add(temp[i]);
+            }
+            return result.ToArray();
         }
         /// <summary>
         /// 清空空项
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
+        /// <param name="changeSelf">改变自身</param>
         /// <returns></returns>
         public static List<T> ClearNullItem<T>(this List<T> list, bool changeSelf = true) where T : Object
         {
+            if (list == null || list.Count < 1)
+                return null;
             List<T> result = new List<T>(list.Count);
             if (!changeSelf)
             {
@@ -639,13 +671,31 @@ namespace RyuGiKen
         /// 清空空项
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
+        /// <param name="array"></param>
         /// <returns></returns>
-        public static T[] ClearNullItem<T>(this T[] array) where T : Object
+        public static T[] ClearNullItem<T>(this T[] array)
         {
-            List<T> list = ClearNullItem(ToList(array));
-            array = list.ToArray();
-            return array;
+            if (array == null || array.Length < 1)
+                return null;
+            List<T> result = new List<T>(array.Length);
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if (array is UnityEngine.Object[])
+                    {
+                        if (array[i] as Object)
+                            result.Add(array[i]);
+                    }
+                    else if (array is string)
+                    {
+                        if (!string.IsNullOrEmpty(array[i] as string))
+                            result.Add(array[i]);
+                    }
+                    else if (array[i] != null)
+                        result.Add(array[i]);
+                }
+                return result.ToArray();
+            }
         }
         /// <summary>
         /// 列表相加。补充在后。
