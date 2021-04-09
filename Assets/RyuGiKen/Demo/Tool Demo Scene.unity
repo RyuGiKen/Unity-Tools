@@ -2134,6 +2134,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca8b3991986e7074cad1609e53576f5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  space: 1
+  m_UpdateMode: 1
+  RandomStartAngle: 1
   autoRoll: 1
   angle: {x: 0, y: 0, z: 1}
   rollSpeed: 90
@@ -6532,7 +6535,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c97b673def845840b6f71358872e022, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  versionNumber: b1.0.0
+  versionNumber: v1.0beta
 --- !u!114 &1458690398
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6564,7 +6567,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: b1.0.0
+  m_Text: v1.0beta
 --- !u!222 &1458690399
 CanvasRenderer:
   m_ObjectHideFlags: 0
