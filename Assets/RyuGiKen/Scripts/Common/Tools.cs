@@ -7,10 +7,14 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+#if UNITY_EDITOR || UNITY_STANDALONE
+using WindowsAPI;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
+using Debug = UnityEngine.Debug;
+#endif
 /// <summary>
 /// RyuGiKen's Tools
 /// </summary>
@@ -218,6 +222,7 @@ namespace RyuGiKen
     /// </summary>
     public static class ObjectAdjust
     {
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// GameObject设置活动状态
         /// </summary>
@@ -390,12 +395,160 @@ namespace RyuGiKen
                     array[i] = m_Array[i].gameObject;
             return array;
         }
+#endif
     }
+#if !UNITY_EDITOR && !UNITY_STANDALONE
+    public static class Random
+    {
+        /// <summary>
+        /// 返回[0，1]范围的小数
+        /// </summary>
+        public static float value { get { return (new System.Random().Next((int)Math.Pow(10, 8))) * (float)Math.Pow(0.1f, 8); } }
+        /// <summary>
+        /// 返回[min，max)范围的整数
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static int Range(int min, int max)
+        {
+            int Min, Max;
+            if (min > max)
+            {
+                Min = max;
+                Max = min;
+            }
+            else
+            {
+                Min = min;
+                Max = max;
+            }
+            return new System.Random().Next(Max - Min) + Min;
+        }
+        /// <summary>
+        /// 返回[min，max)范围的小数
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static float Range(float min, float max)
+        {
+            float Min, Max;
+            if (min > max)
+            {
+                Min = max;
+                Max = min;
+            }
+            else
+            {
+                Min = min;
+                Max = max;
+            }
+            return Random.value * (Max - Min) + Min;
+        }
+    }
+    public class Object
+    {
+        public static implicit operator bool(Object exists) { return exists != null; }
+    }
+    public static class Mathf
+    {
+        public static float Rad2Deg = 360f / (float)(Math.PI * 2);
+        public static float Deg2Rad = (float)(Math.PI * 2) / 360f;
+        /// <summary>
+        /// 限制值范围[0，1]
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static float Clamp01(float value)
+        {
+            return Mathf.Clamp(value, 0, 1f);
+        }
+        /// <summary>
+        /// 限制值范围
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static int Clamp(int value, int min, int max)
+        {
+            if (value < min)
+                value = min;
+            if (value > max)
+                value = max;
+            return value;
+        }
+        /// <summary>
+        /// 限制值范围
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static float Clamp(float value, float min, float max)
+        {
+            if (value < min)
+                value = min;
+            if (value > max)
+                value = max;
+            return value;
+        }
+        /// <summary>
+        /// 返回小于或等于指定小数的最大整数
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int FloorToInt(float value)
+        {
+            return (int)Math.Floor(value);
+        }
+    }
+    public struct Color
+    {
+        public float r;
+        public float g;
+        public float b;
+        public float a;
+        public Color(float Red, float Green, float Blue, float Alpha = 1)
+        {
+            this.r = Red;
+            this.g = Green;
+            this.b = Blue;
+            this.a = Alpha;
+        }
+    }
+    public class Vector2
+    {
+        public float x;
+        public float y;
+        public Vector2(float X = 0, float Y = 0)
+        {
+            this.x = X;
+            this.y = Y;
+        }
+    }
+    public class Vector3
+    {
+        public float x;
+        public float y;
+        public float z;
+        public Vector3(float X = 0, float Y = 0, float Z = 0)
+        {
+            this.x = X;
+            this.y = Y;
+            this.y = Z;
+        }
+    }
+#endif
     /// <summary>
     /// 数值调整
     /// </summary>
     public static class ValueAdjust
     {
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 二维坐标转三维坐标
         /// </summary>
@@ -595,6 +748,7 @@ namespace RyuGiKen
             }
             return ValueAdjust.ClearNullItem(list);
         }
+#endif
         /// <summary>
         /// 清空重复项
         /// </summary>
@@ -615,7 +769,7 @@ namespace RyuGiKen
                 bool Repeating = false;
                 for (int j = 0; j < result.Count; j++)
                 {
-                    if (array is UnityEngine.Object[])
+                    if (array is Object[])
                     {
                         if ((temp[i] as Object) == (result[j] as Object))
                         {
@@ -634,6 +788,7 @@ namespace RyuGiKen
             }
             return result.ToArray();
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 清空空项
         /// </summary>
@@ -667,6 +822,7 @@ namespace RyuGiKen
                 return list;
             }
         }
+#endif
         /// <summary>
         /// 清空空项
         /// </summary>
@@ -681,7 +837,7 @@ namespace RyuGiKen
             {
                 for (int i = 0; i < array.Length; i++)
                 {
-                    if (array is UnityEngine.Object[])
+                    if (array is Object[])
                     {
                         if (array[i] as Object)
                             result.Add(array[i]);
@@ -990,6 +1146,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string PrintArray<T>(T[] array, bool newline = false)
         {
+            if (array == null || array.Length < 1)
+                return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
@@ -1113,6 +1271,7 @@ namespace RyuGiKen
         {
             return (source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0);
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s）
         /// </summary>
@@ -1221,6 +1380,7 @@ namespace RyuGiKen
             Vector2 plusSpeed = (B - A).normalized * PlusSpeed;
             return new Vector2(Lerp(A.x, B.x, step, speed.x, plusSpeed.x, setSpeedRange), Lerp(A.y, B.y, step, speed.y, plusSpeed.y, setSpeedRange));
         }
+#endif
         /// <summary>
         ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s，超出差值范围时的速度/s，差值范围）
         /// </summary>
@@ -1273,7 +1433,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float Square(float X, float b, float k)
         {
-            return Mathf.Sqrt(Math.Abs((X + b) / k));
+            return (float)Math.Sqrt(Math.Abs((X + b) / k));
         }
         /// <summary>
         /// 字符串转浮点数，失败为0
@@ -1435,6 +1595,7 @@ namespace RyuGiKen
                 return false;
             }
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
         /// </summary>
@@ -1477,6 +1638,7 @@ namespace RyuGiKen
             else
                 return false;
         }
+#endif
         /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
@@ -1489,6 +1651,7 @@ namespace RyuGiKen
             //return (float)(Math.Round(value * Math.Pow(10, digits)) * Math.Pow(0.1f, digits));
             //return float.Parse(value.ToString("f" + digits));
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
@@ -1509,6 +1672,7 @@ namespace RyuGiKen
         {
             return new Vector3(Round(value.x, digits), Round(value.y, digits), Round(value.z, digits));
         }
+#endif
         /// <summary>
         /// 调整循环范围(当前值，最小值，最大值，循环周期)
         /// </summary>
@@ -1526,6 +1690,7 @@ namespace RyuGiKen
                 numAdjusted += period;
             return numAdjusted;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
         /// </summary>
@@ -1606,6 +1771,7 @@ namespace RyuGiKen
             rectpos.y = dis * Mathf.Sin(angle * Mathf.Deg2Rad);
             return rectpos;
         }
+#endif
         /// <summary>
         /// 平滑处理
         /// </summary>
@@ -1742,6 +1908,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 取平均值
         /// </summary>
@@ -1784,6 +1951,7 @@ namespace RyuGiKen
             }
             return Max * 1f / (endIndex + 1 - startIndex);
         }
+#endif
         /// <summary>
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
@@ -2031,10 +2199,22 @@ namespace RyuGiKen
     /// </summary>
     public struct HSVColor
     {
-        [Tooltip("色调[0，360]")] public float Hue;
-        [Tooltip("饱和度[0，1]")] public float Saturation;
-        [Tooltip("明度[0，1]")] public float Value;
-        [Tooltip("透明度[0，1]")] public float alpha;
+        /// <summary>
+        /// 色调[0，360]
+        /// </summary>
+        public float Hue;
+        /// <summary>
+        /// 饱和度[0，1]
+        /// </summary>
+        public float Saturation;
+        /// <summary>
+        /// 明度[0，1]
+        /// </summary>
+        public float Value;
+        /// <summary>
+        /// 透明度[0，1]
+        /// </summary>
+        public float alpha;
         /// <summary>
         /// 
         /// </summary>
@@ -2065,13 +2245,19 @@ namespace RyuGiKen
         {
             return new Vector3(Hue, Saturation, Value);
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         public Vector4 ToVector4()
         {
             return new Vector4(Hue, Saturation, Value, alpha);
         }
+#endif
         public override string ToString()
         {
+#if UNITY_EDITOR || UNITY_STANDALONE
             return ToVector4().ToString();
+#else
+            return ("(" + Hue + "," + Saturation + "," + Value + "," + alpha + ")");
+#endif
         }
     }
     /// <summary>
@@ -2088,6 +2274,7 @@ namespace RyuGiKen
         {
             return new Color(value.x, value.y, value.z);
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 四维坐标转颜色
         /// </summary>
@@ -2097,6 +2284,7 @@ namespace RyuGiKen
         {
             return new Color(value.x, value.y, value.z, value.w);
         }
+#endif
         /// <summary>
         /// 更改颜色色相（颜色，指定量百分比系数[0，1]）
         /// </summary>
@@ -2440,7 +2628,7 @@ namespace RyuGiKen
     /// </summary>
     public static class VirtualKeyboard
     {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+
         private const uint WM_SYSCOMMAND = 274;
         private const int SC_CLOSE = 61536;
         private static Process ExternalCall(string filename, string arguments, bool hideWindow)
@@ -2466,6 +2654,7 @@ namespace RyuGiKen
         /// </summary>
         public static void OpenKeyboard()
         {
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
             try
             {
                 if (System.IO.File.Exists("C:\\Program Files\\Common Files\\Microsoft Shared\\ink\\TabTip.exe")
@@ -2483,27 +2672,33 @@ namespace RyuGiKen
             {
                 UnityEngine.Debug.LogError(e);
             }
+#endif
         }
         /// <summary>
         /// 打开旧版屏幕键盘Osk.exe
         /// </summary>
         public static void OpenOSK()
         {
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
             Process.Start("C:\\Windows\\System32\\osk.exe");
+#endif
         }
         /// <summary>
         /// 打开屏幕键盘TabTip.exe
         /// </summary>
         public static void OpenTabTip()
         {
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
             //HideTabTip();
             ExternalCall("C:\\Program Files\\Common Files\\Microsoft Shared\\ink\\TabTip.exe", null, false);
+#endif
         }
         /// <summary>
         /// 隐藏屏幕键盘TabTip.exe
         /// </summary>
         public static void HideTabTip()
         {
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
             try
             {
                 IntPtr ptr = WindowsAPI.User32.FindWindow("IPTip_Main_Window", null);
@@ -2515,7 +2710,7 @@ namespace RyuGiKen
             {
                 UnityEngine.Debug.Log(e);
             }
-        }
 #endif
+        }
     }
 }
