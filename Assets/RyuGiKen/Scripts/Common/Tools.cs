@@ -548,7 +548,6 @@ namespace RyuGiKen
     /// </summary>
     public static class ValueAdjust
     {
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 二维坐标转三维坐标
         /// </summary>
@@ -556,7 +555,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector3 ToVector3(this Vector2 value)
         {
-            return value;
+            return new Vector3(value.x, value.y);
         }
         /// <summary>
         /// 二维坐标数组转三维坐标数组
@@ -568,7 +567,7 @@ namespace RyuGiKen
             Vector3[] result = new Vector3[value.Length];
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = value[i];
+                result[i] = value[i].ToVector3();
             }
             return result;
         }
@@ -595,7 +594,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector2 ToVector2(this Vector3 value)
         {
-            return value;
+            return new Vector2(value.x, value.y);
         }
         /// <summary>
         /// x,y数组转二维坐标数组
@@ -728,6 +727,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 清空重复项
         /// </summary>
@@ -1595,7 +1595,6 @@ namespace RyuGiKen
                 return false;
             }
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
         /// </summary>
@@ -1638,7 +1637,6 @@ namespace RyuGiKen
             else
                 return false;
         }
-#endif
         /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
@@ -1651,7 +1649,6 @@ namespace RyuGiKen
             //return (float)(Math.Round(value * Math.Pow(10, digits)) * Math.Pow(0.1f, digits));
             //return float.Parse(value.ToString("f" + digits));
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
@@ -1672,7 +1669,6 @@ namespace RyuGiKen
         {
             return new Vector3(Round(value.x, digits), Round(value.y, digits), Round(value.z, digits));
         }
-#endif
         /// <summary>
         /// 调整循环范围(当前值，最小值，最大值，循环周期)
         /// </summary>
@@ -1690,7 +1686,6 @@ namespace RyuGiKen
                 numAdjusted += period;
             return numAdjusted;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
         /// </summary>
@@ -1699,11 +1694,11 @@ namespace RyuGiKen
         public static Vector2 RectToPolar(Vector2 pos)
         {
             float Distance = 0, Angle = 0;
-            Distance = Mathf.Sqrt(pos.x * pos.x + pos.y * pos.y);
+            Distance = (float)Math.Sqrt(pos.x * pos.x + pos.y * pos.y);
             if (Distance == 0)
             { Angle = 0; }
             else
-            { Angle = Mathf.Atan2(pos.y, pos.x) / Mathf.Deg2Rad; }
+            { Angle = (float)Math.Atan2(pos.y, pos.x) / Mathf.Deg2Rad; }
 
             while (Angle < 0)
             { Angle += 360; }
@@ -1766,12 +1761,23 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector2 PolarToRect(float angle, float dis = 1f)
         {
-            Vector2 rectpos;
-            rectpos.x = dis * Mathf.Cos(angle * Mathf.Deg2Rad);
-            rectpos.y = dis * Mathf.Sin(angle * Mathf.Deg2Rad);
+            Vector2 rectpos = new Vector2();
+            rectpos.x = dis * (float)Math.Cos(angle * Mathf.Deg2Rad);
+            rectpos.y = dis * (float)Math.Sin(angle * Mathf.Deg2Rad);
             return rectpos;
         }
-#endif
+        /// <summary>
+        /// 极坐标转换成直角坐标系(角度（0，360）, 距离)
+        /// </summary>
+        /// <param name="angle">角度（0，360）</param>
+        /// <param name="dis">距离</param>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
+        public static void PolarToRect(float angle, float dis, out float X, out float Y)
+        {
+            X = dis * (float)Math.Cos(angle * Mathf.Deg2Rad);
+            Y = dis * (float)Math.Sin(angle * Mathf.Deg2Rad);
+        }
         /// <summary>
         /// 平滑处理
         /// </summary>
@@ -1918,7 +1924,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector2 GetAverage(Vector2[] array, int startIndex = -1, int endIndex = -1)
         {
-            Vector2 Max = Vector2.zero;
+            Vector2 Max = new Vector2();
             return ToVector2(GetAverage(ToVector3(array), startIndex, endIndex));
         }
         /// <summary>
@@ -1930,7 +1936,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector3 GetAverage(Vector3[] array, int startIndex = -1, int endIndex = -1)
         {
-            Vector3 Max = Vector3.zero;
+            Vector3 Max = new Vector3();
             if (startIndex == -1 && endIndex == -1)
             {
                 startIndex = 0;
