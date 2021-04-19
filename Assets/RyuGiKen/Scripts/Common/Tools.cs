@@ -400,10 +400,11 @@ namespace RyuGiKen
 #if !UNITY_EDITOR && !UNITY_STANDALONE
     public static class Random
     {
+        static int RandomSeed { set; get; }
         /// <summary>
         /// 返回[0，1]范围的小数
         /// </summary>
-        public static float value { get { return (new System.Random().Next((int)Math.Pow(10, 8))) * (float)Math.Pow(0.1f, 8); } }
+        public static float value { get { return (new System.Random(RandomSeed++).Next((int)Math.Pow(10, 8))) * (float)Math.Pow(0.1f, 8); } }
         /// <summary>
         /// 返回[min，max)范围的整数
         /// </summary>
@@ -423,7 +424,7 @@ namespace RyuGiKen
                 Min = min;
                 Max = max;
             }
-            return new System.Random().Next(Max - Min) + Min;
+            return new System.Random(RandomSeed++).Next(Max - Min) + Min;
         }
         /// <summary>
         /// 返回[min，max)范围的小数
