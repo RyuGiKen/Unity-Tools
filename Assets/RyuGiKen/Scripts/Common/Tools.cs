@@ -751,6 +751,20 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 全局方向转局部角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="direction">全局方向</param>
+        /// <returns></returns>
+        public static Vector3 DirectionToLocalEulerAngles(this Transform transform, Vector3 direction)
+        {
+            Vector3 LocalDirection = transform.InverseTransformDirection(direction);//局部方向
+            Vector3 LocalEulerAngles = Vector3.zero;
+            LocalEulerAngles.x = Mathf.Atan2(LocalDirection.y, LocalDirection.z) / Mathf.PI * 180;
+            LocalEulerAngles.y = Mathf.Atan2(LocalDirection.x, LocalDirection.z) / Mathf.PI * 180;
+            return LocalEulerAngles;
+        }
+        /// <summary>
         /// 二维坐标数组批量设置单轴值
         /// </summary>
         /// <param name="value"></param>
