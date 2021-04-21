@@ -224,6 +224,120 @@ namespace RyuGiKen
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 重设父对象和位置角度缩放
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        public static void SetParentReset(this Transform transform, Transform parent)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = Vector3.zero;
+            transform.localEulerAngles = Vector3.zero;
+            transform.localScale = Vector3.one;
+        }
+        /// <summary>
+        /// 重设父对象和位置角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalPosition"></param>
+        /// <param name="ResetLocalEulerAngles"></param>
+        public static void SetParentReset(this Transform transform, Transform parent, Vector3 ResetLocalPosition, Vector3 ResetLocalEulerAngles)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = ResetLocalPosition;
+            transform.localEulerAngles = ResetLocalEulerAngles;
+        }
+        /// <summary>
+        /// 重设父对象和位置角度缩放
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalPosition"></param>
+        /// <param name="ResetLocalEulerAngles"></param>
+        /// <param name="ResetLocalScale"></param>
+        public static void SetParentReset(this Transform transform, Transform parent, Vector3 ResetLocalPosition, Vector3 ResetLocalEulerAngles, Vector3 ResetLocalScale)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = ResetLocalPosition;
+            transform.localEulerAngles = ResetLocalEulerAngles;
+            transform.localScale = ResetLocalScale;
+        }
+        /// <summary>
+        /// 重设父对象和位置
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalPosition"></param>
+        public static void SetParentResetPosition(this Transform transform, Transform parent, Vector3 ResetLocalPosition)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = ResetLocalPosition;
+        }
+        /// <summary>
+        /// 重设父对象和角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalEulerAngles"></param>
+        public static void SetParentResetRotation(this Transform transform, Transform parent, Vector3 ResetLocalEulerAngles)
+        {
+            transform.SetParent(parent);
+            transform.localEulerAngles = ResetLocalEulerAngles;
+        }
+        /// <summary>
+        /// 重设父对象和角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalRotation"></param>
+        public static void SetParentResetRotation(this Transform transform, Transform parent, Quaternion ResetLocalRotation)
+        {
+            transform.SetParent(parent);
+            transform.localRotation = ResetLocalRotation;
+        }
+        /// <summary>
+        /// 重设父对象和缩放
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalScale"></param>
+        public static void SetParentResetScale(this Transform transform, Transform parent, Vector3 ResetLocalScale)
+        {
+            transform.SetParent(parent);
+            transform.localScale = ResetLocalScale;
+        }
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="GO"></param>
+        public static void Destroy<T>(this T[] GO) where T : Object
+        {
+            foreach (var item in GO)
+            {
+                if (Application.isPlaying)
+                    Object.Destroy(item);
+                else
+                    Object.DestroyImmediate(item);
+            }
+        }
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="GO"></param>
+        public static void Destroy<T>(this List<T> GO) where T : Object
+        {
+            foreach (var item in GO)
+            {
+                if (Application.isPlaying)
+                    Object.Destroy(item);
+                else
+                    Object.DestroyImmediate(item);
+            }
+        }
+        /// <summary>
         /// GameObject设置活动状态
         /// </summary>
         /// <param name="component"></param>
@@ -282,6 +396,30 @@ namespace RyuGiKen
             foreach (var item in GO)
             {
                 item.gameObject.SetActive(active);
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void ColliderSetEnable<T>(this T[] GO, bool active) where T : Collider
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void ColliderSetEnable<T>(this List<T> GO, bool active) where T : Collider
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
             }
         }
         /// <summary>
