@@ -556,11 +556,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 48a159665cf9cb6498baf38c752ec4d7, type: 3}
   - {fileID: 8300000, guid: d3a98a9598321224b9059c4fca746cf1, type: 3}
   - {fileID: 8300000, guid: 083a11b6fd995714a99ab776145116b2, type: 3}
-  - {fileID: 8300000, guid: e2f13f4efc10aae4e89e06d4b804c6e2, type: 3}
+  - {fileID: 8300000, guid: abf75557919c5664d91b72ce9a75883a, type: 3}
   - {fileID: 8300000, guid: 68c1c6ee9ddcd0341a672e9f7ecbbef0, type: 3}
   - {fileID: 8300000, guid: 0362a90ed6c8fb243b81145ad6a8322e, type: 3}
-  - {fileID: 8300000, guid: 5d899c056941065488afa4b7af4e16ae, type: 3}
-  - {fileID: 8300000, guid: 06266e5efe4d1b043929c582b429bbd3, type: 3}
+  - {fileID: 8300000, guid: 87737b00555812a4389d00ad25735817, type: 3}
+  - {fileID: 8300000, guid: 8c9fc13bd92457740b56c9c3a8ece7c8, type: 3}
   m_Audio: {fileID: 8296172669276728082}
   Arrow_Prefab: {fileID: 1485033661919127739, guid: 9cf91ed6a1c1f3542abba4523b859489,
     type: 3}
@@ -575,6 +575,7 @@ MonoBehaviour:
   BoresightTime: 0
   canShowBoresight: 0
   ColdDownTime: 0
+  ColdDownTime_Max: 2
 --- !u!82 &8296172669276728082
 AudioSource:
   m_ObjectHideFlags: 0

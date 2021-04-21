@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class EnemyBody : MonoBehaviour
+namespace RyuGiKen.TrackArrow
 {
-    public Enemy enemy;
+    public class EnemyBody : MonoBehaviour
+    {
+        public Enemy enemy;
+    }
 }

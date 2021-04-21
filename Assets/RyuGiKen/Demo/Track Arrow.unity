@@ -21504,6 +21504,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca8b3991986e7074cad1609e53576f5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  space: 1
+  m_UpdateMode: 0
+  RandomStartAngle: 0
   autoRoll: 1
   angle: {x: 0, y: 0, z: 1}
   rollSpeed: 50
