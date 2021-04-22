@@ -552,6 +552,48 @@ namespace RyuGiKen
             }
             return materials.ClearRepeatingItem().ToArray();
         }
+        /// <summary>
+        /// 批量设置材质
+        /// </summary>
+        /// <param name="materials"></param>
+        /// <param name="material"></param>
+        /// <returns></returns>
+        public static void SetMaterials(this Material[] materials, Material material)
+        {
+            for (int i = 0; i < materials.Length; i++)
+            {
+                try
+                {
+                    materials[i] = material;
+                }
+                catch { }
+            }
+        }
+        /// <summary>
+        /// 批量设置材质颜色
+        /// </summary>
+        /// <param name="materials"></param>
+        /// <param name="color"></param>
+        /// <param name="ColorShaderName"></param>
+        public static void SetMaterialsColor(this Material[] materials, Color color, string ColorShaderName)
+        {
+            for (int i = 0; i < materials.Length; i++)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(ColorShaderName))
+                    {
+                        materials[i].color = color;
+                        materials[i].SetColor("_BaseColor", color);
+                    }
+                    else
+                    {
+                        materials[i].SetColor(ColorShaderName, color);
+                    }
+                }
+                catch { }
+            }
+        }
 #endif
     }
 #if !UNITY_EDITOR && !UNITY_STANDALONE
