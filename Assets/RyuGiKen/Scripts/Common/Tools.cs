@@ -533,6 +533,25 @@ namespace RyuGiKen
                     array[i] = m_Array[i].gameObject;
             return array;
         }
+        /// <summary>
+        /// 获取所有子对象的材质
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="UseSharedMaterials"></param>
+        /// <returns></returns>
+        public static Material[] GetAllMaterials(this Transform transform, bool UseSharedMaterials = false)
+        {
+            Renderer[] renderers = transform.GetComponentsInChildren<Renderer>().ClearRepeatingItem();
+            List<Material> materials = new List<Material>();
+            foreach (Renderer renderer in renderers)
+            {
+                if (UseSharedMaterials)
+                    materials.AddList(renderer.sharedMaterials.ToList());
+                else
+                    materials.AddList(renderer.materials.ToList());
+            }
+            return materials.ClearRepeatingItem().ToArray();
+        }
 #endif
     }
 #if !UNITY_EDITOR && !UNITY_STANDALONE
