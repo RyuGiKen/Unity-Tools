@@ -1627,6 +1627,63 @@ namespace RyuGiKen
             return A;
         }
         /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，(点，速度/s)）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="PointSpeeds">(点，速度/s)</param>
+        /// <returns></returns>
+        public static float Lerp(float A, float B, float step, Vector2[] PointSpeeds)
+        {
+            if (step == 0 || PointSpeeds.Length < 1)
+                return A;
+            List<float> X = PointSpeeds.GetVectorValue("X").ToList();
+            List<float> Y = PointSpeeds.GetVectorValue("Y").ToList();
+            List<Vector2> PointSpeeds2 = new List<Vector2>();
+            PointSpeeds2.Add(new Vector2(X[0], Y[0]));
+            for (int i = 1; i < PointSpeeds.Length; i++)//移除重复点
+            {
+                bool Repeating = false;
+                for (int j = 0; j < PointSpeeds2.Count; j++)
+                {
+                    if (X[i].Equals(PointSpeeds2[j].x))
+                    {
+                        Repeating = true;
+                        break;
+                    }
+                }
+                if (!Repeating)
+                    PointSpeeds2.Add(new Vector2(X[i], Y[i]));
+            }
+            if (PointSpeeds2.Count > 0)//按点值排序
+            {
+                PointSpeeds2.Sort(delegate (Vector2 item01, Vector2 item02)
+                {
+                    int result = item01.x.CompareTo(item02.x);
+                    return result;
+                });
+            }
+            float speed = float.NaN;
+            for (int i = 1; i < PointSpeeds2.Count; i++)
+            {
+                if (B >= PointSpeeds2[i - 1].x && B <= PointSpeeds2[i].x)//最接近B的两点
+                {
+                    speed = Math.Abs(Mathf.Lerp(PointSpeeds2[i - 1].y, PointSpeeds2[i].y, ToPercent01(B, PointSpeeds2[i - 1].x, PointSpeeds2[i].x)));//根据插值计算速度
+                }
+            }
+            if (float.IsNaN(speed))
+                return A;
+
+            if (A > B + speed * step)
+                A -= speed * step;
+            else if (A < B - speed * step)
+                A += speed * step;
+            else
+                A = B;
+            return A;
+        }
+        /// <summary>
         /// 输出y=(k*（x + b）^2) + a；
         /// </summary>
         /// <param name="X"></param>
