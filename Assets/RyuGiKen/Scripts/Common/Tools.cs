@@ -1633,8 +1633,9 @@ namespace RyuGiKen
         /// <param name="B">目标值</param>
         /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
         /// <param name="PointSpeeds">(点，速度/s)</param>
+        /// <param name="SpeedFactor">速度系数</param>
         /// <returns></returns>
-        public static float Lerp(float A, float B, float step, Vector2[] PointSpeeds)
+        public static float Lerp(float A, float B, float step, Vector2[] PointSpeeds, float SpeedFactor = 1)
         {
             if (step == 0 || PointSpeeds.Length < 1)
                 return A;
@@ -1669,10 +1670,10 @@ namespace RyuGiKen
             {
                 if (B >= PointSpeeds2[i - 1].x && B <= PointSpeeds2[i].x)//最接近B的两点
                 {
-                    speed = Math.Abs(Mathf.Lerp(PointSpeeds2[i - 1].y, PointSpeeds2[i].y, ToPercent01(B, PointSpeeds2[i - 1].x, PointSpeeds2[i].x)));//根据插值计算速度
+                    speed = SpeedFactor * Math.Abs(Mathf.Lerp(PointSpeeds2[i - 1].y, PointSpeeds2[i].y, ToPercent01(B, PointSpeeds2[i - 1].x, PointSpeeds2[i].x)));//根据插值计算速度
                 }
             }
-            if (float.IsNaN(speed))
+            if (float.IsNaN(speed) || speed == 0)
                 return A;
 
             if (A > B + speed * step)
@@ -2057,7 +2058,7 @@ namespace RyuGiKen
         /// <param name="iterations">插值倍数（1为原数量）</param>
         /// <param name="outputIteration">输出插值扩充后的数据</param>
         /// <returns></returns>
-        public static float[] Smoothing(float[] array, int size = 1, int iterations = 1, bool outputIteration = false)
+        public static float[] Smoothing(this float[] array, int size = 1, int iterations = 1, bool outputIteration = false)
         {
             if (iterations < 1)
                 iterations = 1;
@@ -2136,7 +2137,7 @@ namespace RyuGiKen
         /// <param name="startIndex">开始序号</param>
         /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static float GetAverage(float[] array, int index = -1, int size = 1, int startIndex = -1, int endIndex = -1)
+        public static float GetAverage(this float[] array, int index = -1, int size = 1, int startIndex = -1, int endIndex = -1)
         {
             float result = 0;
             float sum = 0;
@@ -2193,7 +2194,7 @@ namespace RyuGiKen
         /// <param name="startIndex">开始序号</param>
         /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static Vector2 GetAverage(Vector2[] array, int startIndex = -1, int endIndex = -1)
+        public static Vector2 GetAverage(this Vector2[] array, int startIndex = -1, int endIndex = -1)
         {
             Vector2 Max = new Vector2();
             return ToVector2(GetAverage(ToVector3(array), startIndex, endIndex));
@@ -2205,7 +2206,7 @@ namespace RyuGiKen
         /// <param name="startIndex">开始序号</param>
         /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static Vector3 GetAverage(Vector3[] array, int startIndex = -1, int endIndex = -1)
+        public static Vector3 GetAverage(this Vector3[] array, int startIndex = -1, int endIndex = -1)
         {
             Vector3 Max = new Vector3();
             if (startIndex == -1 && endIndex == -1)
