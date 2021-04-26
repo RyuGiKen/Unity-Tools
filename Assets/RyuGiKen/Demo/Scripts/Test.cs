@@ -18,13 +18,17 @@ public class Test : MonoBehaviour
     {
         instance = this;
     }
+    [ContextMenu("Test1")]
+    void Test1()
+    {
+
+    }
     void Start()
     {
         ShowSystemInfo();
         Invoke(nameof(UpdateResolutionInput), 2f);
         SmoothingLines();
     }
-
     void Update()
     {
         m_Text[1].text = ValueAdjust.ShowTime(Time.time);

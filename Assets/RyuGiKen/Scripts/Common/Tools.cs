@@ -1985,6 +1985,100 @@ namespace RyuGiKen
                 return false;
         }
         /// <summary>
+        /// 点到直线距离
+        /// </summary>
+        /// <param name="point">点坐标</param>
+        /// <param name="linePoint1">直线上一个点的坐标</param>
+        /// <param name="linePoint2">直线上另一个点的坐标</param>
+        /// <returns></returns>
+        public static float DistanceToLine(Vector2 point, Vector2 linePoint1, Vector2 linePoint2)
+        {
+            Vector2 vec1 = point - linePoint1;
+            Vector2 vec2 = linePoint2 - linePoint1;
+            Vector2 vecProj = Vector3.Project(vec1, vec2);
+            float dis = Mathf.Sqrt(Mathf.Pow(vec1.magnitude, 2) - Mathf.Pow(vecProj.magnitude, 2));
+            return dis;
+        }
+        /// <summary>
+        /// 点到直线距离
+        /// </summary>
+        /// <param name="point">点坐标</param>
+        /// <param name="linePoint1">直线上一个点的坐标</param>
+        /// <param name="linePoint2">直线上另一个点的坐标</param>
+        /// <returns></returns>
+        public static float DistanceToLine(Vector3 point, Vector3 linePoint1, Vector3 linePoint2)
+        {
+            Vector3 vec1 = point - linePoint1;
+            Vector3 vec2 = linePoint2 - linePoint1;
+            Vector3 vecProj = Vector3.Project(vec1, vec2);
+            float dis = Mathf.Sqrt(Mathf.Pow(vec1.magnitude, 2) - Mathf.Pow(vecProj.magnitude, 2));
+            return dis;
+        }
+        /// <summary>
+        /// 判断点位于线段上
+        /// </summary>
+        /// <param name="value">点</param>
+        /// <param name="start">起点</param>
+        /// <param name="end">重点</param>
+        /// <param name="errorRange">误差半径</param>
+        /// <returns></returns>
+        public static bool InLine(Vector3 point, Vector3 linePoint1, Vector3 linePoint2, float errorRange)
+        {
+            bool result = false;
+            if (DistanceToLine(point, linePoint1, linePoint2) <= Mathf.Abs(errorRange))
+                result = true;
+            return result;
+        }
+        /// <summary>
+        /// 点到平面距离，三点确定一平面  
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="surfacePoint1"></param>
+        /// <param name="surfacePoint2"></param>
+        /// <param name="surfacePoint3"></param>
+        /// <returns></returns>
+        public static float DistanceToPlane(Vector3 point, Vector3 surfacePoint1, Vector3 surfacePoint2, Vector3 surfacePoint3)
+        {
+            Plane plane = new Plane(surfacePoint1, surfacePoint2, surfacePoint3);
+            return DistanceToPlane(point, plane);
+        }
+        /// <summary>
+        /// 点到平面距离
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="plane"></param>
+        /// <returns></returns>
+        public static float DistanceToPlane(Vector3 point, Plane plane)
+        {
+            return plane.GetDistanceToPoint(point);
+        }
+        /// <summary>
+        /// 平面夹角
+        /// </summary>
+        /// <param name="surface1Point1"></param>
+        /// <param name="surface1Point2"></param>
+        /// <param name="surface1Point3"></param>
+        /// <param name="surface2Point1"></param>
+        /// <param name="surface2Point2"></param>
+        /// <param name="surface2Point3"></param>
+        /// <returns></returns>
+        public static float PlaneAngle(Vector3 surface1Point1, Vector3 surface1Point2, Vector3 surface1Point3, Vector3 surface2Point1, Vector3 surface2Point2, Vector3 surface2Point3)
+        {
+            Plane plane1 = new Plane(surface1Point1, surface1Point2, surface1Point3);
+            Plane plane2 = new Plane(surface2Point1, surface2Point2, surface2Point3);
+            return PlaneAngle(plane1, plane2);
+        }
+        /// <summary>
+        /// 平面夹角
+        /// </summary>
+        /// <param name="plane1"></param>
+        /// <param name="plane2"></param>
+        /// <returns></returns>
+        public static float PlaneAngle(Plane plane1, Plane plane2)
+        {
+            return Vector3.Angle(plane1.normal, plane2.normal);
+        }
+        /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
         /// <param name="value">值</param>
