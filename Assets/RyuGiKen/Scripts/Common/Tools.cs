@@ -886,6 +886,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 全局方向转局部角度
         /// </summary>
@@ -900,6 +901,7 @@ namespace RyuGiKen
             LocalEulerAngles.y = Mathf.Atan2(LocalDirection.x, LocalDirection.z) / Mathf.PI * 180;
             return LocalEulerAngles;
         }
+#endif
         /// <summary>
         /// 二维坐标数组批量设置单轴值
         /// </summary>
@@ -1701,6 +1703,7 @@ namespace RyuGiKen
                 A = B;
             return A;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，(点，速度/s)）
         /// </summary>
@@ -1759,6 +1762,7 @@ namespace RyuGiKen
                 A = B;
             return A;
         }
+#endif
         /// <summary>
         /// 输出y=(k*（x + b）^2) + a；
         /// </summary>
@@ -1984,6 +1988,7 @@ namespace RyuGiKen
             else
                 return false;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 点到直线距离
         /// </summary>
@@ -1996,7 +2001,7 @@ namespace RyuGiKen
             Vector2 vec1 = point - linePoint1;
             Vector2 vec2 = linePoint2 - linePoint1;
             Vector2 vecProj = Vector3.Project(vec1, vec2);
-            float dis = Mathf.Sqrt(Mathf.Pow(vec1.magnitude, 2) - Mathf.Pow(vecProj.magnitude, 2));
+            float dis = (float)Math.Sqrt(Math.Pow(vec1.magnitude, 2) - Math.Pow(vecProj.magnitude, 2));
             return dis;
         }
         /// <summary>
@@ -2011,7 +2016,7 @@ namespace RyuGiKen
             Vector3 vec1 = point - linePoint1;
             Vector3 vec2 = linePoint2 - linePoint1;
             Vector3 vecProj = Vector3.Project(vec1, vec2);
-            float dis = Mathf.Sqrt(Mathf.Pow(vec1.magnitude, 2) - Mathf.Pow(vecProj.magnitude, 2));
+            float dis = (float)Math.Sqrt(Math.Pow(vec1.magnitude, 2) - Math.Pow(vecProj.magnitude, 2));
             return dis;
         }
         /// <summary>
@@ -2025,8 +2030,14 @@ namespace RyuGiKen
         public static bool InLine(Vector3 point, Vector3 linePoint1, Vector3 linePoint2, float errorRange)
         {
             bool result = false;
-            if (DistanceToLine(point, linePoint1, linePoint2) <= Mathf.Abs(errorRange))
-                result = true;
+            if (DistanceToLine(point, linePoint1, linePoint2) <= Math.Abs(errorRange))
+            {
+                float dis1 = (linePoint1 - point).magnitude;
+                float dis2 = (linePoint2 - point).magnitude;
+                float Dis = (linePoint2 - linePoint1).magnitude;
+                if (dis1 > dis2 ? (Dis > dis1) : (Dis > dis2))
+                    result = true;
+            }
             return result;
         }
         /// <summary>
@@ -2078,6 +2089,7 @@ namespace RyuGiKen
         {
             return Vector3.Angle(plane1.normal, plane2.normal);
         }
+#endif
         /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
