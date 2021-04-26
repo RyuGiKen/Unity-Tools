@@ -744,10 +744,85 @@ namespace RyuGiKen
     }
 #endif
     /// <summary>
+    /// 速度类型
+    /// </summary>
+    public enum SpeedType
+    {
+        /// <summary>
+        /// 米每秒
+        /// </summary>
+        MPS,
+        /// <summary>
+        /// 千米每小时
+        /// </summary>
+        KPH,
+        /// <summary>
+        /// 英里每小时
+        /// </summary>
+        MPH,
+    }
+    /// <summary>
     /// 数值调整
     /// </summary>
     public static class ValueAdjust
     {
+        /// <summary>
+        /// 转换速度
+        /// </summary>
+        /// <param name="type">原单位</param>
+        /// <param name="TargetType">目标单位</param>
+        /// <param name="value">原数值</param>
+        /// <returns></returns>
+        public static float ConvertSpeed(SpeedType type, SpeedType TargetType, float value)
+        {
+            float result = 0;
+            switch (type)
+            {
+                case SpeedType.MPH:
+                    switch (TargetType)
+                    {
+                        case SpeedType.MPH:
+                            result = value;
+                            break;
+                        case SpeedType.KPH:
+                            result = value * 1.609344f;
+                            break;
+                        case SpeedType.MPS:
+                            result = value / 2.23693629f;
+                            break;
+                    }
+                    break;
+                case SpeedType.KPH:
+                    switch (TargetType)
+                    {
+                        case SpeedType.MPH:
+                            result = value * 0.6213711f;
+                            break;
+                        case SpeedType.KPH:
+                            result = value;
+                            break;
+                        case SpeedType.MPS:
+                            result = value / 3.6f;
+                            break;
+                    }
+                    break;
+                case SpeedType.MPS:
+                    switch (TargetType)
+                    {
+                        case SpeedType.MPH:
+                            result = value * 2.23693629f;
+                            break;
+                        case SpeedType.KPH:
+                            result = value * 3.6f;
+                            break;
+                        case SpeedType.MPS:
+                            result = value;
+                            break;
+                    }
+                    break;
+            }
+            return result;
+        }
         /// <summary>
         /// 二维坐标转三维坐标
         /// </summary>
