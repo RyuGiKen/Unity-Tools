@@ -207,6 +207,28 @@ namespace RyuGiKen.DriftCar
             return transform.TransformDirection(result);
         }
         /// <summary>
+        /// 根据序号获取路径上的偏航角
+        /// </summary>
+        /// <param name="pos">序号</param>
+        /// <returns>局部偏航角</returns>
+        public float EvaluateYaw(float pos)
+        {
+            float result = 0;
+            if (m_Waypoints.Length > 1)
+            {
+                UpdateControlPoints();
+                pos = GetBoundingIndices(pos, out int indexA, out int indexB);
+                if (indexA == indexB)
+                    result = m_Waypoints[indexA].yaw;
+                else
+                    result = Mathf.Lerp(m_Waypoints[indexA].yaw, m_Waypoints[indexB].yaw, ValueAdjust.ToPercent01(pos, indexA, indexB));
+                    //result = SplineHelpers.BezierTangent1(pos - indexA,
+                    //    m_Waypoints[indexA].yaw, m_ControlPoints1[indexA].yaw,
+                    //    m_ControlPoints2[indexA].yaw, m_Waypoints[indexB].yaw);
+            }
+            return result;
+        }
+        /// <summary>
         /// 根据序号获取路径上的旋转
         /// </summary>
         /// <param name="pos">序号</param>
