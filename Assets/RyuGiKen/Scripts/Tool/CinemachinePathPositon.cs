@@ -6,6 +6,9 @@ using Cinemachine;
 using RyuGiKen;
 namespace RyuGiKen.Tools
 {
+    /// <summary>
+    /// 按曲线摆放
+    /// </summary>
 #if UNITY_2018_3_OR_NEWER
     [ExecuteAlways]
 #else
@@ -40,7 +43,7 @@ namespace RyuGiKen.Tools
         [Tooltip("放置预制体")] public Transform[] ChildPrefab;
         [Tooltip("间隔")] public float Step = 0;//平均数量模式无用
         [Tooltip("放置量")] public int Count = 0;
-        [Tooltip("预制体循环序号")] int ChildIndex = 0;
+        [Tooltip("预制体循环序号")] int[] ChildIndex;
         [Tooltip("曲线总长度")] public float MaxDistance = 0;
         void Awake()
         {
@@ -92,9 +95,21 @@ namespace RyuGiKen.Tools
             if (ChildPrefab.Length < 1 || Paths == null || Paths.Length < 1 || Paths[0] == null)
                 return;
             int MaxChildCount = 0;
+            int CurChildIndex = 0;
             switch (mode)
             {
                 case Mode.Count:
+                    if (ChildIndex == null || ChildIndex.Length != Count)
+                    {
+                        ChildIndex = new int[Count];
+                        for (int i = 0; i < Count; i++)
+                        {
+                            ChildIndex[i] = CurChildIndex;
+                            CurChildIndex++;
+                            if (CurChildIndex >= ChildPrefab.Length)
+                                CurChildIndex = 0;
+                        }
+                    }
                     foreach (CinemachineSmoothPath path in Paths)
                     {
                         if (path == null)
@@ -140,6 +155,17 @@ namespace RyuGiKen.Tools
                             }
                         }
                     }
+                    if (ChildIndex == null || ChildIndex.Length != Count)
+                    {
+                        ChildIndex = new int[Count];
+                        for (int i = 0; i < Count; i++)
+                        {
+                            ChildIndex[i] = CurChildIndex;
+                            CurChildIndex++;
+                            if (CurChildIndex >= ChildPrefab.Length)
+                                CurChildIndex = 0;
+                        }
+                    }
                     AdjustChildCount();
                     break;
             }
@@ -159,15 +185,13 @@ namespace RyuGiKen.Tools
             }
             if (AdjustCount > 0)//子对象数量不足，需补足
             {
-                ChildIndex = 0;
                 for (int i = 0; i < AdjustCount; i++)
                 {
-                    Instantiate(ChildPrefab[ChildIndex], this.transform);
-
-                    if (ChildIndex < ChildPrefab.Length - 1)
-                        ChildIndex++;
-                    else
-                        ChildIndex = 0;
+                    try
+                    {
+                        Instantiate(ChildPrefab[ChildIndex[this.transform.childCount - 1]], this.transform);
+                    }
+                    catch { }
                 }
             }
             else if (AdjustCount < 0)//子对象数量过量，需减少

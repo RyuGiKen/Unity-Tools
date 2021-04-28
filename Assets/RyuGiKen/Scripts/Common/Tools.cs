@@ -224,6 +224,120 @@ namespace RyuGiKen
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 重设父对象和位置角度缩放
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        public static void SetParentReset(this Transform transform, Transform parent)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = Vector3.zero;
+            transform.localEulerAngles = Vector3.zero;
+            transform.localScale = Vector3.one;
+        }
+        /// <summary>
+        /// 重设父对象和位置角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalPosition"></param>
+        /// <param name="ResetLocalEulerAngles"></param>
+        public static void SetParentReset(this Transform transform, Transform parent, Vector3 ResetLocalPosition, Vector3 ResetLocalEulerAngles)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = ResetLocalPosition;
+            transform.localEulerAngles = ResetLocalEulerAngles;
+        }
+        /// <summary>
+        /// 重设父对象和位置角度缩放
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalPosition"></param>
+        /// <param name="ResetLocalEulerAngles"></param>
+        /// <param name="ResetLocalScale"></param>
+        public static void SetParentReset(this Transform transform, Transform parent, Vector3 ResetLocalPosition, Vector3 ResetLocalEulerAngles, Vector3 ResetLocalScale)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = ResetLocalPosition;
+            transform.localEulerAngles = ResetLocalEulerAngles;
+            transform.localScale = ResetLocalScale;
+        }
+        /// <summary>
+        /// 重设父对象和位置
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalPosition"></param>
+        public static void SetParentResetPosition(this Transform transform, Transform parent, Vector3 ResetLocalPosition)
+        {
+            transform.SetParent(parent);
+            transform.localPosition = ResetLocalPosition;
+        }
+        /// <summary>
+        /// 重设父对象和角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalEulerAngles"></param>
+        public static void SetParentResetRotation(this Transform transform, Transform parent, Vector3 ResetLocalEulerAngles)
+        {
+            transform.SetParent(parent);
+            transform.localEulerAngles = ResetLocalEulerAngles;
+        }
+        /// <summary>
+        /// 重设父对象和角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalRotation"></param>
+        public static void SetParentResetRotation(this Transform transform, Transform parent, Quaternion ResetLocalRotation)
+        {
+            transform.SetParent(parent);
+            transform.localRotation = ResetLocalRotation;
+        }
+        /// <summary>
+        /// 重设父对象和缩放
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="parent">父对象</param>
+        /// <param name="ResetLocalScale"></param>
+        public static void SetParentResetScale(this Transform transform, Transform parent, Vector3 ResetLocalScale)
+        {
+            transform.SetParent(parent);
+            transform.localScale = ResetLocalScale;
+        }
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="GO"></param>
+        public static void Destroy<T>(this T[] GO) where T : Object
+        {
+            foreach (var item in GO)
+            {
+                if (Application.isPlaying)
+                    Object.Destroy(item);
+                else
+                    Object.DestroyImmediate(item);
+            }
+        }
+        /// <summary>
+        /// 批量删除
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="GO"></param>
+        public static void Destroy<T>(this List<T> GO) where T : Object
+        {
+            foreach (var item in GO)
+            {
+                if (Application.isPlaying)
+                    Object.Destroy(item);
+                else
+                    Object.DestroyImmediate(item);
+            }
+        }
+        /// <summary>
         /// GameObject设置活动状态
         /// </summary>
         /// <param name="component"></param>
@@ -282,6 +396,30 @@ namespace RyuGiKen
             foreach (var item in GO)
             {
                 item.gameObject.SetActive(active);
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void ColliderSetEnable<T>(this T[] GO, bool active) where T : Collider
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void ColliderSetEnable<T>(this List<T> GO, bool active) where T : Collider
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
             }
         }
         /// <summary>
@@ -394,6 +532,67 @@ namespace RyuGiKen
                 if (m_Array[i].gameObject)
                     array[i] = m_Array[i].gameObject;
             return array;
+        }
+        /// <summary>
+        /// 获取所有子对象的材质
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="UseSharedMaterials"></param>
+        /// <returns></returns>
+        public static Material[] GetAllMaterials(this Transform transform, bool UseSharedMaterials = false)
+        {
+            Renderer[] renderers = transform.GetComponentsInChildren<Renderer>().ClearRepeatingItem();
+            List<Material> materials = new List<Material>();
+            foreach (Renderer renderer in renderers)
+            {
+                if (UseSharedMaterials)
+                    materials.AddList(renderer.sharedMaterials.ToList());
+                else
+                    materials.AddList(renderer.materials.ToList());
+            }
+            return materials.ClearRepeatingItem().ToArray();
+        }
+        /// <summary>
+        /// 批量设置材质
+        /// </summary>
+        /// <param name="materials"></param>
+        /// <param name="material"></param>
+        /// <returns></returns>
+        public static void SetMaterials(this Material[] materials, Material material)
+        {
+            for (int i = 0; i < materials.Length; i++)
+            {
+                try
+                {
+                    materials[i] = material;
+                }
+                catch { }
+            }
+        }
+        /// <summary>
+        /// 批量设置材质颜色
+        /// </summary>
+        /// <param name="materials"></param>
+        /// <param name="color"></param>
+        /// <param name="ColorShaderName"></param>
+        public static void SetMaterialsColor(this Material[] materials, Color color, string ColorShaderName)
+        {
+            for (int i = 0; i < materials.Length; i++)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(ColorShaderName))
+                    {
+                        materials[i].color = color;
+                        materials[i].SetColor("_BaseColor", color);
+                    }
+                    else
+                    {
+                        materials[i].SetColor(ColorShaderName, color);
+                    }
+                }
+                catch { }
+            }
         }
 #endif
     }
@@ -545,10 +744,85 @@ namespace RyuGiKen
     }
 #endif
     /// <summary>
+    /// 速度类型
+    /// </summary>
+    public enum SpeedType
+    {
+        /// <summary>
+        /// 米每秒
+        /// </summary>
+        MPS,
+        /// <summary>
+        /// 千米每小时
+        /// </summary>
+        KPH,
+        /// <summary>
+        /// 英里每小时
+        /// </summary>
+        MPH,
+    }
+    /// <summary>
     /// 数值调整
     /// </summary>
     public static class ValueAdjust
     {
+        /// <summary>
+        /// 转换速度
+        /// </summary>
+        /// <param name="type">原单位</param>
+        /// <param name="TargetType">目标单位</param>
+        /// <param name="value">原数值</param>
+        /// <returns></returns>
+        public static float ConvertSpeed(SpeedType type, SpeedType TargetType, float value)
+        {
+            float result = 0;
+            switch (type)
+            {
+                case SpeedType.MPH:
+                    switch (TargetType)
+                    {
+                        case SpeedType.MPH:
+                            result = value;
+                            break;
+                        case SpeedType.KPH:
+                            result = value * 1.609344f;
+                            break;
+                        case SpeedType.MPS:
+                            result = value / 2.23693629f;
+                            break;
+                    }
+                    break;
+                case SpeedType.KPH:
+                    switch (TargetType)
+                    {
+                        case SpeedType.MPH:
+                            result = value * 0.6213711f;
+                            break;
+                        case SpeedType.KPH:
+                            result = value;
+                            break;
+                        case SpeedType.MPS:
+                            result = value / 3.6f;
+                            break;
+                    }
+                    break;
+                case SpeedType.MPS:
+                    switch (TargetType)
+                    {
+                        case SpeedType.MPH:
+                            result = value * 2.23693629f;
+                            break;
+                        case SpeedType.KPH:
+                            result = value * 3.6f;
+                            break;
+                        case SpeedType.MPS:
+                            result = value;
+                            break;
+                    }
+                    break;
+            }
+            return result;
+        }
         /// <summary>
         /// 二维坐标转三维坐标
         /// </summary>
@@ -612,6 +886,22 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 全局方向转局部角度
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="direction">全局方向</param>
+        /// <returns></returns>
+        public static Vector3 DirectionToLocalEulerAngles(this Transform transform, Vector3 direction)
+        {
+            Vector3 LocalDirection = transform.InverseTransformDirection(direction);//局部方向
+            Vector3 LocalEulerAngles = Vector3.zero;
+            LocalEulerAngles.x = Mathf.Atan2(LocalDirection.y, LocalDirection.z) / Mathf.PI * 180;
+            LocalEulerAngles.y = Mathf.Atan2(LocalDirection.x, LocalDirection.z) / Mathf.PI * 180;
+            return LocalEulerAngles;
+        }
+#endif
         /// <summary>
         /// 二维坐标数组批量设置单轴值
         /// </summary>
@@ -1075,11 +1365,13 @@ namespace RyuGiKen
             if (excludeNull)
             {
                 T[] temp = array.ClearNullItem();
-                result = temp[Random.Range(0, temp.Length - 1)];
+                if (temp.Length < 1)
+                    return default(T);
+                result = temp[Random.Range(0, temp.Length)];
             }
             else
             {
-                result = array[Random.Range(0, array.Length - 1)];
+                result = array[Random.Range(0, array.Length)];
             }
             return result;
         }
@@ -1098,11 +1390,13 @@ namespace RyuGiKen
             if (excludeNull)
             {
                 T[] temp = list.ToArray().ClearNullItem();
-                result = temp[Random.Range(0, temp.Length - 1)];
+                if (temp.Length < 1)
+                    return default(T);
+                result = temp[Random.Range(0, temp.Length)];
             }
             else
             {
-                result = list[Random.Range(0, list.Count - 1)];
+                result = list[Random.Range(0, list.Count)];
             }
             return result;
         }
@@ -1413,6 +1707,66 @@ namespace RyuGiKen
                 A = B;
             return A;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，(点，速度/s)）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="PointSpeeds">(点，速度/s)</param>
+        /// <param name="SpeedFactor">速度系数</param>
+        /// <returns></returns>
+        public static float Lerp(float A, float B, float step, Vector2[] PointSpeeds, float SpeedFactor = 1)
+        {
+            if (step == 0 || PointSpeeds.Length < 1)
+                return A;
+            List<float> X = PointSpeeds.GetVectorValue("X").ToList();
+            List<float> Y = PointSpeeds.GetVectorValue("Y").ToList();
+            List<Vector2> PointSpeeds2 = new List<Vector2>();
+            PointSpeeds2.Add(new Vector2(X[0], Y[0]));
+            for (int i = 1; i < PointSpeeds.Length; i++)//移除重复点
+            {
+                bool Repeating = false;
+                for (int j = 0; j < PointSpeeds2.Count; j++)
+                {
+                    if (X[i].Equals(PointSpeeds2[j].x))
+                    {
+                        Repeating = true;
+                        break;
+                    }
+                }
+                if (!Repeating)
+                    PointSpeeds2.Add(new Vector2(X[i], Y[i]));
+            }
+            if (PointSpeeds2.Count > 0)//按点值排序
+            {
+                PointSpeeds2.Sort(delegate (Vector2 item01, Vector2 item02)
+                {
+                    int result = item01.x.CompareTo(item02.x);
+                    return result;
+                });
+            }
+            float speed = float.NaN;
+            for (int i = 1; i < PointSpeeds2.Count; i++)
+            {
+                if (B >= PointSpeeds2[i - 1].x && B <= PointSpeeds2[i].x)//最接近B的两点
+                {
+                    speed = SpeedFactor * Math.Abs(Mathf.Lerp(PointSpeeds2[i - 1].y, PointSpeeds2[i].y, ToPercent01(B, PointSpeeds2[i - 1].x, PointSpeeds2[i].x)));//根据插值计算速度
+                }
+            }
+            if (float.IsNaN(speed) || speed == 0)
+                return A;
+
+            if (A > B + speed * step)
+                A -= speed * step;
+            else if (A < B - speed * step)
+                A += speed * step;
+            else
+                A = B;
+            return A;
+        }
+#endif
         /// <summary>
         /// 输出y=(k*（x + b）^2) + a；
         /// </summary>
@@ -1638,6 +1992,108 @@ namespace RyuGiKen
             else
                 return false;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 点到直线距离
+        /// </summary>
+        /// <param name="point">点坐标</param>
+        /// <param name="linePoint1">直线上一个点的坐标</param>
+        /// <param name="linePoint2">直线上另一个点的坐标</param>
+        /// <returns></returns>
+        public static float DistanceToLine(Vector2 point, Vector2 linePoint1, Vector2 linePoint2)
+        {
+            Vector2 vec1 = point - linePoint1;
+            Vector2 vec2 = linePoint2 - linePoint1;
+            Vector2 vecProj = Vector3.Project(vec1, vec2);
+            float dis = (float)Math.Sqrt(Math.Pow(vec1.magnitude, 2) - Math.Pow(vecProj.magnitude, 2));
+            return dis;
+        }
+        /// <summary>
+        /// 点到直线距离
+        /// </summary>
+        /// <param name="point">点坐标</param>
+        /// <param name="linePoint1">直线上一个点的坐标</param>
+        /// <param name="linePoint2">直线上另一个点的坐标</param>
+        /// <returns></returns>
+        public static float DistanceToLine(Vector3 point, Vector3 linePoint1, Vector3 linePoint2)
+        {
+            Vector3 vec1 = point - linePoint1;
+            Vector3 vec2 = linePoint2 - linePoint1;
+            Vector3 vecProj = Vector3.Project(vec1, vec2);
+            float dis = (float)Math.Sqrt(Math.Pow(vec1.magnitude, 2) - Math.Pow(vecProj.magnitude, 2));
+            return dis;
+        }
+        /// <summary>
+        /// 判断点位于线段上
+        /// </summary>
+        /// <param name="value">点</param>
+        /// <param name="start">起点</param>
+        /// <param name="end">重点</param>
+        /// <param name="errorRange">误差半径</param>
+        /// <returns></returns>
+        public static bool InLine(Vector3 point, Vector3 linePoint1, Vector3 linePoint2, float errorRange)
+        {
+            bool result = false;
+            if (DistanceToLine(point, linePoint1, linePoint2) <= Math.Abs(errorRange))
+            {
+                float dis1 = (linePoint1 - point).magnitude;
+                float dis2 = (linePoint2 - point).magnitude;
+                float Dis = (linePoint2 - linePoint1).magnitude;
+                if (dis1 > dis2 ? (Dis > dis1) : (Dis > dis2))
+                    result = true;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 点到平面距离，三点确定一平面  
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="surfacePoint1"></param>
+        /// <param name="surfacePoint2"></param>
+        /// <param name="surfacePoint3"></param>
+        /// <returns></returns>
+        public static float DistanceToPlane(Vector3 point, Vector3 surfacePoint1, Vector3 surfacePoint2, Vector3 surfacePoint3)
+        {
+            Plane plane = new Plane(surfacePoint1, surfacePoint2, surfacePoint3);
+            return DistanceToPlane(point, plane);
+        }
+        /// <summary>
+        /// 点到平面距离
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="plane"></param>
+        /// <returns></returns>
+        public static float DistanceToPlane(Vector3 point, Plane plane)
+        {
+            return plane.GetDistanceToPoint(point);
+        }
+        /// <summary>
+        /// 平面夹角
+        /// </summary>
+        /// <param name="surface1Point1"></param>
+        /// <param name="surface1Point2"></param>
+        /// <param name="surface1Point3"></param>
+        /// <param name="surface2Point1"></param>
+        /// <param name="surface2Point2"></param>
+        /// <param name="surface2Point3"></param>
+        /// <returns></returns>
+        public static float PlaneAngle(Vector3 surface1Point1, Vector3 surface1Point2, Vector3 surface1Point3, Vector3 surface2Point1, Vector3 surface2Point2, Vector3 surface2Point3)
+        {
+            Plane plane1 = new Plane(surface1Point1, surface1Point2, surface1Point3);
+            Plane plane2 = new Plane(surface2Point1, surface2Point2, surface2Point3);
+            return PlaneAngle(plane1, plane2);
+        }
+        /// <summary>
+        /// 平面夹角
+        /// </summary>
+        /// <param name="plane1"></param>
+        /// <param name="plane2"></param>
+        /// <returns></returns>
+        public static float PlaneAngle(Plane plane1, Plane plane2)
+        {
+            return Vector3.Angle(plane1.normal, plane2.normal);
+        }
+#endif
         /// <summary>
         /// 精确到小数点后几位（值，位数）
         /// </summary>
@@ -1787,7 +2243,7 @@ namespace RyuGiKen
         /// <param name="iterations">插值倍数（1为原数量）</param>
         /// <param name="outputIteration">输出插值扩充后的数据</param>
         /// <returns></returns>
-        public static float[] Smoothing(float[] array, int size = 1, int iterations = 1, bool outputIteration = false)
+        public static float[] Smoothing(this float[] array, int size = 1, int iterations = 1, bool outputIteration = false)
         {
             if (iterations < 1)
                 iterations = 1;
@@ -1866,7 +2322,7 @@ namespace RyuGiKen
         /// <param name="startIndex">开始序号</param>
         /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static float GetAverage(float[] array, int index = -1, int size = 1, int startIndex = -1, int endIndex = -1)
+        public static float GetAverage(this float[] array, int index = -1, int size = 1, int startIndex = -1, int endIndex = -1)
         {
             float result = 0;
             float sum = 0;
@@ -1923,7 +2379,7 @@ namespace RyuGiKen
         /// <param name="startIndex">开始序号</param>
         /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static Vector2 GetAverage(Vector2[] array, int startIndex = -1, int endIndex = -1)
+        public static Vector2 GetAverage(this Vector2[] array, int startIndex = -1, int endIndex = -1)
         {
             Vector2 Max = new Vector2();
             return ToVector2(GetAverage(ToVector3(array), startIndex, endIndex));
@@ -1935,7 +2391,7 @@ namespace RyuGiKen
         /// <param name="startIndex">开始序号</param>
         /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static Vector3 GetAverage(Vector3[] array, int startIndex = -1, int endIndex = -1)
+        public static Vector3 GetAverage(this Vector3[] array, int startIndex = -1, int endIndex = -1)
         {
             Vector3 Max = new Vector3();
             if (startIndex == -1 && endIndex == -1)

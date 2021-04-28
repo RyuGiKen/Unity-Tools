@@ -11,10 +11,14 @@ namespace RyuGiKen.Tools
     [RequireComponent(typeof(AudioSource))]
     public class MusicRandomPlay : MonoBehaviour
     {
-        AudioSource audioSource;
+        public AudioSource audioSource;
         public AudioClip[] otherClip;
-        public bool canPlay = true;
+        [Tooltip("切换键")] public KeyCode switchKey = KeyCode.PageDown;
         void Awake()
+        {
+            Reset();
+        }
+        private void Reset()
         {
             audioSource = GetComponent<AudioSource>();
         }
@@ -24,29 +28,20 @@ namespace RyuGiKen.Tools
         }
         void Update()
         {
-            if (audioSource != null && canPlay)
-                if (!audioSource.isPlaying || !this.gameObject.activeInHierarchy || Input.GetKeyUp(KeyCode.PageDown) || Input.GetKeyUp(KeyCode.PageUp))//切换音乐
-                {
-                    Switch();
-                }
+            if (audioSource != null && (!audioSource.isPlaying || Input.GetKeyDown(switchKey)))//切换音乐
+            {
+                Switch();
+            }
         }
         /// <summary>
         /// 切换音乐
         /// </summary>
+        [ContextMenu("切换音乐")]
         public void Switch()
         {
             if (otherClip.Length > 0)
             {
-                int randomNum = Random.Range(0, otherClip.Length);
-                if (Input.GetKeyUp(KeyCode.PageUp))
-                    randomNum--;
-                if (Input.GetKeyUp(KeyCode.PageDown))
-                    randomNum++;
-                if (randomNum < 0)
-                    randomNum = otherClip.Length - 1;
-                else if (randomNum >= otherClip.Length)
-                    randomNum = 0;
-                audioSource.clip = otherClip[randomNum];
+                audioSource.clip = otherClip.GetRandomItem(true);
                 audioSource.Play();
             }
         }
