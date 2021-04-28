@@ -10,6 +10,7 @@ namespace RyuGiKen.DriftCar
     /// </summary>
     [ExecuteAlways]
     [DisallowMultipleComponent]
+    [RequireComponent(typeof(CarController))]
     public class CinemachineCarDrift : MonoBehaviour
     {
         [Tooltip("路径")] public CinemachineSmoothPathForCarDrift m_Path;
@@ -20,18 +21,29 @@ namespace RyuGiKen.DriftCar
         public float m_PathUnits;
         public float m_CurrentRoadWidth;
         public float m_CurrentYaw;
-        [Tooltip("轮子碰撞体")] [SerializeField] WheelCollider[] m_WheelColliders = new WheelCollider[4];
-        [Tooltip("轮子物体")] [SerializeField] GameObject[] m_WheelMeshes = new GameObject[4];
+        [SerializeField] Vector3 WheelForward;
+        public CarController car;
+        public float OutputSteerAngle;
+        private void Awake()
+        {
+            if (Application.isPlaying)
+                Reset();
+        }
+        private void Reset()
+        {
+            car = this.GetComponent<CarController>();
+        }
         void FixedUpdate()
         {
             switch (m_UpdateMethod)
             {
                 case CinemachineDollyCart.UpdateMethod.FixedUpdate:
+                    UpdateWheelForward();
                     if (!Application.isPlaying)
                         SetCartPosition(m_Distance);
                     else
                         //SetCartPosition(m_Position + m_Speed * Time.fixedDeltaTime);
-                        SetCartPosition(this.transform.position, m_WheelMeshes[0].transform.forward, m_Speed_KPH, Time.fixedDeltaTime);
+                        SetCartPosition(this.transform.position, WheelForward, m_Speed_MPS, Time.fixedDeltaTime);
                     break;
             }
         }
@@ -41,11 +53,12 @@ namespace RyuGiKen.DriftCar
             {
                 case CinemachineDollyCart.UpdateMethod.Update:
                 case CinemachineDollyCart.UpdateMethod.LateUpdate:
+                    UpdateWheelForward();
                     if (!Application.isPlaying)
                         SetCartPosition(m_Distance);
                     else
                         //SetCartPosition(m_Position + m_Speed * Time.deltaTime);
-                        SetCartPosition(this.transform.position, m_WheelMeshes[0].transform.forward, m_Speed_KPH, Time.deltaTime);
+                        SetCartPosition(this.transform.position, WheelForward, m_Speed_MPS, Time.deltaTime);
                     break;
             }
         }
@@ -55,13 +68,18 @@ namespace RyuGiKen.DriftCar
             {
                 case CinemachineDollyCart.UpdateMethod.Update:
                 case CinemachineDollyCart.UpdateMethod.LateUpdate:
+                    UpdateWheelForward();
                     if (!Application.isPlaying)
                         SetCartPosition(m_Distance);
                     else
                         //SetCartPosition(m_Position + m_Speed * Time.deltaTime);
-                        SetCartPosition(this.transform.position, m_WheelMeshes[0].transform.forward, m_Speed_KPH, Time.deltaTime);
+                        SetCartPosition(this.transform.position, WheelForward, m_Speed_MPS, Time.deltaTime);
                     break;
             }
+        }
+        void UpdateWheelForward()
+        {
+            WheelForward = (this.transform.forward + this.transform.right * car.carController.CurrentSteerAngle / 90f).normalized;
         }
         void SetCartPosition(float distanceAlongPath)
         {
@@ -76,6 +94,11 @@ namespace RyuGiKen.DriftCar
                 m_Speed_MPS = ValueAdjust.ConvertSpeed(SpeedType.KPH, SpeedType.MPS, m_Speed_KPH);
                 m_CurrentRoadWidth = m_Path.EvaluateWidth(m_PathUnits);
                 m_CurrentYaw = m_Path.EvaluateYaw(m_PathUnits);
+
+                Vector3 nextPos = m_Path.EvaluatePosition(m_Path.FindClosestPoint(this.transform.position + WheelForward.normalized * m_Speed_MPS, 0, 1, 2));
+                OutputSteerAngle = this.transform.DirectionToLocalEulerAngles(nextPos - this.transform.position).y;
+                car.m_SteerAngle = OutputSteerAngle;
+                UpdateWheels(OutputSteerAngle);
             }
         }
         void SetCartPosition(Vector3 nowPosition, Vector3 direction, float speed, float step)
@@ -92,13 +115,16 @@ namespace RyuGiKen.DriftCar
                     this.transform.position = pos;
                 this.transform.rotation = m_Path.EvaluateOrientation(m_PathUnits, true);// * Quaternion.Euler(Vector3.up * Random.Range(-1f, 1f));
                 m_CurrentYaw = m_Path.EvaluateYaw(m_PathUnits);
-                Vector3 nextPos = m_Path.EvaluatePosition(m_Path.FindClosestPoint(this.transform.position + direction.normalized * speed * step, 0, 1, 2));
-                UpdateWheels(this.transform.DirectionToLocalEulerAngles(nextPos - this.transform.position).y);
+
+                Vector3 nextPos = m_Path.EvaluatePosition(m_Path.FindClosestPoint(this.transform.position + direction.normalized * speed, 0, 1, 2));
+                OutputSteerAngle = this.transform.DirectionToLocalEulerAngles(nextPos - this.transform.position).y;
+                car.m_SteerAngle = OutputSteerAngle;
+                UpdateWheels(OutputSteerAngle);
             }
         }
         void UpdateWheels(float SteerAngle)
         {
-            m_WheelColliders[0].steerAngle = m_WheelColliders[1].steerAngle = SteerAngle;
+            /*m_WheelColliders[0].steerAngle = m_WheelColliders[1].steerAngle = SteerAngle;
             for (int i = 0; i < 4; i++)
             {
                 if (Application.isPlaying)
@@ -112,7 +138,7 @@ namespace RyuGiKen.DriftCar
                     if (i < 2)
                         m_WheelMeshes[i].transform.localEulerAngles = Vector3.up * SteerAngle;
                 }
-            }
+            }*/
         }
         Vector3 ForwardToRight(Vector3 direction)
         {
