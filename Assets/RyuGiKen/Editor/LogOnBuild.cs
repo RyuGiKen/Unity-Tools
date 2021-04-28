@@ -18,6 +18,8 @@ public class LogOnBuild : IPreprocessBuildWithReport, IPostprocessBuildWithRepor
 	public void OnPreprocessBuild(BuildReport report)
 	{
 		m_startTime = DateTime.Now;
+		if (!Directory.Exists(Application.streamingAssetsPath))
+			Directory.CreateDirectory(Application.streamingAssetsPath);
 		VersionFileFullName = Application.streamingAssetsPath + "/" + "Version.txt";
 		//File.Create(VersionFileFullName);
 		FileStream file = new FileStream(VersionFileFullName, FileMode.OpenOrCreate);
