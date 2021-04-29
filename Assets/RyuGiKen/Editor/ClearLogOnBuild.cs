@@ -14,7 +14,17 @@ public class ClearLogOnBuild : IPreprocessBuildWithReport
 	public void OnPreprocessBuild(BuildReport report)
 	{
 		Debug.Log("构建时清空日志");
-		File.WriteAllText(Application.streamingAssetsPath + "/Log.txt", string.Empty);
-		File.WriteAllText(Application.streamingAssetsPath + "/FpsRecord.txt", string.Empty);
+		if (!Directory.Exists(Application.streamingAssetsPath))
+			Directory.CreateDirectory(Application.streamingAssetsPath);
+		try
+		{
+			File.WriteAllText(Application.streamingAssetsPath + "/Log.txt", string.Empty);
+		}
+		catch { }
+		try
+		{
+			File.WriteAllText(Application.streamingAssetsPath + "/FpsRecord.txt", string.Empty);
+		}
+		catch { }
 	}
 }

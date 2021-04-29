@@ -133,6 +133,8 @@ namespace RyuGiKen.Tools
         {
             try
             {
+                if (!Directory.Exists(Path))
+                    Directory.CreateDirectory(Path);
                 sw = new StreamWriter(Path + "/FpsRecord.txt", true);
                 for (int i = 0; i < 2; i++)
                     if (Data_FPS.Count > 2)

@@ -106,6 +106,8 @@ namespace RyuGiKen.Tools
         {
             bool originEnable = CanPrint;
             CanPrint = false;//清空前需暂停打印
+            if (!Directory.Exists(Path))
+                Directory.CreateDirectory(Path);
             File.WriteAllText(Path + "/Log.txt", string.Empty);
             CanPrint = originEnable;
             if (sw != null)
