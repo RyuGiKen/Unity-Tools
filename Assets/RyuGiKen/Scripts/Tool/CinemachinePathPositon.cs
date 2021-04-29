@@ -189,7 +189,8 @@ namespace RyuGiKen.Tools
                 {
                     try
                     {
-                        Instantiate(ChildPrefab[ChildIndex[this.transform.childCount - 1]], this.transform);
+                        int index = this.transform.childCount < 1 ? 0 : (this.transform.childCount - 1);
+                        Instantiate(ChildPrefab[ChildIndex[index]], this.transform);
                     }
                     catch { }
                 }
