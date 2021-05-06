@@ -7,8 +7,11 @@ namespace RyuGiKen.Tools
     /// <summary>
     /// 残影特效
     /// </summary>
+    [DisallowMultipleComponent]
+    [AddComponentMenu("RyuGiKen/残影特效")]
     public class GhostShadowRender : MonoBehaviour
     {
+        [Tooltip("生成")] public bool Enable = true;
         [Tooltip("持续时间")] public float survivalTime = 1;
         [Tooltip("生成间隔")] public float intervalTime = 0.2f;
         [Tooltip("生成计时")] private float buildTimer = 0;
@@ -38,7 +41,7 @@ namespace RyuGiKen.Tools
                     return;
                 }
                 buildTimer += Time.deltaTime;
-                if (buildTimer >= intervalTime)
+                if (buildTimer >= intervalTime && Enable)
                 {
                     buildTimer = 0;
                     for (int i = 0; i < meshRenderer.Length; i++)
@@ -144,8 +147,8 @@ namespace RyuGiKen.Tools
                 shadowList[i].duration -= Time.deltaTime;
                 if (shadowList[i].duration <= 0)
                 {
-                    shadowList.Remove(shadowList[i]);
                     Destroy(shadowList[i]);
+                    shadowList.Remove(shadowList[i]);
                     continue;
                 }
                 for (int j = 0; j < shadowList[i].material.Length; j++)
