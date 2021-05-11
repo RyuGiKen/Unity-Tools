@@ -2462,6 +2462,110 @@ namespace RyuGiKen
             else
                 return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="range">参数最小值,最大值</param>
+        /// <param name="OutputRange">输出最小值,最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static float ToRange(float value, Vector2 range, Vector2 OutputRange, float n = 1, bool limit = true)
+        {
+            return ToRange(value, range.x, range.y, OutputRange.x, OutputRange.y, n, limit);
+        }
+#endif
+        /// <summary>
+        /// 映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">参数最小值</param>
+        /// <param name="max">参数最大值</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static float ToRange(float value, float min, float max, float OutputMin, float OutputMax, float n = 1, bool limit = true)
+        {
+            float result, percent;
+            if (min == max) { return min; }
+            if (OutputMin == OutputMax) { return OutputMin; }
+            if (min > max)
+            {
+                ValueAdjust.Exchange(min, max, out min, out max);
+            }
+            if (OutputMin > OutputMax)
+            {
+                ValueAdjust.Exchange(OutputMin, OutputMax, out OutputMin, out OutputMax);
+            }
+            if (n < 0)
+            {
+                percent = (value - max) * 1f / (min - max);//输出[1,0]
+            }
+            else
+            {
+                percent = (value - min) * 1f / (max - min);//输出[0,1]
+            }
+            if (limit)
+                result = ValueAdjust.Clamp(percent) * (OutputMax - OutputMin) + OutputMin;
+            else
+                result = percent * (OutputMax - OutputMin) + OutputMin;
+            return result;
+        }
+        /// <summary>
+        /// 不对称范围映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">参数最小值</param>
+        /// <param name="middle">参数中间值</param>
+        /// <param name="max">参数最大值</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMiddle">输出中间值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static float ToAsymmetryRange(float value, float min, float middle, float max, float OutputMin, float OutputMiddle, float OutputMax, float n = 1, bool limit = true)
+        {
+            if (min == max) { return min; }
+            if (OutputMin == OutputMax) { return OutputMin; }
+            if (min > max)
+            {
+                ValueAdjust.Exchange(min, max, out min, out max);
+            }
+            if (OutputMin > OutputMax)
+            {
+                ValueAdjust.Exchange(OutputMin, OutputMax, out OutputMin, out OutputMax);
+            }
+            middle = ValueAdjust.Clamp(middle, min, max);
+            OutputMiddle = ValueAdjust.Clamp(OutputMiddle, OutputMin, OutputMax);
+            if (limit)
+            {
+                if (value >= max)
+                    return n < 0 ? OutputMin : OutputMax;
+                else if (value <= min)
+                    return n < 0 ? OutputMax : OutputMin;
+            }
+            if (value == middle)
+                return OutputMiddle;
+            else if (value < middle)
+            {
+                if (n < 0)
+                    return ToRange(value, min, middle, OutputMiddle, OutputMax, n, limit);
+                else
+                    return ToRange(value, min, middle, OutputMin, OutputMiddle, n, limit);
+            }
+            else
+            {
+                if (n < 0)
+                    return ToRange(value, middle, max, OutputMin, OutputMiddle, n, limit);
+                else
+                    return ToRange(value, middle, max, OutputMiddle, OutputMax, n, limit);
+            }
+        }
         /// <summary>
         /// 输出"00:00:00"
         /// </summary>
