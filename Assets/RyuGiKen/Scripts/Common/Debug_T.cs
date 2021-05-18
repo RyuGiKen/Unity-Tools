@@ -32,9 +32,10 @@ namespace RyuGiKen.Tools
         }
         void Start()
         {
+            CanPrint = true;
 #if UNITY_EDITOR
             CanPrint = false;//编辑器状态打印可能导致循环导入
-            CanAdd = false;
+            //CanAdd = false;
 #endif
         }
         void Update()
@@ -58,6 +59,8 @@ namespace RyuGiKen.Tools
             {
                 if (CanPrint && LogList.Count > 0)
                 {
+                    if (sw == null)
+                        CheckStreamWriter();
                     try
                     {
                         //StreamWriter sw = new StreamWriter(Path + "/Log.txt", true);
@@ -89,13 +92,13 @@ namespace RyuGiKen.Tools
         /// <param name="Content"></param>
         public static void Log(string Content)
         {
-            if (CanAdd)
+            if (CanAdd && LogList != null)
                 LogList.Add(Content);
             Debug.Log(Content);
         }
         public static void LogError(string Content)
         {
-            if (CanAdd)
+            if (CanAdd && LogList != null)
                 LogList.Add(Content);
             Debug.LogError(Content);
         }
@@ -111,17 +114,35 @@ namespace RyuGiKen.Tools
             File.WriteAllText(Path + "/Log.txt", string.Empty);
             CanPrint = originEnable;
             if (sw != null)
+            {
                 sw.Close();
-            sw = new StreamWriter(Path + "/Log.txt", true);
+                sw = null;
+            }
+            CheckStreamWriter();
+        }
+        private static void CheckStreamWriter()
+        {
+            if (sw == null)
+            {
+                Path = Application.streamingAssetsPath;
+                sw = new StreamWriter(Path + "/Log.txt", true);
+            }
         }
         private void OnApplicationQuit()
         {
-            if (th != null)
-                th.Abort();
-            if (sw != null)
+            try
             {
-                sw.Flush();
-                sw.Close();
+                if (th != null)
+                    th.Abort();
+                if (sw != null)
+                {
+                    sw.Flush();
+                    sw.Close();
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug_T.LogError("失败 " + e);
             }
         }
     }

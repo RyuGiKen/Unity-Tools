@@ -2137,10 +2137,14 @@ namespace RyuGiKen
         public static float SetRange(float num, float min, float max, float period)
         {
             float numAdjusted = num;
-            if (num > max)
+            while (numAdjusted >= max)
+            {
                 numAdjusted -= period;
-            else if (num < min)
+            }
+            while (numAdjusted < min)
+            {
                 numAdjusted += period;
+            }
             return numAdjusted;
         }
         /// <summary>
