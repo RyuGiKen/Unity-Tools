@@ -2490,7 +2490,55 @@ namespace RyuGiKen
             else
                 return result;
         }
+        /// <summary>
+        /// 输出在范围内的连续数组
+        /// </summary>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns></returns>
+        public static int[] ToRange(int min, int max)
+        {
+            if (min == max)
+                return new int[] { min };
+            int[] result = new int[max - min + 1];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = min + i;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 输出在范围内的等比变化数组
+        /// </summary>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="num">数组长度</param>
+        /// <returns></returns>
+        public static float[] ToRange(float min, float max, int num)
+        {
+            if (min == max)
+                return new float[] { min };
+            if (num < 2)
+                num = 2;
+            float[] result = new float[num];
+            for (int i = 0; i < result.Length; i++)
+            {
+                //result[i] = MappingRange(i, 0, result.Length - 1, min, max);
+                result[i] = min + (max - min) * i * 1f / (result.Length - 1);
+            }
+            return result;
+        }
 #if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 输出在范围内的等比变化数组
+        /// </summary>
+        /// <param name="range">参数最小值,最大值</param>
+        /// <param name="num">数组长度</param>
+        /// <returns></returns>
+        public static float[] ToRange(Vector2 range, int num)
+        {
+            return ToRange(range.x, range.y, num);
+        }
         /// <summary>
         /// 映射
         /// </summary>
@@ -2499,10 +2547,10 @@ namespace RyuGiKen
         /// <param name="OutputRange">输出最小值,最大值</param>
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
-        /// <returns>[0，1]</returns>
-        public static float ToRange(float value, Vector2 range, Vector2 OutputRange, float n = 1, bool limit = true)
+        /// <returns></returns>
+        public static float MappingRange(float value, Vector2 range, Vector2 OutputRange, float n = 1, bool limit = true)
         {
-            return ToRange(value, range.x, range.y, OutputRange.x, OutputRange.y, n, limit);
+            return MappingRange(value, range.x, range.y, OutputRange.x, OutputRange.y, n, limit);
         }
 #endif
         /// <summary>
@@ -2515,8 +2563,8 @@ namespace RyuGiKen
         /// <param name="OutputMax">输出最大值</param>
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
-        /// <returns>[0，1]</returns>
-        public static float ToRange(float value, float min, float max, float OutputMin, float OutputMax, float n = 1, bool limit = true)
+        /// <returns></returns>
+        public static float MappingRange(float value, float min, float max, float OutputMin, float OutputMax, float n = 1, bool limit = true)
         {
             float result, percent;
             if (min == max) { return min; }
@@ -2555,8 +2603,8 @@ namespace RyuGiKen
         /// <param name="OutputMax">输出最大值</param>
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
-        /// <returns>[0，1]</returns>
-        public static float ToAsymmetryRange(float value, float min, float middle, float max, float OutputMin, float OutputMiddle, float OutputMax, float n = 1, bool limit = true)
+        /// <returns></returns>
+        public static float MappingAsymmetryRange(float value, float min, float middle, float max, float OutputMin, float OutputMiddle, float OutputMax, float n = 1, bool limit = true)
         {
             if (min == max) { return min; }
             if (OutputMin == OutputMax) { return OutputMin; }
@@ -2582,16 +2630,16 @@ namespace RyuGiKen
             else if (value < middle)
             {
                 if (n < 0)
-                    return ToRange(value, min, middle, OutputMiddle, OutputMax, n, limit);
+                    return MappingRange(value, min, middle, OutputMiddle, OutputMax, n, limit);
                 else
-                    return ToRange(value, min, middle, OutputMin, OutputMiddle, n, limit);
+                    return MappingRange(value, min, middle, OutputMin, OutputMiddle, n, limit);
             }
             else
             {
                 if (n < 0)
-                    return ToRange(value, middle, max, OutputMin, OutputMiddle, n, limit);
+                    return MappingRange(value, middle, max, OutputMin, OutputMiddle, n, limit);
                 else
-                    return ToRange(value, middle, max, OutputMiddle, OutputMax, n, limit);
+                    return MappingRange(value, middle, max, OutputMiddle, OutputMax, n, limit);
             }
         }
         /// <summary>
