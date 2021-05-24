@@ -403,7 +403,7 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="GO"></param>
         /// <param name="active">活动状态</param>
-        public static void ColliderSetEnable<T>(this T[] GO, bool active) where T : Collider
+        public static void SetEnable(this Collider[] GO, bool active)
         {
             foreach (var item in GO)
             {
@@ -415,7 +415,7 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="GO"></param>
         /// <param name="active">活动状态</param>
-        public static void ColliderSetEnable<T>(this List<T> GO, bool active) where T : Collider
+        public static void SetEnable(this List<Collider> GO, bool active)
         {
             foreach (var item in GO)
             {
@@ -427,7 +427,7 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="GO"></param>
         /// <param name="active">活动状态</param>
-        public static void BehaviourSetEnable<T>(this T[] GO, bool active) where T : Behaviour
+        public static void SetEnable(this Renderer[] GO, bool active)
         {
             foreach (var item in GO)
             {
@@ -439,7 +439,31 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="GO"></param>
         /// <param name="active">活动状态</param>
-        public static void BehaviourSetEnable<T>(this List<T> GO, bool active) where T : Behaviour
+        public static void SetEnable(this List<Renderer> GO, bool active)
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetEnable<T>(this T[] GO, bool active) where T : Behaviour
+        {
+            foreach (var item in GO)
+            {
+                item.enabled = active;
+            }
+        }
+        /// <summary>
+        /// 批量设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetEnable<T>(this List<T> GO, bool active) where T : Behaviour
         {
             foreach (var item in GO)
             {
