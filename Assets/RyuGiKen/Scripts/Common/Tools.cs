@@ -1148,25 +1148,41 @@ namespace RyuGiKen
         {
             if (array == null || array.Length < 1)
                 return null;
-            List<T> result = new List<T>(array.Length);
+            List<T> result = new List<T>();
+            for (int i = 0; i < array.Length; i++)
             {
-                for (int i = 0; i < array.Length; i++)
+                if (array is Object[])
                 {
-                    if (array is Object[])
-                    {
-                        if (array[i] as Object)
-                            result.Add(array[i]);
-                    }
-                    else if (array is string)
-                    {
-                        if (!string.IsNullOrEmpty(array[i] as string))
-                            result.Add(array[i]);
-                    }
-                    else if (array[i] != null)
+                    if (array[i] as Object)
                         result.Add(array[i]);
                 }
-                return result.ToArray();
+                else if (array is string[])
+                {
+                    if (!string.IsNullOrEmpty(array[i] as string))
+                        result.Add(array[i]);
+                }
+                else if (array[i] != null)
+                    result.Add(array[i]);
             }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 路径分离
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string[] SplitPath(string path)
+        {
+            string[] result = null;
+            string[] temp1 = path.Split('\\');
+            List<List<string>> temp2 = new List<List<string>>();
+            for (int i = 0; i < temp1.Length; i++)
+            {
+                string[] temp3 = temp1[i].Split('/');
+                temp2.Add(temp3.ToList());
+            }
+            result = temp2.ListAddition().ToArray().ClearNullItem<string>();
+            return result;
         }
         /// <summary>
         /// 列表相加。补充在后。
