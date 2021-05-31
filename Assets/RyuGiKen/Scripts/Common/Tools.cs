@@ -786,6 +786,32 @@ namespace RyuGiKen
         MPH,
     }
     /// <summary>
+    /// 散布模式
+    /// </summary>
+    public enum IntersperseMode
+    {
+        /// <summary>
+        /// 平均
+        /// </summary>
+        Average = 0,
+        /// <summary>
+        /// 集中中心
+        /// </summary>
+        Centre = 1,
+        /// <summary>
+        /// 集中边缘
+        /// </summary>
+        Edge = 2,
+        /// <summary>
+        /// 偏离中心与边缘
+        /// </summary>
+        NotCentreAndEdge = 3,
+        /// <summary>
+        /// 集中中心与边缘
+        /// </summary>
+        CentreAndEdge = 4
+    }
+    /// <summary>
     /// 数值调整
     /// </summary>
     public static class ValueAdjust
@@ -851,22 +877,24 @@ namespace RyuGiKen
         /// 二维坐标转三维坐标
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="valueZ"></param>
         /// <returns></returns>
-        public static Vector3 ToVector3(this Vector2 value)
+        public static Vector3 ToVector3(this Vector2 value, float valueZ = 0)
         {
-            return new Vector3(value.x, value.y);
+            return new Vector3(value.x, value.y, valueZ);
         }
         /// <summary>
         /// 二维坐标数组转三维坐标数组
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="valueZ"></param>
         /// <returns></returns>
-        public static Vector3[] ToVector3(this Vector2[] value)
+        public static Vector3[] ToVector3(this Vector2[] value, float valueZ = 0)
         {
             Vector3[] result = new Vector3[value.Length];
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = value[i].ToVector3();
+                result[i] = value[i].ToVector3(valueZ);
             }
             return result;
         }
@@ -1337,7 +1365,7 @@ namespace RyuGiKen
             for (int i = 0; i < list.Count; i++)
             {
                 for (int j = 0; j < list.Count; j++)
-                    if (Random.value > 0.5f && i != j)
+                    if (RandomBoolean() && i != j)
                     {
                         if (changeSelf)
                         {
@@ -1377,7 +1405,7 @@ namespace RyuGiKen
             for (int i = 0; i < array.Length; i++)
             {
                 for (int j = 0; j < array.Length; j++)
-                    if (Random.value > 0.5f && i != j)
+                    if (RandomBoolean() && i != j)
                     {
                         if (changeSelf)
                             Exchange(array[i], array[j], out array[i], out array[j]);
@@ -2278,6 +2306,135 @@ namespace RyuGiKen
         {
             X = dis * (float)Math.Cos(angle * Mathf.Deg2Rad);
             Y = dis * (float)Math.Sin(angle * Mathf.Deg2Rad);
+        }
+        /// <summary>
+        /// 圆形范围随机取值（半径，散布类型）
+        /// </summary>
+        /// <param name="size">半径</param>
+        /// <param name="type">散布类型</param>
+        /// <returns>直角坐标</returns>
+        public static Vector2 RandomPolarPoint(float size, IntersperseMode type = IntersperseMode.Average)
+        {
+            return RandomPolarPoint(size, Vector2.zero, type);
+        }
+        /// <summary>
+        /// 圆形范围随机取值（半径，散布类型）
+        /// </summary>
+        /// <param name="size">半径</param>
+        /// <param name="Center">圆心</param>
+        /// <param name="type">散布类型</param>
+        /// <returns>直角坐标</returns>
+        public static Vector2 RandomPolarPoint(float size, Vector2 Center, IntersperseMode type = IntersperseMode.Average)
+        {
+            float dis = 0;
+            switch (type)
+            {
+                default:
+                case IntersperseMode.Average:
+                    dis = Random.Range(0, size);
+                    break;
+                case IntersperseMode.NotCentreAndEdge:
+                    dis = (Random.Range(0, size) + Random.Range(0, size)) * 0.5f;
+                    break;
+                case IntersperseMode.Centre:
+                    dis = Random.Range(0, 1f) * Random.Range(0, 1f) * size;
+                    break;
+                case IntersperseMode.Edge:
+                    dis = (1 - Random.Range(0, 1f) * Random.Range(0, 1f)) * size;
+                    break;
+                case IntersperseMode.CentreAndEdge:
+                    if (RandomBoolean())
+                        dis = Random.Range(0, 1f) * Random.Range(0, 1f) * size;
+                    else
+                        dis = (1 - Random.Range(0, 1f) * Random.Range(0, 1f)) * size;
+                    break;
+            }
+            Vector2 result = ValueAdjust.PolarToRect(Random.Range(0, 360f), dis);
+            return result + Center;
+        }
+        /// <summary>
+        /// 随机布尔值
+        /// </summary>
+        /// <param name="percent">为true的百分比</param>
+        /// <returns></returns>
+        public static bool RandomBoolean(float percent = 0.5f)
+        {
+            return Random.value > percent ? true : false;
+        }
+        /// <summary>
+        /// 范围内随机取值
+        /// </summary>
+        /// <param name="RangeX"></param>
+        /// <param name="RangeY"></param>
+        /// <returns></returns>
+        public static float RandomValueInRange(Vector2 Range, IntersperseMode type = IntersperseMode.Average)
+        {
+            if (Range.x == Range.y)
+                return Range.x;
+            float result = 0;
+            float min = Math.Min(Range.x, Range.y);
+            float max = Math.Max(Range.x, Range.y);
+            float middle = (min + max) * 0.5f;
+            float dis = max - min;
+            switch (type)
+            {
+                default:
+                case IntersperseMode.Average:
+                    result = Random.Range(min, max);
+                    break;
+                case IntersperseMode.NotCentreAndEdge:
+                    result = ValueAdjust.PolarToRect(RandomBoolean() ? 0 : 180, (Random.Range(0, dis * 0.5f) + Random.Range(0, dis * 0.5f)) * 0.5f).x;
+                    break;
+                case IntersperseMode.Centre:
+                    result = Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f * (RandomBoolean() ? 1 : -1) + middle;
+                    break;
+                case IntersperseMode.Edge:
+                    if (RandomBoolean())
+                        result = Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f + min;
+                    else
+                        result = max - Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f;
+                    break;
+                case IntersperseMode.CentreAndEdge:
+                    if (RandomBoolean())
+                        result = Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f * (RandomBoolean() ? 1 : -1) + middle;
+                    else
+                    {
+                        if (RandomBoolean())
+                            result = Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f + min;
+                        else
+                            result = max - Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f;
+                    }
+                    break;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 二维范围内随机取值
+        /// </summary>
+        /// <param name="RangeX"></param>
+        /// <param name="RangeY"></param>
+        /// <returns></returns>
+        public static Vector2 RandomRectPointInRange(Vector2 RangeX, Vector2 RangeY, IntersperseMode type = IntersperseMode.Average)
+        {
+            Vector2 result = new Vector2();
+            result.x = RandomValueInRange(RangeX, type);
+            result.y = RandomValueInRange(RangeY, type);
+            return result;
+        }
+        /// <summary>
+        /// 三维范围内随机取值
+        /// </summary>
+        /// <param name="RangeX"></param>
+        /// <param name="RangeY"></param>
+        /// <param name="RangeZ"></param>
+        /// <returns></returns>
+        public static Vector3 RandomRectPointInRange(Vector2 RangeX, Vector2 RangeY, Vector2 RangeZ, IntersperseMode type = IntersperseMode.Average)
+        {
+            Vector3 result = new Vector3();
+            result.x = RandomValueInRange(RangeX, type);
+            result.y = RandomValueInRange(RangeY, type);
+            result.z = RandomValueInRange(RangeZ, type);
+            return result;
         }
         /// <summary>
         /// 平滑处理
