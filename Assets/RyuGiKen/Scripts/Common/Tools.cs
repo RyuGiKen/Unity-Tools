@@ -744,27 +744,35 @@ namespace RyuGiKen
             this.a = Alpha;
         }
     }
-    public class Vector2
+    public struct Vector2
     {
         public float x;
         public float y;
+        public static Vector2 zero = new Vector2(0, 0);
+        public static Vector2 one = new Vector2(1, 1);
         public Vector2(float X = 0, float Y = 0)
         {
             this.x = X;
             this.y = Y;
         }
+        public static Vector2 operator +(Vector2 a, Vector2 b) { return new Vector2(a.x + b.x, a.y + b.y); }
+        public static Vector2 operator -(Vector2 a, Vector2 b) { return new Vector2(a.x - b.x, a.y - b.y); }
     }
-    public class Vector3
+    public struct Vector3
     {
         public float x;
         public float y;
         public float z;
+        public static Vector3 zero = new Vector3(0, 0, 0);
+        public static Vector3 one = new Vector3(1, 1, 1);
         public Vector3(float X = 0, float Y = 0, float Z = 0)
         {
             this.x = X;
             this.y = Y;
-            this.y = Z;
+            this.z = Z;
         }
+        public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z); }
+        public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.x - b.x, a.y - b.y, a.z + b.z); }
     }
 #endif
     /// <summary>
@@ -1881,6 +1889,16 @@ namespace RyuGiKen
             int result = FailValue;
             int.TryParse(num, out result);
             return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static int ToInteger(this float num)
+        {
+            return (int)Round(num);
         }
         /// <summary>
         /// 限位。返回[0，1]
