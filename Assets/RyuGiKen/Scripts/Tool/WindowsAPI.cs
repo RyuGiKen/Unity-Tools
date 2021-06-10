@@ -124,6 +124,13 @@ namespace WindowsAPI
         /// </summary>
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern IntPtr GetParent(IntPtr hWnd);
+
+        public delegate bool WNDENUMPROC(IntPtr hwnd, uint lParam);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool EnumWindows(WNDENUMPROC lpEnumFunc, uint lParam);
+        [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, ref uint lpdwProcessId);
+
+        [DllImport("kernel32.dll")] public static extern void SetLastError(uint dwErrCode);
         /// <summary>
         /// 该函数将指定的消息发送到一个或多个窗口。此函数为指定的窗口调用窗口程序，直到窗口程序处理完消息再返回。　
         /// </summary>

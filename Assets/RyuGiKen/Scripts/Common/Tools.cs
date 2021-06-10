@@ -1901,6 +1901,33 @@ namespace RyuGiKen
             return (int)Round(num);
         }
         /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int Abs(this int value)
+        {
+            return Math.Abs(value);
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static float Abs(this float value)
+        {
+            return Math.Abs(value);
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static double Abs(this double value)
+        {
+            return Math.Abs(value);
+        }
+        /// <summary>
         /// 限位。返回[0，1]
         /// </summary>
         /// <param name="value"></param>
@@ -2377,7 +2404,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static bool RandomBoolean(float percent = 0.5f)
         {
-            return Random.value > percent ? true : false;
+            return Random.value < percent ? true : false;
         }
         /// <summary>
         /// 范围内随机取值
