@@ -13,6 +13,7 @@ namespace RyuGiKen.Tools
     [DisallowMultipleComponent]
     public class FPSShow : MonoBehaviour
     {
+        public static FPSShow instance;
         [Tooltip("隐藏")] public bool hide = true;//默认隐藏
         public Text FPSText;
         float passTime;
@@ -28,12 +29,38 @@ namespace RyuGiKen.Tools
         [Tooltip("最小帧率")] public int adjustMinFPS = 20;
         [Tooltip("最大帧率")] public int adjustMaxFPS = 50;
         [Tooltip("限制帧率")] public int LockFrameRate = 60;
-        private void Start()
+        private void Awake()
         {
             if (FPSText == null)
             { FPSText = GetComponent<Text>(); }
+            if (gameObject.activeInHierarchy)
+                if (!instance) instance = this;
+            if (instance != this)
+                Destroy(this.gameObject);
             QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = LockFrameRate;
+            RefreshTargetFPS();
+        }
+        private void Start()
+        {
+            RefreshTargetFPS();
+        }
+        public static void RefreshTargetFPS(int num = -1)
+        {
+            if (num > 0)
+            {
+                if (instance)
+                {
+                    Application.targetFrameRate = instance.LockFrameRate = num;
+                }
+                else
+                {
+                    Application.targetFrameRate = num;
+                }
+            }
+            else if (instance)
+            {
+                Application.targetFrameRate = instance.LockFrameRate;
+            }
         }
         void Update()
         {
@@ -47,7 +74,7 @@ namespace RyuGiKen.Tools
             }
             if (Input.GetKeyUp(KeyCode.F3))//按F3限制帧数为60;
             {
-                Application.targetFrameRate = LockFrameRate;
+                RefreshTargetFPS();
             }
             if (Input.GetKeyUp(KeyCode.F4))//按F4不限制帧数;
             {
