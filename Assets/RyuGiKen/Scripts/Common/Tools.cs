@@ -224,6 +224,66 @@ namespace RyuGiKen
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 获取对象所有子对象
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <returns></returns>
+        public static GameObject[] GetChildren(this GameObject GO)
+        {
+            List<GameObject> result = new List<GameObject>();
+            if (GO.transform.childCount > 0)
+                foreach (Transform child in GO.transform)
+                {
+                    result.Add(child.gameObject);
+                }
+            return ValueAdjust.ToArray(result.ClearRepeatingItem());
+        }
+        /// <summary>
+        /// 获取对象所有子对象
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public static Transform[] GetChildren(this Transform transform)
+        {
+            List<Transform> result = new List<Transform>();
+            if (transform.childCount > 0)
+                foreach (Transform child in transform)
+                {
+                    result.Add(child);
+                }
+            return ValueAdjust.ToArray(result.ClearRepeatingItem());
+        }
+        /// <summary>
+        /// 获取对象所有子孙
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <returns></returns>
+        public static GameObject[] GetDescendants(this GameObject GO)
+        {
+            List<GameObject> result = new List<GameObject>();
+            result.AddList(GO.GetChildren().ToList());
+            foreach (Transform child in GO.transform)
+            {
+                result.AddList(child.gameObject.GetDescendants().ToList());
+            }
+            return ValueAdjust.ToArray(result.ClearRepeatingItem());
+        }
+        /// <summary>
+        /// 获取对象所有子孙
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public static Transform[] GetDescendants(this Transform transform)
+        {
+            List<Transform> result = new List<Transform>();
+            result.AddList(transform.GetChildren().ToList());
+            foreach (Transform child in transform)
+            {
+                result.AddList(child.GetDescendants().ToList());
+            }
+            return ValueAdjust.ToArray(result.ClearRepeatingItem());
+        }
+        /// <summary>
         /// Transform复制
         /// </summary>
         /// <param name="Get">读取对象</param>
@@ -1326,6 +1386,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<T> AddList<T>(this List<T> list01, List<T> list02)
         {
+            if (list01 == null || list02 == null)
+                return null;
             for (int i = 0; i < list02.Count; i++)
             {
                 list01.Add(list02[i]);
@@ -1340,6 +1402,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<T> ToList<T>(this T[] array)
         {
+            if (array == null || array.Length < 1)
+                return null;
             List<T> list = new List<T>();
             for (int i = 0; i < array.Length; i++)
                 list.Add(array[i]);
@@ -1353,6 +1417,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static T[] ToArray<T>(this List<T> list)
         {
+            if (list == null || list.Count < 1)
+                return null;
             return list.ToArray();
         }
         /// <summary>
