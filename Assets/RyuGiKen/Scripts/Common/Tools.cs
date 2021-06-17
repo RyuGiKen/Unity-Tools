@@ -224,6 +224,52 @@ namespace RyuGiKen
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// Transform复制
+        /// </summary>
+        /// <param name="Get">读取对象</param>
+        /// <param name="Set">设置对象</param>
+        /// <param name="localPosition">是否更新局部位置</param>
+        /// <param name="position">是否更新全局位置</param>
+        /// <param name="localEulerAngles">是否更新局部旋转</param>
+        /// <param name="rotation">是否更新全局旋转</param>
+        /// <param name="localScale">是否更新局部缩放</param>
+        /// <param name="lossyScale">是否更新全局缩放</param>
+        public static void Sync(Transform Get, Transform Set, bool localPosition, bool position, bool localEulerAngles, bool rotation, bool localScale, bool lossyScale)
+        {
+            if (!Get || !Set)
+                return;
+
+            if (localPosition)
+                Set.localPosition = Get.localPosition;
+            if (position)
+                Set.position = Get.position;
+            if (localEulerAngles)
+                Set.localEulerAngles = Get.localEulerAngles;
+            if (rotation)
+                Set.rotation = Get.rotation;
+            if (localScale)
+                Set.localScale = Get.localScale;
+            if (lossyScale)
+            {
+                SetGlobalScale(Set, Get.lossyScale);
+            }
+        }
+        /// <summary>
+        /// 设置全局缩放
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="lossyScale"></param>
+        public static void SetGlobalScale(this Transform transform, Vector3 lossyScale)
+        {
+            if (transform)
+            {
+                if (transform.parent)
+                    transform.localScale = new Vector3(lossyScale.x / transform.parent.lossyScale.x, lossyScale.y / transform.parent.lossyScale.y, lossyScale.z / transform.parent.lossyScale.z);
+                else
+                    transform.localScale = lossyScale;
+            }
+        }
+        /// <summary>
         /// 重设父对象和位置角度缩放
         /// </summary>
         /// <param name="transform"></param>
@@ -1080,12 +1126,12 @@ namespace RyuGiKen
         }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
-        /// 清空重复项
+        /// 重复项置空
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static List<T> ClearRepeatingItem<T>(this List<T> list) where T : Object
+        public static List<T> SetRepeatingItemNull<T>(this List<T> list) where T : Object
         {
             if (list == null || list.Count < 1)
                 return null;
@@ -1097,7 +1143,19 @@ namespace RyuGiKen
                         list[i] = null;
                 }
             }
-            return ValueAdjust.ClearNullItem(list);
+            return list;
+        }
+        /// <summary>
+        /// 清空重复项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static List<T> ClearRepeatingItem<T>(this List<T> list) where T : Object
+        {
+            if (list == null || list.Count < 1)
+                return null;
+            return ValueAdjust.ClearNullItem(list.SetRepeatingItemNull());
         }
 #endif
         /// <summary>
