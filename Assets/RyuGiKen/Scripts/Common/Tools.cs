@@ -465,7 +465,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.SetActive(active);
+                if (item)
+                    item.SetActive(active);
             }
         }
         /// <summary>
@@ -477,7 +478,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.gameObject.SetActive(active);
+                if (item)
+                    item.gameObject.SetActive(active);
             }
         }
         /// <summary>
@@ -489,7 +491,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.SetActive(active);
+                if (item)
+                    item.SetActive(active);
             }
         }
         /// <summary>
@@ -501,7 +504,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.gameObject.SetActive(active);
+                if (item)
+                    item.gameObject.SetActive(active);
             }
         }
         /// <summary>
@@ -513,7 +517,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.enabled = active;
+                if (item)
+                    item.enabled = active;
             }
         }
         /// <summary>
@@ -525,7 +530,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.enabled = active;
+                if (item)
+                    item.enabled = active;
             }
         }
         /// <summary>
@@ -537,7 +543,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.enabled = active;
+                if (item)
+                    item.enabled = active;
             }
         }
         /// <summary>
@@ -549,7 +556,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.enabled = active;
+                if (item)
+                    item.enabled = active;
             }
         }
         /// <summary>
@@ -561,7 +569,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.enabled = active;
+                if (item)
+                    item.enabled = active;
             }
         }
         /// <summary>
@@ -573,7 +582,8 @@ namespace RyuGiKen
         {
             foreach (var item in GO)
             {
-                item.enabled = active;
+                if (item)
+                    item.enabled = active;
             }
         }
         /// <summary>
@@ -587,7 +597,7 @@ namespace RyuGiKen
         {
             List<T> list = new List<T>();
             for (int i = 0; i < array.Length; i++)
-                if (array[i].GetComponent<T>())
+                if (array[i] && array[i].GetComponent<T>())
                     list.Add(array[i].GetComponent<T>());
                 else
                     list.Add(null);
@@ -603,7 +613,7 @@ namespace RyuGiKen
         {
             T[] array = new T[list.Count];
             for (int i = 0; i < array.Length; i++)
-                if (list[i].GetComponent<T>())
+                if (list[i] && list[i].GetComponent<T>())
                     array[i] = list[i].GetComponent<T>();
             return array;
         }
@@ -616,7 +626,7 @@ namespace RyuGiKen
         {
             List<T> list = new List<T>();
             for (int i = 0; i < m_List.Count; i++)
-                if (m_List[i].GetComponent<T>())
+                if (m_List[i] && m_List[i].GetComponent<T>())
                     list.Add(m_List[i].GetComponent<T>());
                 else
                     list.Add(null);
@@ -631,7 +641,7 @@ namespace RyuGiKen
         {
             T[] array = new T[m_Array.Length];
             for (int i = 0; i < array.Length; i++)
-                if (m_Array[i].GetComponent<T>())
+                if (m_Array[i] && m_Array[i].GetComponent<T>())
                     array[i] = m_Array[i].GetComponent<T>();
             return array;
         }
@@ -644,7 +654,7 @@ namespace RyuGiKen
         {
             List<GameObject> list = new List<GameObject>();
             for (int i = 0; i < m_List.Count; i++)
-                if (m_List[i].gameObject)
+                if (m_List[i] && m_List[i].gameObject)
                     list.Add(m_List[i].gameObject);
                 else
                     list.Add(null);
@@ -659,7 +669,7 @@ namespace RyuGiKen
         {
             GameObject[] array = new GameObject[m_Array.Length];
             for (int i = 0; i < array.Length; i++)
-                if (m_Array[i].gameObject)
+                if (m_Array[i] && m_Array[i].gameObject)
                     array[i] = m_Array[i].gameObject;
             return array;
         }

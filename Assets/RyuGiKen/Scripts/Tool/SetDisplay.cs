@@ -58,12 +58,7 @@ namespace RyuGiKen.Tools
                 XmlNodeList node = xmlDoc.SelectSingleNode("Data").ChildNodes;
                 foreach (XmlElement x1 in node)
                 {
-                    if (x1.Name == "UseSecondScreen")
-                    {
-                        UseSecondScreen = x1.InnerText.ContainIgnoreCase("True") || x1.InnerText == "1";
-                        break;
-                    }
-                    else if (x1.Name == "SecondScreen")
+                    if (x1.Name == "UseSecondScreen" || x1.Name == "SecondScreen")
                     {
                         UseSecondScreen = x1.InnerText.ContainIgnoreCase("True") || x1.InnerText == "1";
                         break;
