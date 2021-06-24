@@ -50,21 +50,13 @@ namespace RyuGiKen.Tools
         void Start()
         {
             Debug_T.Log(" displays(显示器数)： " + Display.displays.Length + " \r\n");
-            string filePath = Application.streamingAssetsPath + "/Setting.xml";
-            if (File.Exists(filePath))
+
+            string xmlData = GetFile.LoadXmlData(new string[] { "UseSecondScreen", "SecondScreen" }, Application.streamingAssetsPath + "/Setting.xml", "Data", true);
+            if (!string.IsNullOrEmpty(xmlData))
             {
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(filePath);
-                XmlNodeList node = xmlDoc.SelectSingleNode("Data").ChildNodes;
-                foreach (XmlElement x1 in node)
-                {
-                    if (x1.Name == "UseSecondScreen" || x1.Name == "SecondScreen")
-                    {
-                        UseSecondScreen = x1.InnerText.ContainIgnoreCase("True") || x1.InnerText == "1";
-                        break;
-                    }
-                }
+                UseSecondScreen = xmlData.ContainIgnoreCase("True") || xmlData == "1";
             }
+
             if (Display.displays.Length > 1 && UseSecondScreen && this.enabled)//多显示器
             {
                 WindowWidth = Display.displays[1].systemWidth;

@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Xml;
 #if UNITY_EDITOR || UNITY_STANDALONE
 using WindowsAPI;
 using UnityEngine;
@@ -25,6 +26,117 @@ namespace RyuGiKen
     /// </summary>
     public static class GetFile
     {
+        /// <summary>
+        /// 读取配置参数
+        /// </summary>
+        /// <param name="NodeName"></param>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="RootNodeName">根节点</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <returns></returns>
+        public static XmlDocument LoadXmlData(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+                return null;
+            XmlDocument xmlDoc = null;
+            XmlReader reader = null;
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    xmlDoc = new XmlDocument();
+                    XmlReaderSettings settings = new XmlReaderSettings();
+                    settings.IgnoreComments = true;//忽略注释
+                    reader = XmlReader.Create(filePath, settings);
+                    xmlDoc.Load(reader);
+                }
+            }
+            catch { }
+            if (reader != null)
+                reader.Close();
+            return xmlDoc;
+        }
+        /// <summary>
+        /// 读取配置参数
+        /// </summary>
+        /// <param name="NodeName"></param>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="RootNodeName">根节点</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <returns></returns>
+        public static string LoadXmlData(string NodeName, string filePath, string RootNodeName, bool IgnoreCase = false)
+        {
+            if (string.IsNullOrEmpty(NodeName) || string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(RootNodeName))
+                return null;
+            string result = null;
+            XmlReader reader = null;
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    XmlReaderSettings settings = new XmlReaderSettings();
+                    settings.IgnoreComments = true;//忽略注释
+                    reader = XmlReader.Create(filePath, settings);
+                    xmlDoc.Load(reader);
+                    XmlNodeList node = xmlDoc.SelectSingleNode(RootNodeName).ChildNodes;
+                    foreach (XmlElement x1 in node)
+                    {
+                        if (x1.Name == NodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(NodeName)))
+                        {
+                            result = x1.InnerText;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch { }
+            if (reader != null)
+                reader.Close();
+            return result;
+        }
+        /// <summary>
+        /// 读取配置参数
+        /// </summary>
+        /// <param name="NodeName"></param>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="RootNodeName">根节点</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <returns></returns>
+        public static string LoadXmlData(string[] NodeName, string filePath, string RootNodeName, bool IgnoreCase = false)
+        {
+            if (NodeName == null || NodeName.Length < 1 || string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(RootNodeName))
+                return null;
+            string result = null;
+            XmlReader reader = null;
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    XmlReaderSettings settings = new XmlReaderSettings();
+                    settings.IgnoreComments = true;//忽略注释
+                    reader = XmlReader.Create(filePath, settings);
+                    xmlDoc.Load(reader);
+                    XmlNodeList node = xmlDoc.SelectSingleNode(RootNodeName).ChildNodes;
+                    foreach (XmlElement x1 in node)
+                    {
+                        foreach (string nodeName in NodeName)
+                        {
+                            if (x1.Name == nodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(nodeName)))
+                            {
+                                result = x1.InnerText;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            if (reader != null)
+                reader.Close();
+            return result;
+        }
         /// <summary>
         /// 获得指定路径下所有子目录文件名
         /// </summary>
