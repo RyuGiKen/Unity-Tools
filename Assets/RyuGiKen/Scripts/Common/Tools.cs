@@ -310,10 +310,17 @@ namespace RyuGiKen
         /// <returns></returns>
         public static bool JudgeFileType(string name, string Type)
         {
-            if (name == null || name == "" || Type == null || Type == "")
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(Type))
                 return false;
-            string FileTypeName = name.Substring(name.Length - Type.Length - 1);
-            return FileTypeName.LastIndexOf("." + Type, StringComparison.OrdinalIgnoreCase) >= 0;
+            try
+            {
+                string FileTypeName = name.Substring(name.Length - Type.Length - 1);
+                return FileTypeName.LastIndexOf("." + Type, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
         /// <summary>
         /// 从文件名判断类型
