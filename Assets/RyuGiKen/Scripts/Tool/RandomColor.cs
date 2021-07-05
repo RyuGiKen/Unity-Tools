@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -11,6 +12,8 @@ namespace RyuGiKen.Tools
     {
         [Tooltip("Shader中的颜色属性名")] [SerializeField] string ColorNameInShader = "_EmissionColor";
         [SerializeField] List<Renderer> renderers = new List<Renderer>();
+        [SerializeField] List<Graphic> graphics = new List<Graphic>();
+        public bool randomColour = true;
         [SerializeField] Color color;
         [SerializeField] Color color2;
         [SerializeField] float time = 0;
@@ -18,15 +21,14 @@ namespace RyuGiKen.Tools
         [SerializeField] int direction = 1;
         void Start()
         {
-            color = ColorAdjust.ConvertHsvToRgb(Random.Range(0, 360), Random.Range(0, 1f), 1);
+            if (randomColour)
+                color = ColorAdjust.ConvertHsvToRgb(Random.Range(0, 360), Random.Range(0, 1f), 1);
             if (renderers.Count < 1)
                 renderers.Add(this.GetComponent<Renderer>());
-            if (renderers.Count > 0)
-                for (int i = 0; i < renderers.Count; i++)
-                    if (renderers[i])
-                        renderers[i].material.SetColor(ColorNameInShader, color);
+            if (graphics.Count < 1)
+                graphics.Add(this.GetComponent<Graphic>());
+            SetColor(color);
         }
-
         void Update()
         {
             if (SwitchColorTime > 0 && renderers.Count > 0)
@@ -34,22 +36,38 @@ namespace RyuGiKen.Tools
                 time += direction * Time.deltaTime;
                 if (time <= 0)//(renderers[0].material.color == color)
                 {
-                    color2 = ColorAdjust.ConvertHsvToRgb(Random.Range(0, 360), Random.Range(0, 1f), 1);
+                    if (randomColour)
+                        color2 = ColorAdjust.ConvertHsvToRgb(Random.Range(0, 360), Random.Range(0, 1f), 1);
                     direction = 1;
                 }
                 else if (time >= SwitchColorTime)//(renderers[0].material.color == color2)
                 {
-                    color = ColorAdjust.ConvertHsvToRgb(Random.Range(0, 360), Random.Range(0, 1f), 1);
+                    if (randomColour)
+                        color = ColorAdjust.ConvertHsvToRgb(Random.Range(0, 360), Random.Range(0, 1f), 1);
                     direction = -1;
                 }
                 else
                 {
                     Color tempColor = Color.Lerp(color, color2, time / SwitchColorTime);
-                    for (int i = 0; i < renderers.Count; i++)
-                        if (renderers[i])
-                            renderers[i].material.SetColor(ColorNameInShader, tempColor);
+                    SetColor(tempColor);
                 }
             }
+        }
+        void SetColor(Color m_color)
+        {
+            for (int i = 0; i < renderers.Count; i++)
+                if (renderers[i])
+                {
+                    if (string.IsNullOrEmpty(ColorNameInShader))
+                        renderers[i].material.color = m_color;
+                    else
+                        renderers[i].material.SetColor(ColorNameInShader, m_color);
+                }
+            for (int i = 0; i < graphics.Count; i++)
+                if (graphics[i])
+                {
+                    graphics[i].color = m_color;
+                }
         }
     }
 }

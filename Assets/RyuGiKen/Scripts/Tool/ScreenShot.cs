@@ -62,6 +62,7 @@ namespace RyuGiKen.Tools
             }
             else
             {
+#if UNITY_EDITOR
                 int width = Screen.currentResolution.width;
                 int height = Screen.currentResolution.height;
                 RenderTexture rt = new RenderTexture(width, height, 16);
@@ -73,6 +74,7 @@ namespace RyuGiKen.Tools
                 t.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
                 t.Apply();
                 System.IO.File.WriteAllBytes(fileName, t.EncodeToPNG());
+#endif
             }
             switch (Application.systemLanguage)
             {
