@@ -6,20 +6,27 @@ namespace RyuGiKen.Tools
     /// <summary>
     /// 抖动
     /// </summary>
-    [AddComponentMenu("RyuGiKen/震动")]
+    [AddComponentMenu("RyuGiKen/抖动")]
     public class Shake : MonoBehaviour
     {
         [Tooltip("启动播放")] public bool playOnAwake;
-        [Tooltip("初始位置")] [SerializeField] Vector3 originPos;
+        [SerializeField] Space space = Space.Self;
+        public bool RandomX = true;
+        public bool RandomY = true;
+        public bool RandomZ = true;
+        [Tooltip("初始位置")] [SerializeField] Vector3 originPosition;
+        [Tooltip("初始位置")] [SerializeField] Vector3 originLocalPosition;
         [Tooltip("刷新目标位置")] [SerializeField] Vector3 tarPos;
         [Tooltip("刷新计时")] float mTime;
         [Tooltip("刷新时间")] public float maxTime;
         [Tooltip("刷新距离")] public float distance;
+        [Tooltip("到达距离阈值")] public float reachDistance = 0.01f;
         [Tooltip("抖动中")] public bool playing;
         [Tooltip("归位中")] bool stopping = false;
         void Start()
         {
-            originPos = this.transform.localPosition;
+            originPosition = this.transform.position;
+            originLocalPosition = this.transform.localPosition;
             playing = playOnAwake;
         }
         void Update()
@@ -31,20 +38,46 @@ namespace RyuGiKen.Tools
                 mTime += Time.deltaTime;
                 if (mTime >= maxTime && !stopping)
                 {
-                    tarPos = new Vector3(Random.Range(-distance, distance), Random.Range(-distance, distance), Random.Range(-distance, distance));
+                    tarPos = new Vector3(RandomX ? Random.Range(-distance, distance) : 0, RandomY ? Random.Range(-distance, distance) : 0, RandomZ ? Random.Range(-distance, distance) : 0);
+                    if (tarPos.magnitude > distance.Abs())
+                        tarPos = tarPos.normalized * distance.Abs();
                     mTime = 0;
                 }
                 if (stopping)
                 {
-                    if ((this.transform.localPosition - originPos).magnitude < 0.01f)
+                    switch (space)
                     {
-                        playing = false;
-                        stopping = false;
-                        this.transform.localPosition = originPos;
+                        default:
+                        case Space.Self:
+                            if ((this.transform.localPosition - originLocalPosition).magnitude < reachDistance)
+                            {
+                                playing = false;
+                                stopping = false;
+                                this.transform.localPosition = originLocalPosition;
+                            }
+                            tarPos = originLocalPosition;
+                            break;
+                        case Space.World:
+                            if ((this.transform.position - originPosition).magnitude < reachDistance)
+                            {
+                                playing = false;
+                                stopping = false;
+                                this.transform.position = originPosition;
+                            }
+                            tarPos = Vector3.zero;
+                            break;
                     }
-                    tarPos = originPos;
                 }
-                this.transform.localPosition += new Vector3(tarPos.x - this.transform.localPosition.x, tarPos.y - this.transform.localPosition.y, tarPos.z - this.transform.localPosition.z) * Time.deltaTime / maxTime;
+                switch (space)
+                {
+                    default:
+                    case Space.Self:
+                        this.transform.localPosition += new Vector3(tarPos.x - this.transform.localPosition.x, tarPos.y - this.transform.localPosition.y, tarPos.z - this.transform.localPosition.z) * Time.deltaTime / maxTime;
+                        break;
+                    case Space.World:
+                        this.transform.position += new Vector3((originPosition + tarPos).x - this.transform.position.x, (originPosition + tarPos).y - this.transform.position.y, (originPosition + tarPos).z - this.transform.position.z) * Time.deltaTime / maxTime;
+                        break;
+                }
             }
         }
         /// <summary>
@@ -79,7 +112,16 @@ namespace RyuGiKen.Tools
         {
             playing = false;
             mTime = 0;
-            this.transform.localPosition = originPos;
+            switch (space)
+            {
+                default:
+                case Space.Self:
+                    this.transform.localPosition = originLocalPosition;
+                    break;
+                case Space.World:
+                    this.transform.position = originPosition;
+                    break;
+            }
         }
         /// <summary>
         /// 抖动一定时间后停止、立刻归位
