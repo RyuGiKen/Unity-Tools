@@ -13,9 +13,10 @@ namespace RyuGiKen.Tools
         [Tooltip("Shader中的颜色属性名")] [SerializeField] string ColorNameInShader = "_EmissionColor";
         [SerializeField] List<Renderer> renderers = new List<Renderer>();
         [SerializeField] List<Graphic> graphics = new List<Graphic>();
+        public ColorAdjust.ColorAdjustMode mode = ColorAdjust.ColorAdjustMode.RGBA;
         public bool randomColour = true;
-        [SerializeField] Color color;
-        [SerializeField] Color color2;
+        public Color color;
+        public Color color2;
         [SerializeField] float time = 0;
         [Tooltip("切换颜色时间")] public float SwitchColorTime = 0;
         [SerializeField] int direction = 1;
@@ -49,11 +50,11 @@ namespace RyuGiKen.Tools
                 else
                 {
                     Color tempColor = Color.Lerp(color, color2, time / SwitchColorTime);
-                    SetColor(tempColor);
+                    SetColor(tempColor, mode);
                 }
             }
         }
-        void SetColor(Color m_color)
+        public void SetColor(Color m_color)
         {
             for (int i = 0; i < renderers.Count; i++)
                 if (renderers[i])
@@ -68,6 +69,35 @@ namespace RyuGiKen.Tools
                 {
                     graphics[i].color = m_color;
                 }
+        }
+        public void SetColor(Color m_color, ColorAdjust.ColorAdjustMode mode)
+        {
+            for (int i = 0; i < renderers.Count; i++)
+                if (renderers[i])
+                {
+                    if (string.IsNullOrEmpty(ColorNameInShader))
+                    {
+                        renderers[i].material.color = ColorAdjust.AdjustColor(renderers[i].material.color, m_color, mode);
+                    }
+                    else
+                    {
+                        Color tempColor = renderers[i].material.GetColor(ColorNameInShader);
+                        renderers[i].material.SetColor(ColorNameInShader, ColorAdjust.AdjustColor(tempColor, m_color, mode));
+                    }
+                }
+            for (int i = 0; i < graphics.Count; i++)
+                if (graphics[i])
+                {
+                    graphics[i].color = ColorAdjust.AdjustColor(graphics[i].color, m_color, mode);
+                }
+        }
+        public void ForceSetColor1()
+        {
+            SetColor(color);
+        }
+        public void ForceSetColor2()
+        {
+            SetColor(color2);
         }
     }
 }

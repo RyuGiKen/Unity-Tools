@@ -3380,6 +3380,105 @@ namespace RyuGiKen
     public static class ColorAdjust
     {
         /// <summary>
+        /// 颜色调整模式
+        /// </summary>
+        public enum ColorAdjustMode
+        {
+            /// <summary>
+            /// 完全颜色
+            /// </summary>
+            RGBA,
+            /// <summary>
+            /// 忽略透明度
+            /// </summary>
+            RGB,
+            /// <summary>
+            /// 红
+            /// </summary>
+            Red,
+            /// <summary>
+            /// 绿
+            /// </summary>
+            Green,
+            /// <summary>
+            /// 蓝
+            /// </summary>
+            Blue,
+            /// <summary>
+            /// 透明度
+            /// </summary>
+            Alpha,
+            /// <summary>
+            /// 色相
+            /// </summary>
+            Hue,
+            /// <summary>
+            /// 饱和度
+            /// </summary>
+            Saturation,
+            /// <summary>
+            /// 明度
+            /// </summary>
+            Value
+        }
+        /// <summary>
+        /// 调整颜色
+        /// </summary>
+        /// <param name="color">当前颜色</param>
+        /// <param name="targetColor">目标颜色</param>
+        /// <param name="mode">模式</param>
+        /// <returns></returns>
+        public static Color AdjustColor(this Color color, Color targetColor, ColorAdjustMode mode = ColorAdjustMode.RGBA)
+        {
+            Color result = color;
+            switch (mode)
+            {
+                default:
+                    switch (mode)
+                    {
+                        case ColorAdjustMode.RGBA:
+                        case ColorAdjustMode.RGB:
+                        case ColorAdjustMode.Red:
+                            result.r = targetColor.r;
+                            break;
+                    }
+                    switch (mode)
+                    {
+                        case ColorAdjustMode.RGBA:
+                        case ColorAdjustMode.RGB:
+                        case ColorAdjustMode.Green:
+                            result.g = targetColor.g;
+                            break;
+                    }
+                    switch (mode)
+                    {
+                        case ColorAdjustMode.RGBA:
+                        case ColorAdjustMode.RGB:
+                        case ColorAdjustMode.Blue:
+                            result.b = targetColor.b;
+                            break;
+                    }
+                    switch (mode)
+                    {
+                        case ColorAdjustMode.RGBA:
+                        case ColorAdjustMode.Alpha:
+                            result.a = targetColor.a;
+                            break;
+                    }
+                    break;
+                case ColorAdjustMode.Hue:
+                    result = ColorHueChange(color, targetColor.ConvertRgbToHsv().Hue);
+                    break;
+                case ColorAdjustMode.Saturation:
+                    result = ColorSaturationChange(color, targetColor.ConvertRgbToHsv().Saturation);
+                    break;
+                case ColorAdjustMode.Value:
+                    result = ColorValueChange(color, targetColor.ConvertRgbToHsv().Value);
+                    break;
+            }
+            return result;
+        }
+        /// <summary>
         /// 三维坐标转颜色
         /// </summary>
         /// <param name="value"></param>
@@ -3539,7 +3638,7 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="RGB"></param>
         /// <returns>(360，1，1，1)</returns>
-        public static HSVColor ConvertRgbToHsv(Color RGB)
+        public static HSVColor ConvertRgbToHsv(this Color RGB)
         {
             HSVColor HSV = ConvertRgbToHsv(RGB.r, RGB.g, RGB.b, RGB.a);
             return HSV;

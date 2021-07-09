@@ -72,7 +72,7 @@ namespace RyuGiKen.Tools
                 {
                     default:
                     case Space.Self:
-                        this.transform.localPosition += new Vector3(tarPos.x - this.transform.localPosition.x, tarPos.y - this.transform.localPosition.y, tarPos.z - this.transform.localPosition.z) * Time.deltaTime / maxTime;
+                        this.transform.localPosition += new Vector3((originLocalPosition + tarPos).x - this.transform.localPosition.x, (originLocalPosition + tarPos).y - this.transform.localPosition.y, (originLocalPosition + tarPos).z - this.transform.localPosition.z) * Time.deltaTime / maxTime;
                         break;
                     case Space.World:
                         this.transform.position += new Vector3((originPosition + tarPos).x - this.transform.position.x, (originPosition + tarPos).y - this.transform.position.y, (originPosition + tarPos).z - this.transform.position.z) * Time.deltaTime / maxTime;
