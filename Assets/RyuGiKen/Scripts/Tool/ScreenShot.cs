@@ -52,7 +52,7 @@ namespace RyuGiKen.Tools
         /// <param name="GameView">false时为场景视图</param>
         public static void PrintScreen(string fileName, bool GameView = true)
         {
-            if (string.IsNullOrEmpty(fileName))
+            if (string.IsNullOrWhiteSpace(fileName))
                 fileName = Application.dataPath + "/" + Application.productName;
             if (!GetFile.JudgeFileType(fileName, ".png"))
                 fileName += ".png";

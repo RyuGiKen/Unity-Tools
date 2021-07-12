@@ -59,7 +59,7 @@ namespace RyuGiKen.Tools
             for (int i = 0; i < renderers.Count; i++)
                 if (renderers[i])
                 {
-                    if (string.IsNullOrEmpty(ColorNameInShader))
+                    if (string.IsNullOrWhiteSpace(ColorNameInShader))
                         renderers[i].material.color = m_color;
                     else
                         renderers[i].material.SetColor(ColorNameInShader, m_color);
@@ -75,7 +75,7 @@ namespace RyuGiKen.Tools
             for (int i = 0; i < renderers.Count; i++)
                 if (renderers[i])
                 {
-                    if (string.IsNullOrEmpty(ColorNameInShader))
+                    if (string.IsNullOrWhiteSpace(ColorNameInShader))
                     {
                         renderers[i].material.color = ColorAdjust.AdjustColor(renderers[i].material.color, m_color, mode);
                     }

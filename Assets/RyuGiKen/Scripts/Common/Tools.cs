@@ -29,14 +29,11 @@ namespace RyuGiKen
         /// <summary>
         /// 读取配置参数
         /// </summary>
-        /// <param name="NodeName"></param>
         /// <param name="filePath">文件路径</param>
-        /// <param name="RootNodeName">根节点</param>
-        /// <param name="IgnoreCase">忽略大小写</param>
         /// <returns></returns>
         public static XmlDocument LoadXmlData(string filePath)
         {
-            if (string.IsNullOrEmpty(filePath))
+            if (string.IsNullOrWhiteSpace(filePath))
                 return null;
             XmlDocument xmlDoc = null;
             XmlReader reader = null;
@@ -66,7 +63,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string LoadXmlData(string NodeName, string filePath, string RootNodeName, bool IgnoreCase = false)
         {
-            if (string.IsNullOrEmpty(NodeName) || string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(RootNodeName))
+            if (string.IsNullOrWhiteSpace(NodeName) || string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(RootNodeName))
                 return null;
             string result = null;
             XmlReader reader = null;
@@ -105,7 +102,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string LoadXmlData(string[] NodeName, string filePath, string RootNodeName, bool IgnoreCase = false)
         {
-            if (NodeName == null || NodeName.Length < 1 || string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(RootNodeName))
+            if (NodeName == null || NodeName.Length < 1 || string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(RootNodeName))
                 return null;
             string result = null;
             XmlReader reader = null;
@@ -123,7 +120,7 @@ namespace RyuGiKen
                     {
                         foreach (string nodeName in NodeName)
                         {
-                            if (x1.Name == nodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(nodeName)))
+                            if (!string.IsNullOrWhiteSpace(nodeName) && (x1.Name == nodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(nodeName))))
                             {
                                 result = x1.InnerText;
                                 break;
@@ -310,7 +307,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static bool JudgeFileType(string name, string Type)
         {
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(Type))
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(Type))
                 return false;
             try
             {
@@ -840,7 +837,7 @@ namespace RyuGiKen
             {
                 try
                 {
-                    if (string.IsNullOrEmpty(ColorShaderName))
+                    if (string.IsNullOrWhiteSpace(ColorShaderName))
                     {
                         materials[i].color = color;
                         materials[i].SetColor("_BaseColor", color);
@@ -1539,6 +1536,26 @@ namespace RyuGiKen
             return list;
         }
         /// <summary>
+        /// 数组转列表
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static List<List<T>> ToList<T>(this T[][] array)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            List<List<T>> list = new List<List<T>>();
+            for (int i = 0; i < array.Length; i++)
+            {
+                list[i] = new List<T>();
+                if (array[i] != null)
+                    for (int j = 0; j < array[i].Length; j++)
+                        list[i].Add(array[i][j]);
+            }
+            return list;
+        }
+        /// <summary>
         /// 列表转数组
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -1551,6 +1568,24 @@ namespace RyuGiKen
             return list.ToArray();
         }
         /// <summary>
+        /// 列表转数组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static T[][] ToArray<T>(this List<List<T>> list)
+        {
+            if (list == null || list.Count < 1)
+                return null;
+            T[][] result = new T[list.Count][];
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (list[i] != null)
+                    result[i] = list[i].ToArray();
+            }
+            return result;
+        }
+        /// <summary>
         /// 数组ToString
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -1558,6 +1593,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string[] ToStrings<T>(this T[] array)
         {
+            if (array == null)
+                return null;
             string[] result = new string[array.Length];
             for (int i = 0; i < array.Length; i++)
             {
@@ -1573,6 +1610,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string[] ToStrings<T>(this List<T> list)
         {
+            if (list == null)
+                return null;
             string[] result = new string[list.Count];
             for (int i = 0; i < list.Count; i++)
             {
@@ -1762,13 +1801,63 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 数组转换
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static T[][] ConvertArray<T>(this T[,] array)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            T[][] result = new T[array.GetLength(0)][];
+            for (int i = 0; i < array.Length; i++)
+            {
+                result[i] = new T[array.GetLength(1)];
+                for (int j = 0; j < result[i].Length; j++)
+                {
+                    result[i][j] = array[i, j];
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 数组转换
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static T[,] ConvertArray<T>(this T[][] array)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            int maxLength = -1;
+            foreach (T[] item in array)
+            {
+                if (item != null && item.Length > maxLength)
+                    maxLength = item.Length;
+            }
+            if (maxLength < 1)
+                return null;
+            T[,] result = new T[array.Length, maxLength];
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] != null)
+                    for (int j = 0; j < maxLength; j++)
+                    {
+                        result[i, j] = array[i][j];
+                    }
+            }
+            return result;
+        }
+        /// <summary>
         /// 打印数组元素
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
         /// <param name="newline">换行</param>
         /// <returns></returns>
-        public static string PrintArray<T>(T[] array, bool newline = false)
+        public static string PrintArray<T>(this T[] array, bool newline = false)
         {
             if (array == null || array.Length < 1)
                 return "";
@@ -1789,16 +1878,42 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
         /// <returns></returns>
-        public static string PrintArray<T>(T[][] array)
+        public static string PrintArray<T>(this T[][] array)
         {
+            if (array == null || array.Length < 1)
+                return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                for (int j = 0; j < array[i].Length; j++)
+                if (array[i] != null)
+                    for (int j = 0; j < array[i].Length; j++)
+                    {
+                        str += "  [" + i + "][" + j + "] ";
+                        if (array[i][j] != null)
+                            str += array[i][j].ToString();
+                    }
+                str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static string PrintArray<T>(this T[,] array)
+        {
+            if (array == null || array.Length < 1)
+                return "";
+            string str = "";
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                for (int j = 0; j < array.GetLength(1); j++)
                 {
                     str += "  [" + i + "][" + j + "] ";
-                    if (array[i][j] != null)
-                        str += array[i][j].ToString();
+                    if (array[i, j] != null)
+                        str += array[i, j].ToString();
                 }
                 str += "\n";
             }
@@ -1811,8 +1926,10 @@ namespace RyuGiKen
         /// <param name="list"></param>
         /// <param name="newline">换行</param>
         /// <returns></returns>
-        public static string PrintArray<T>(List<T> list, bool newline = false)
+        public static string PrintArray<T>(this List<T> list, bool newline = false)
         {
+            if (list == null || list.Count < 1)
+                return "";
             string str = "";
             for (int i = 0; i < list.Count; i++)
             {
@@ -1830,17 +1947,20 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static string PrintArray<T>(List<List<T>> list)
+        public static string PrintArray<T>(this List<List<T>> list)
         {
+            if (list == null || list.Count < 1)
+                return "";
             string str = "";
             for (int i = 0; i < list.Count; i++)
             {
-                for (int j = 0; j < list[i].Count; j++)
-                {
-                    str += "  [" + i + "][" + j + "] ";
-                    if (list[i][j] != null)
-                        str += list[i][j].ToString();
-                }
+                if (list[i] != null)
+                    for (int j = 0; j < list[i].Count; j++)
+                    {
+                        str += "  [" + i + "][" + j + "] ";
+                        if (list[i][j] != null)
+                            str += list[i][j].ToString();
+                    }
                 str += "\n";
             }
             return str;

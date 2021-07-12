@@ -83,7 +83,7 @@ namespace RyuGiKen
 		public static string SetVersionNumber(string number)
 		{
 			string versionNumber;
-			if (string.IsNullOrEmpty(number))
+			if (string.IsNullOrWhiteSpace(number))
 				versionNumber = "";
 			else
 				versionNumber = number.Trim(' ');//移除空格

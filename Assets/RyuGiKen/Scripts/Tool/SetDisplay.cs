@@ -52,7 +52,7 @@ namespace RyuGiKen.Tools
             Debug_T.Log(" displays(显示器数)： " + Display.displays.Length + " \r\n");
 
             string xmlData = GetFile.LoadXmlData(new string[] { "UseSecondScreen", "SecondScreen" }, Application.streamingAssetsPath + "/Setting.xml", "Data", true);
-            if (!string.IsNullOrEmpty(xmlData))
+            if (!string.IsNullOrWhiteSpace(xmlData))
             {
                 UseSecondScreen = xmlData.ContainIgnoreCase("True") || xmlData == "1";
             }
