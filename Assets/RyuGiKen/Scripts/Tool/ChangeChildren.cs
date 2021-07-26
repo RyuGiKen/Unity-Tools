@@ -63,5 +63,41 @@ namespace RyuGiKen.Tools
             }
             return null;
         }
+        /// <summary>
+        /// 批量移除隐藏子对象
+        /// </summary>
+        [ContextMenu("批量移除隐藏子对象")]
+        public void DestroyInactiveChildren()
+        {
+            GameObject[] Objects = ObjectAdjust.GetChildren(this.gameObject);
+            for (int i = Objects.Length - 1; i >= 0; i--)
+            {
+                if (Objects[i] && !Objects[i].activeInHierarchy)
+                {
+                    if (Application.isPlaying)
+                        Object.Destroy(Objects[i]);
+                    else
+                        Object.DestroyImmediate(Objects[i]);
+                }
+            }
+        }
+        /// <summary>
+        /// 批量移除隐藏子孙对象
+        /// </summary>
+        [ContextMenu("批量移除隐藏子孙对象")]
+        public void DestroyInactiveDescendants()
+        {
+            GameObject[] Objects = ObjectAdjust.GetDescendants(this.gameObject);
+            for (int i = Objects.Length - 1; i >= 0; i--)
+            {
+                if (Objects[i] && !Objects[i].activeInHierarchy)
+                {
+                    if (Application.isPlaying)
+                        Object.Destroy(Objects[i]);
+                    else
+                        Object.DestroyImmediate(Objects[i]);
+                }
+            }
+        }
     }
 }
