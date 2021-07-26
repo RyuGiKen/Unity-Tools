@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace RyuGiKen.Tools
@@ -53,9 +54,10 @@ namespace RyuGiKen.Tools
         public static void PrintScreen(string fileName, bool GameView = true)
         {
             if (string.IsNullOrWhiteSpace(fileName))
-                fileName = Application.dataPath + "/" + Application.productName;
+                fileName = Application.productName + "_" + DateTime.Now.ToString().Replace(":", "_").Replace("/", "_").Replace("\\", "_");
             if (!GetFile.JudgeFileType(fileName, ".png"))
                 fileName += ".png";
+
             if (GameView)
             {
                 ScreenCapture.CaptureScreenshot(fileName);
