@@ -1383,6 +1383,74 @@ namespace RyuGiKen
             }
             return result.ToArray();
         }
+        /// <summary>
+        /// 排除指定项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="exclude"></param>
+        /// <returns></returns>
+        public static T[] Remove<T>(this T[] array, T[] exclude)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            if (exclude == null)
+                return array;
+            List<T> result = new List<T>();
+            for (int i = 0; i < array.Length; i++)
+            {
+                bool Repeating = false;
+                for (int j = 0; j < exclude.Length; j++)
+                {
+                    if (array is Object[])
+                    {
+                        if ((array[i] as Object) == (exclude[j] as Object))
+                        {
+                            Repeating = true;
+                            break;
+                        }
+                    }
+                    else if (array[i].Equals(exclude[j]))
+                    {
+                        Repeating = true;
+                        break;
+                    }
+                }
+                if (!Repeating)
+                    result.Add(array[i]);
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 排除指定项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="exclude"></param>
+        /// <returns></returns>
+        public static T[] Remove<T>(this T[] array, T exclude)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            if (exclude == null)
+                return array;
+            List<T> result = new List<T>();
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array is Object[])
+                {
+                    if ((array[i] as Object) != (exclude as Object))
+                    {
+                        result.Add(array[i]);
+                    }
+                }
+                else if (!array[i].Equals(exclude))
+                {
+                    result.Add(array[i]);
+                }
+            }
+            return result.ToArray();
+        }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 清空空项

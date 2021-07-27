@@ -11,6 +11,14 @@ namespace RyuGiKen.Tools
     [RequireComponent(typeof(AudioSource))]
     public class MusicRandomPlay : MonoBehaviour
     {
+        public enum PlayType
+        {
+            AutoRandomPlay,
+            StartRandomPlayOnce,
+            StartRandomLoopPlay,
+            SecondRandomPlay
+        }
+        public PlayType playType;
         public AudioSource audioSource;
         public AudioClip[] otherClip;
         [Tooltip("切换键")] public KeyCode switchKey = KeyCode.PageDown;
@@ -21,29 +29,71 @@ namespace RyuGiKen.Tools
         private void Reset()
         {
             audioSource = GetComponent<AudioSource>();
+            if (audioSource)
+                audioSource.loop = false;
+            otherClip = otherClip.ClearNullItem();
         }
         private void OnEnable()
         {
-            Switch();
+            switch (playType)
+            {
+                case PlayType.AutoRandomPlay:
+                case PlayType.StartRandomPlayOnce:
+                case PlayType.StartRandomLoopPlay:
+                    SwitchAndPlay();
+                    break;
+                case PlayType.SecondRandomPlay:
+                    if (audioSource && audioSource.clip)
+                        audioSource.Play();
+                    else
+                        SwitchAndPlay();
+                    break;
+            }
         }
         void Update()
         {
-            if (audioSource != null && (!audioSource.isPlaying || Input.GetKeyDown(switchKey)))//切换音乐
+            if (audioSource)
             {
-                Switch();
+                if (Input.GetKeyDown(switchKey))
+                {
+                    SwitchAndPlay();
+                    return;
+                }
+                if (!audioSource.isPlaying)
+                {
+                    switch (playType)
+                    {
+                        case PlayType.AutoRandomPlay:
+                        case PlayType.SecondRandomPlay:
+                            SwitchAndPlay();
+                            break;
+                        case PlayType.StartRandomPlayOnce:
+                            break;
+                        case PlayType.StartRandomLoopPlay:
+                            audioSource?.Play();
+                            break;
+                    }
+                }
             }
         }
         /// <summary>
         /// 切换音乐
         /// </summary>
-        [ContextMenu("切换音乐")]
         public void Switch()
         {
             if (otherClip.Length > 0)
             {
-                audioSource.clip = otherClip.GetRandomItem(true);
-                audioSource.Play();
+                audioSource.clip = otherClip.Remove(audioSource.clip).GetRandomItem(true);
             }
+        }
+        /// <summary>
+        /// 切换音乐并播放
+        /// </summary>
+        [ContextMenu("切换音乐")]
+        public void SwitchAndPlay()
+        {
+            Switch();
+            audioSource?.Play();
         }
     }
 }
