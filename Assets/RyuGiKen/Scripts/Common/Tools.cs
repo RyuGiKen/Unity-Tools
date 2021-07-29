@@ -1193,6 +1193,49 @@ namespace RyuGiKen
             LocalEulerAngles.y = Mathf.Atan2(LocalDirection.x, LocalDirection.z) / Mathf.PI * 180;
             return LocalEulerAngles;
         }
+        /// <summary>
+        /// 方向转旋转
+        /// </summary>
+        /// <param name="direction">方向</param>
+        /// <returns></returns>
+        public static Quaternion DirectionToRotation(this Vector3 direction)
+        {
+            //return Quaternion.FromToRotation(Vector3.forward, direction);
+            return Quaternion.LookRotation(direction);
+        }
+        /// <summary>
+        /// 旋转转方向
+        /// </summary>
+        /// <param name="rotation">旋转</param>
+        /// <returns></returns>
+        public static Vector3 RotationToDirection(this Quaternion rotation)
+        {
+            return rotation * Vector3.forward;
+            //Vector3 Angle = rotation.eulerAngles;
+            //return Quaternion.AngleAxis(Angle.x, Vector3.right) * Quaternion.AngleAxis(Angle.y, Vector3.up) * Vector3.forward;
+        }
+        /// <summary>
+        /// 直线旋转球形插值
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="t">[0,1]</param>
+        /// <returns></returns>
+        public static Quaternion Slerp(Quaternion a, Quaternion b, float t)
+        {
+            return Vector3.Slerp(a.RotationToDirection(), b.RotationToDirection(), t).DirectionToRotation();
+        }
+        /// <summary>
+        /// 直线旋转球形插值
+        /// </summary>
+        /// <param name="a">欧拉角</param>
+        /// <param name="b">欧拉角</param>
+        /// <param name="t">[0,1]</param>
+        /// <returns>欧拉角</returns>
+        public static Vector3 Slerp(Vector3 a, Vector3 b, float t)
+        {
+            return ValueAdjust.Slerp(Quaternion.Euler(a), Quaternion.Euler(b), t).eulerAngles;
+        }
 #endif
         /// <summary>
         /// 二维坐标数组批量设置单轴值
