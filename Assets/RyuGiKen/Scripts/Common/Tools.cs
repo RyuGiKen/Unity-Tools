@@ -2506,6 +2506,132 @@ namespace RyuGiKen
             //return Math.Abs((int)Num).ToString().Length * (Num < 0 ? -1 : 1);
         }
         /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(int A, int B, out int min, out int max)
+        {
+            min = Math.Min(A, B);
+            max = Math.Max(A, B);
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(float A, float B, out float min, out float max)
+        {
+            min = Math.Min(A, B);
+            max = Math.Max(A, B);
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(double A, double B, out double min, out double max)
+        {
+            min = Math.Min(A, B);
+            max = Math.Max(A, B);
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(float[] array, out float min, out float max)
+        {
+            min = float.MinValue;
+            max = float.MaxValue;
+            if (array == null || array.Length < 1)
+            {
+                min = max = float.NaN;
+                return;
+            }
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] < min)
+                    min = array[i];
+                if (array[i] > max)
+                    max = array[i];
+            }
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(List<float> list, out float min, out float max)
+        {
+
+            if (list == null || list.Count < 1)
+            {
+                min = max = float.NaN;
+                return;
+            }
+            else
+            {
+                min = float.MinValue;
+                max = float.MaxValue;
+            }
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] < min)
+                    min = list[i];
+                if (list[i] > max)
+                    max = list[i];
+            }
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="array"></param>
+        public static Vector2 FindMinAndMax(float[] array)
+        {
+            Vector2 result;
+            if (array == null || array.Length < 1)
+                return new Vector2(float.NaN, float.NaN);
+            else
+                result = new Vector2(float.MinValue, float.MaxValue);
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] < result.x)
+                    result.x = array[i];
+                if (array[i] > result.y)
+                    result.y = array[i];
+            }
+            return result;
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="list"></param>
+        public static Vector2 FindMinAndMax(List<float> list)
+        {
+            Vector2 result;
+            if (list == null || list.Count < 1)
+                return new Vector2(float.NaN, float.NaN);
+            else
+                result = new Vector2(float.MinValue, float.MaxValue);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] < result.x)
+                    result.x = list[i];
+                if (list[i] > result.y)
+                    result.y = list[i];
+            }
+            return result;
+        }
+        /// <summary>
         /// 判定是否在范围内
         /// </summary>
         /// <param name="CurrentValue">当前值</param>
@@ -4065,96 +4191,6 @@ namespace RyuGiKen
             IPHostEntry hostEntry = Dns.GetHostEntry(domain);
             IPEndPoint ipEndPoint = new IPEndPoint(hostEntry.AddressList[0], 0);
             return ipEndPoint.Address;
-        }
-    }
-    /// <summary>
-    /// 屏幕键盘
-    /// </summary>
-    public static class VirtualKeyboard
-    {
-
-        private const uint WM_SYSCOMMAND = 274;
-        private const int SC_CLOSE = 61536;
-        private static Process ExternalCall(string filename, string arguments, bool hideWindow)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = filename;
-            startInfo.Arguments = arguments;
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            if (hideWindow)
-            {
-                startInfo.RedirectStandardOutput = true;
-                startInfo.RedirectStandardError = true;
-                startInfo.UseShellExecute = false;
-                startInfo.CreateNoWindow = true;
-            }
-            Process process = new Process();
-            process.StartInfo = startInfo;
-            process.Start();
-            return process;
-        }
-        /// <summary>
-        /// 识别系统打开虚拟键盘
-        /// </summary>
-        public static void OpenKeyboard()
-        {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-            try
-            {
-                if (System.IO.File.Exists("C:\\Program Files\\Common Files\\Microsoft Shared\\ink\\TabTip.exe")
-                    //&& FindWindow("IPTip_Main_Window", null) != IntPtr.Zero 
-                    && SystemInfo.processorType.IndexOf("Atom", StringComparison.OrdinalIgnoreCase) < 0)//测试发现CPU为Atom型号的Win10平板有TabTip.exe但没成功实现切换，因此排除
-                {
-                    OpenTabTip();
-                }
-                else
-                {
-                    OpenOSK();
-                }
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogError(e);
-            }
-#endif
-        }
-        /// <summary>
-        /// 打开旧版屏幕键盘Osk.exe
-        /// </summary>
-        public static void OpenOSK()
-        {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-            Process.Start("C:\\Windows\\System32\\osk.exe");
-#endif
-        }
-        /// <summary>
-        /// 打开屏幕键盘TabTip.exe
-        /// </summary>
-        public static void OpenTabTip()
-        {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-            //HideTabTip();
-            ExternalCall("C:\\Program Files\\Common Files\\Microsoft Shared\\ink\\TabTip.exe", null, false);
-#endif
-        }
-        /// <summary>
-        /// 隐藏屏幕键盘TabTip.exe
-        /// </summary>
-        public static void HideTabTip()
-        {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-            try
-            {
-                IntPtr ptr = WindowsAPI.User32.FindWindow("IPTip_Main_Window", null);
-                if (ptr == IntPtr.Zero)
-                    return;
-                WindowsAPI.User32.PostMessage(ptr, WM_SYSCOMMAND, SC_CLOSE, 0);
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.Log(e);
-            }
-#endif
         }
     }
 }

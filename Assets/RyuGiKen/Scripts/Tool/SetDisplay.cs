@@ -2,12 +2,7 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Windows;
-using System.Xml;
-using WindowsAPI;
-using RyuGiKen;
 namespace RyuGiKen.Tools
 {
     /// <summary>

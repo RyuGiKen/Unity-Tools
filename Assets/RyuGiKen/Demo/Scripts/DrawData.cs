@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Threading;
-using RyuGiKen;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -133,6 +132,8 @@ namespace RyuGiKen.Tools
         /// </summary>
         void ClampDataCount()
         {
+            if (RecordData == null)
+                RecordData = new List<float>();
             if (RecordData.Count > MaxRecord)
             {
                 RecordData.RemoveRange(0, RecordData.Count - MaxRecord);

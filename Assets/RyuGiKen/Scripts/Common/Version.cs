@@ -15,17 +15,17 @@ namespace RyuGiKen
 		/// <summary>
 		/// 版本号位数
 		/// </summary>
-		const int Length = 2;
+		const int Length = 3;
 		public static int VersionLength { get { return Length < 1 ? 1 : Length; } }
 		/// <summary>
 		/// 测试版标识
 		/// </summary>
-		public const string DebugSign = "beta";
+		public const string DebugSign = "b";
 		/// <summary>
 		/// 发布版标识
 		/// </summary>
 		public const string ReleaseSign = "v";
-		public const VersionSignType SignType = VersionSignType.SamePrefixAndOnlyDebugPostfix;
+		public const VersionSignType SignType = VersionSignType.SamePrefix;
 		/// <summary>
 		/// 版本号标识
 		/// </summary>
