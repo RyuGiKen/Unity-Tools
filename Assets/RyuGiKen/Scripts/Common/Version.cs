@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-namespace RyuGiKen
+namespace RyuGiKen.Tools
 {
 	/// <summary>
 	/// 版本号格式限制
@@ -15,17 +15,20 @@ namespace RyuGiKen
 		/// <summary>
 		/// 版本号位数
 		/// </summary>
-		const int Length = 3;
-		public static int VersionLength { get { return Length < 1 ? 1 : Length; } }
+		public static int VersionLength { get { return Style.Length.Clamp(1); } }
+		/// <summary>
+		/// 版本号样式
+		/// </summary>
+		static readonly string[] Style = { "D1", "D1" };
 		/// <summary>
 		/// 测试版标识
 		/// </summary>
-		public const string DebugSign = "b";
+		public const string DebugSign = " beta";
 		/// <summary>
 		/// 发布版标识
 		/// </summary>
 		public const string ReleaseSign = "v";
-		public const VersionSignType SignType = VersionSignType.SamePrefix;
+		public const VersionSignType SignType = VersionSignType.SamePrefixAndOnlyDebugPostfix;
 		/// <summary>
 		/// 版本号标识
 		/// </summary>
@@ -154,10 +157,27 @@ namespace RyuGiKen
 			}
 			for (int i = 0; i < ver.Length; i++)
 			{
-				if (i == 0) //第一位
-					versionNumber += ver[0];
+				string style;
+				if (Style == null || Style.Length < 1)
+				{
+					style = "D0";
+				}
+				else if (i >= Style.Length)
+				{
+					style = Style[Style.Length - 1];
+				}
 				else
-					versionNumber += "." + ver[i];
+				{
+					style = Style[i];
+				}
+				if (i == 0) //第一位
+				{
+					versionNumber += ver[0].ToString(style);
+				}
+				else
+				{
+					versionNumber += "." + ver[i].ToString(style);
+				}
 			}
 			switch (SignType)//后缀
 			{
