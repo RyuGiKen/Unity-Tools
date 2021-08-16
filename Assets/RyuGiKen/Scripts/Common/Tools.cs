@@ -2378,11 +2378,53 @@ namespace RyuGiKen
         /// 转整数
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
         public static int ToInteger(this float num)
         {
             return (int)Round(num);
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static int ToInteger(this double num)
+        {
+            return (int)Round(num);
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static int[] ToInteger(this float[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            int[] result = new int[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static int[] ToInteger(this double[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            int[] result = new int[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger();
+            }
+            return result;
         }
         /// <summary>
         /// 取绝对值
@@ -2828,6 +2870,16 @@ namespace RyuGiKen
             return (float)Math.Round(value, digits);
             //return (float)(Math.Round(value * Math.Pow(10, digits)) * Math.Pow(0.1f, digits));
             //return float.Parse(value.ToString("f" + digits));
+        }
+        /// <summary>
+        /// 精确到小数点后几位（值，位数）
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="digits">位数</param>
+        /// <returns></returns>
+        public static double Round(this double value, int digits = 0)
+        {
+            return Math.Round(value, digits);
         }
         /// <summary>
         /// 精确到小数点后几位（值，位数）
