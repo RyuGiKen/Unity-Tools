@@ -2505,6 +2505,26 @@ namespace RyuGiKen
         public static float Clamp(this float value, float min, float max)
         {
             float result = 0;
+            if (min > max)
+                ValueAdjust.Exchange(min, max, out min, out max);
+            if (value < min)
+                result = min;
+            else if (value > max)
+                result = max;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static double Clamp(this double value, double min, double max)
+        {
+            double result = 0;
+            if (min > max)
+                ValueAdjust.Exchange(min, max, out min, out max);
             if (value < min)
                 result = min;
             else if (value > max)
@@ -2521,10 +2541,30 @@ namespace RyuGiKen
         public static int Clamp(this int value, int min, int max)
         {
             int result = 0;
+            if (min > max)
+                ValueAdjust.Exchange(min, max, out min, out max);
             if (value < min)
                 result = min;
             else if (value > max)
                 result = max;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int Clamp(this int value, float min, float max)
+        {
+            int result = 0;
+            if (min > max)
+                ValueAdjust.Exchange(min, max, out min, out max);
+            if (value < min)
+                result = Mathf.CeilToInt(min);
+            else if (value > max)
+                result = Mathf.FloorToInt(max);
             else
                 result = value;
             return result;
