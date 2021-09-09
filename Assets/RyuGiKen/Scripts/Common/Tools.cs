@@ -2351,6 +2351,103 @@ namespace RyuGiKen
             return (float)Math.Sqrt(Math.Abs((X + b) / k));
         }
         /// <summary>
+        /// 是否非数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static bool IsNaN(this float num)
+        {
+            return float.IsNaN(num);
+        }
+        /// <summary>
+        /// 是否非数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static bool IsNaN(this double num)
+        {
+            return double.IsNaN(num);
+        }
+        /// <summary>
+        /// 字符串转浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static float ToDouble(this string num, float FailValue = 0)
+        {
+            float result = FailValue;
+            float.TryParse(num, out result);
+            return result;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double ToDouble(this int num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double ToDouble(this float num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 字符串转浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static double[] ToDouble(this string[] num, float FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            double[] result = new double[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDouble(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double[] ToDouble(this int[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            double[] result = new double[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i];
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转双精度浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double[] ToDouble(this float[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            double[] result = new double[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i];
+            }
+            return result;
+        }
+        /// <summary>
         /// 字符串转浮点数，失败为0
         /// </summary>
         /// <param name="num"></param>
@@ -2360,6 +2457,81 @@ namespace RyuGiKen
         {
             float result = FailValue;
             float.TryParse(num, out result);
+            return result;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float ToFloat(this int num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转单精度浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static float ToFloat(this double num, float FailValue = 0)
+        {
+            float result = FailValue;
+            try
+            {
+                result = (float)num;
+            }
+            catch { }
+            return result;
+        }
+        /// <summary>
+        /// 字符串转浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static float[] ToFloat(this string[] num, float FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            float[] result = new float[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToFloat(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float[] ToFloat(this int[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            float[] result = new float[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i];
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转单精度浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static float[] ToFloat(this double[] num, float FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            float[] result = new float[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToFloat(FailValue);
+            }
             return result;
         }
         /// <summary>
@@ -2378,19 +2550,11 @@ namespace RyuGiKen
         /// 转整数
         /// </summary>
         /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
-        public static int ToInteger(this float num)
+        public static int ToInteger(this float num, int FailValue = 0)
         {
-            return (int)Round(num);
-        }
-        /// <summary>
-        /// 转整数
-        /// </summary>
-        /// <param name="num"></param>
-        /// <returns></returns>
-        public static int ToInteger(this double num)
-        {
-            return (int)Round(num);
+            return float.IsNaN(num) ? FailValue : (int)Round(num);
         }
         /// <summary>
         /// 转整数
@@ -2398,14 +2562,24 @@ namespace RyuGiKen
         /// <param name="num"></param>
         /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
-        public static int[] ToInteger(this float[] num)
+        public static int ToInteger(this double num, int FailValue = 0)
+        {
+            return double.IsNaN(num) ? FailValue : (int)Round(num);
+        }
+        /// <summary>
+        /// 字符串转整数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static int[] ToInteger(this string[] num, int FailValue = 0)
         {
             if (num == null || num.Length < 1)
                 return null;
             int[] result = new int[num.Length];
             for (int i = 0; i < num.Length; i++)
             {
-                result[i] = num[i].ToInteger();
+                result[i] = num[i].ToInteger(FailValue);
             }
             return result;
         }
@@ -2415,14 +2589,31 @@ namespace RyuGiKen
         /// <param name="num"></param>
         /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
-        public static int[] ToInteger(this double[] num)
+        public static int[] ToInteger(this float[] num, int FailValue = 0)
         {
             if (num == null || num.Length < 1)
                 return null;
             int[] result = new int[num.Length];
             for (int i = 0; i < num.Length; i++)
             {
-                result[i] = num[i].ToInteger();
+                result[i] = num[i].ToInteger(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static int[] ToInteger(this double[] num, int FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            int[] result = new int[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger(FailValue);
             }
             return result;
         }
@@ -3254,6 +3445,17 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="valueA">输入A值</param>
         /// <param name="valueB">输入B值</param>
+        public static void Exchange<T>(ref T valueA, ref T valueB)
+        {
+            T temp = valueB;
+            valueB = valueA;
+            valueA = temp;
+        }
+        /// <summary>
+        /// 交换AB值
+        /// </summary>
+        /// <param name="valueA">输入A值</param>
+        /// <param name="valueB">输入B值</param>
         /// <param name="outputA">输出A值</param>
         /// <param name="outputB">输出B值</param>
         public static void Exchange<T>(T valueA, T valueB, out T outputA, out T outputB)
@@ -3329,7 +3531,6 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector2 GetAverage(this Vector2[] array, int startIndex = -1, int endIndex = -1)
         {
-            Vector2 Max = new Vector2();
             return ToVector2(GetAverage(ToVector3(array), startIndex, endIndex));
         }
         /// <summary>
@@ -3363,6 +3564,199 @@ namespace RyuGiKen
             return Max * 1f / (endIndex + 1 - startIndex);
         }
 #endif
+        /// <summary>
+        /// 按权重映射
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static float[] ToWeight(this int[] array)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            float sum = 0;
+            float[] result = new float[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] > 0)
+                    sum += array[i];
+            }
+            for (int i = 0; i < array.Length; i++)
+            {
+                result[i] = (array[i] > 0 ? array[i] : 0) / sum;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 按权重映射
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static List<float> ToWeight(this List<int> list)
+        {
+            return ToWeight(list.ToArray()).ToList();
+        }
+        /// <summary>
+        /// 按权重映射
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static float[] ToWeight(this float[] array)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            float sum = 0;
+            float[] result = new float[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] > 0)
+                    sum += array[i];
+            }
+            for (int i = 0; i < array.Length; i++)
+            {
+                result[i] = (array[i] > 0 ? array[i] : 0) / sum;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 按权重映射
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static List<float> ToWeight(this List<float> list)
+        {
+            return ToWeight(list.ToArray()).ToList();
+        }
+        /// <summary>
+        /// 按权重映射
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static double[] ToWeight(this double[] array)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            double sum = 0;
+            double[] result = new double[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] > 0)
+                    sum += array[i];
+            }
+            for (int i = 0; i < array.Length; i++)
+            {
+                result[i] = (array[i] > 0 ? array[i] : 0) / sum;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 按权重映射
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static List<double> ToWeight(this List<double> list)
+        {
+            return ToWeight(list.ToArray()).ToList();
+        }
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static int Sum(this int[] array)
+        {
+            if (array == null || array.Length < 1)
+                return 0;
+            int sum = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                sum += array[i];
+            }
+            return sum;
+        }
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static int Sum(this List<int> list)
+        {
+            if (list == null || list.Count < 1)
+                return 0;
+            int sum = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                sum += list[i];
+            }
+            return sum;
+        }
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static float Sum(this float[] array)
+        {
+            if (array == null || array.Length < 1)
+                return float.NaN;
+            float sum = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (!float.IsNaN(array[i]))
+                    sum += array[i];
+            }
+            return sum;
+        }
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static float Sum(this List<float> list)
+        {
+            if (list == null || list.Count < 1)
+                return float.NaN;
+            float sum = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!float.IsNaN(list[i]))
+                    sum += list[i];
+            }
+            return sum;
+        }
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static double Sum(this double[] array)
+        {
+            if (array == null || array.Length < 1)
+                return double.NaN;
+            double sum = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (!double.IsNaN(array[i]))
+                    sum += array[i];
+            }
+            return sum;
+        }
+        /// <summary>
+        /// 求和
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static double Sum(this List<double> list)
+        {
+            if (list == null || list.Count < 1)
+                return double.NaN;
+            double sum = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!double.IsNaN(list[i]))
+                    sum += list[i];
+            }
+            return sum;
+        }
         /// <summary>
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
