@@ -2248,12 +2248,43 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float Lerp(float A, float B, float step, float NormalSpeed = 1f, float PlusSpeed = 1f, float setSpeedRange = 0)
         {
-            if (NormalSpeed == 0 || step == 0)
+            if (NormalSpeed == 0 || step == 0 || A.IsNaN() || B.IsNaN() || step.IsNaN() || NormalSpeed.IsNaN())
                 return A;
             float speed = Math.Abs(NormalSpeed);
             if (setSpeedRange != 0)
             {
-                if (PlusSpeed == 0)
+                if (PlusSpeed == 0 || PlusSpeed.IsNaN())
+                    PlusSpeed = speed;
+                setSpeedRange = Math.Abs(setSpeedRange) * 0.5f;
+                if (A > B + setSpeedRange || A < B - setSpeedRange)
+                    speed = Math.Abs(PlusSpeed);
+            }
+            if (A > B + speed * step)
+                A -= speed * step;
+            else if (A < B - speed * step)
+                A += speed * step;
+            else
+                A = B;
+            return A;
+        }
+        /// <summary>
+        ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s，超出差值范围时的速度/s，差值范围）
+        /// </summary>
+        /// <param name="A">当前值</param>
+        /// <param name="B">目标值</param>
+        /// <param name="step">步长(Time.deltaTime或Time.unscaledDeltaTime)</param>
+        /// <param name="NormalSpeed">速度/s</param>
+        /// <param name="PlusSpeed ">超出差值范围时的速度/s</param>
+        /// <param name="setSpeedRange">差值范围</param>
+        /// <returns></returns>
+        public static double Lerp(double A, double B, double step, double NormalSpeed = 1f, double PlusSpeed = 1f, double setSpeedRange = 0)
+        {
+            if (NormalSpeed == 0 || step == 0 || A.IsNaN() || B.IsNaN() || step.IsNaN() || NormalSpeed.IsNaN())
+                return A;
+            double speed = Math.Abs(NormalSpeed);
+            if (setSpeedRange != 0)
+            {
+                if (PlusSpeed == 0 || PlusSpeed.IsNaN())
                     PlusSpeed = speed;
                 setSpeedRange = Math.Abs(setSpeedRange) * 0.5f;
                 if (A > B + setSpeedRange || A < B - setSpeedRange)
@@ -2661,6 +2692,22 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 限位。返回[0，1]
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static double Clamp(double value)
+        {
+            double result = 0;
+            if (value < 0)
+                result = 0;
+            else if (value > 1)
+                result = 1;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
         /// 限位。返回不小于min的值
         /// </summary>
         /// <param name="value"></param>
@@ -2668,6 +2715,20 @@ namespace RyuGiKen
         public static float Clamp(this float value, float min)
         {
             float result = 0;
+            if (value < min)
+                result = min;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static double Clamp(this double value, double min)
+        {
+            double result = 0;
             if (value < min)
                 result = min;
             else
@@ -2908,23 +2969,35 @@ namespace RyuGiKen
         /// 判定是否在范围内
         /// </summary>
         /// <param name="CurrentValue">当前值</param>
-        /// <param name="MinValue"></param>
-        /// <param name="MaxValue"></param>
+        /// <param name="MinValue">最小值</param>
+        /// <param name="MaxValue">最大值</param>
         /// <returns></returns>
         public static bool InRange(this float CurrentValue, float MinValue, float MaxValue)
         {
+            if (CurrentValue.IsNaN() || MinValue.IsNaN() || MaxValue.IsNaN())
+                return false;
             if (MinValue > MaxValue)
             {
                 Exchange(MinValue, MaxValue, out MinValue, out MaxValue);
             }
-            if (CurrentValue >= MinValue && CurrentValue <= MaxValue)
-            {
-                return true;
-            }
-            else
-            {
+            return CurrentValue >= MinValue && CurrentValue <= MaxValue;
+        }
+        /// <summary>
+        /// 判定是否在范围内
+        /// </summary>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="MinValue">最小值</param>
+        /// <param name="MaxValue">最大值</param>
+        /// <returns></returns>
+        public static bool InRange(this double CurrentValue, double MinValue, double MaxValue)
+        {
+            if (CurrentValue.IsNaN() || MinValue.IsNaN() || MaxValue.IsNaN())
                 return false;
+            if (MinValue > MaxValue)
+            {
+                Exchange(MinValue, MaxValue, out MinValue, out MaxValue);
             }
+            return CurrentValue >= MinValue && CurrentValue <= MaxValue;
         }
         /// <summary>
         /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
@@ -2935,16 +3008,28 @@ namespace RyuGiKen
         /// <returns></returns>
         public static bool JudgeRange(this float CurrentValue, float TargetValue, float ErrorRange)
         {
+            if (CurrentValue.IsNaN() || TargetValue.IsNaN() || ErrorRange.IsNaN())
+                return false;
             if (ErrorRange < 0)
                 ErrorRange = -ErrorRange;
-            if (CurrentValue >= (TargetValue - ErrorRange * 0.5f) && CurrentValue <= (TargetValue + ErrorRange * 0.5f))
-            {
-                return true;
-            }
-            else
-            {
+
+            return CurrentValue >= (TargetValue - ErrorRange * 0.5f) && CurrentValue <= (TargetValue + ErrorRange * 0.5f);
+        }
+        /// <summary>
+        /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
+        /// </summary>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="TargetValue">目标值</param>
+        /// <param name="ErrorRange">误差范围</param>
+        /// <returns></returns>
+        public static bool JudgeRange(this double CurrentValue, double TargetValue, double ErrorRange)
+        {
+            if (CurrentValue.IsNaN() || TargetValue.IsNaN() || ErrorRange.IsNaN())
                 return false;
-            }
+            if (ErrorRange < 0)
+                ErrorRange = -ErrorRange;
+
+            return CurrentValue >= (TargetValue - ErrorRange * 0.5f) && CurrentValue <= (TargetValue + ErrorRange * 0.5f);
         }
         /// <summary>
         /// 判定是否在一定误差范围内约等于目标值（当前值，目标值，误差范围）
@@ -3862,7 +3947,7 @@ namespace RyuGiKen
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
         /// <returns></returns>
-        public static float MappingRange(float value, Vector2 range, Vector2 OutputRange, float n = 1, bool limit = true)
+        public static float MappingRange(float value, Vector2 range, Vector2 OutputRange, int n = 1, bool limit = true)
         {
             return MappingRange(value, range.x, range.y, OutputRange.x, OutputRange.y, n, limit);
         }
@@ -3878,11 +3963,13 @@ namespace RyuGiKen
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
         /// <returns></returns>
-        public static float MappingRange(float value, float min, float max, float OutputMin, float OutputMax, float n = 1, bool limit = true)
+        public static float MappingRange(float value, float min, float max, float OutputMin, float OutputMax, int n = 1, bool limit = true)
         {
             float result, percent;
-            if (min == max) { return min; }
-            if (OutputMin == OutputMax) { return OutputMin; }
+            if (float.IsNaN(value) || float.IsNaN(min) || float.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
+            if (float.IsNaN(OutputMin) || float.IsNaN(OutputMax))
+                return float.NaN;
             if (min > max)
             {
                 ValueAdjust.Exchange(min, max, out min, out max);
@@ -3906,6 +3993,118 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">参数最小值</param>
+        /// <param name="max">参数最大值</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static double MappingRange(double value, double min, double max, double OutputMin, double OutputMax, int n = 1, bool limit = true)
+        {
+            double result, percent;
+            if (double.IsNaN(value) || double.IsNaN(min) || double.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
+            if (double.IsNaN(OutputMin) || double.IsNaN(OutputMax))
+                return double.NaN;
+            if (min > max)
+            {
+                ValueAdjust.Exchange(min, max, out min, out max);
+            }
+            if (OutputMin > OutputMax)
+            {
+                ValueAdjust.Exchange(OutputMin, OutputMax, out OutputMin, out OutputMax);
+            }
+            if (n < 0)
+            {
+                percent = (value - max) * 1f / (min - max);//输出[1,0]
+            }
+            else
+            {
+                percent = (value - min) * 1f / (max - min);//输出[0,1]
+            }
+            if (limit)
+                result = ValueAdjust.Clamp(percent) * (OutputMax - OutputMin) + OutputMin;
+            else
+                result = percent * (OutputMax - OutputMin) + OutputMin;
+            return result;
+        }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">参数最小值</param>
+        /// <param name="max">参数最大值</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static Vector2 MappingRange(float value, float min, float max, Vector2 OutputMin, Vector2 OutputMax, int n = 1, bool limit = true)
+        {
+            Vector2 result;
+            float percent;
+            if (float.IsNaN(value) || float.IsNaN(min) || float.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
+            if (min > max)
+            {
+                ValueAdjust.Exchange(min, max, out min, out max);
+            }
+            if (n < 0)
+            {
+                percent = (value - max) * 1f / (min - max);//输出[1,0]
+            }
+            else
+            {
+                percent = (value - min) * 1f / (max - min);//输出[0,1]
+            }
+            if (limit)
+                result = ValueAdjust.Clamp(percent) * (OutputMax - OutputMin) + OutputMin;
+            else
+                result = percent * (OutputMax - OutputMin) + OutputMin;
+            return result;
+        }
+        /// <summary>
+        /// 映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">参数最小值</param>
+        /// <param name="max">参数最大值</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static Vector3 MappingRange(float value, float min, float max, Vector3 OutputMin, Vector3 OutputMax, int n = 1, bool limit = true)
+        {
+            Vector3 result;
+            float percent;
+            if (float.IsNaN(value) || float.IsNaN(min) || float.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
+            if (min > max)
+            {
+                ValueAdjust.Exchange(min, max, out min, out max);
+            }
+            if (n < 0)
+            {
+                percent = (value - max) * 1f / (min - max);//输出[1,0]
+            }
+            else
+            {
+                percent = (value - min) * 1f / (max - min);//输出[0,1]
+            }
+            if (limit)
+                result = ValueAdjust.Clamp(percent) * (OutputMax - OutputMin) + OutputMin;
+            else
+                result = percent * (OutputMax - OutputMin) + OutputMin;
+            return result;
+        }
+#endif
+        /// <summary>
         /// 不对称范围映射
         /// </summary>
         /// <param name="value">参数</param>
@@ -3918,10 +4117,65 @@ namespace RyuGiKen
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
         /// <returns></returns>
-        public static float MappingAsymmetryRange(float value, float min, float middle, float max, float OutputMin, float OutputMiddle, float OutputMax, float n = 1, bool limit = true)
+        public static float MappingAsymmetryRange(float value, float min, float middle, float max, float OutputMin, float OutputMiddle, float OutputMax, int n = 1, bool limit = true)
         {
-            if (min == max) { return min; }
-            if (OutputMin == OutputMax) { return OutputMin; }
+            if (float.IsNaN(value) || float.IsNaN(min) || float.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
+            if (float.IsNaN(OutputMin) || float.IsNaN(OutputMax))
+                return float.NaN;
+            if (min > max)
+            {
+                ValueAdjust.Exchange(min, max, out min, out max);
+            }
+            if (OutputMin > OutputMax)
+            {
+                ValueAdjust.Exchange(OutputMin, OutputMax, out OutputMin, out OutputMax);
+            }
+            middle = ValueAdjust.Clamp(middle, min, max);
+            OutputMiddle = ValueAdjust.Clamp(OutputMiddle, OutputMin, OutputMax);
+            if (limit)
+            {
+                if (value >= max)
+                    return n < 0 ? OutputMin : OutputMax;
+                else if (value <= min)
+                    return n < 0 ? OutputMax : OutputMin;
+            }
+            if (value == middle)
+                return OutputMiddle;
+            else if (value < middle)
+            {
+                if (n < 0)
+                    return MappingRange(value, min, middle, OutputMiddle, OutputMax, n, limit);
+                else
+                    return MappingRange(value, min, middle, OutputMin, OutputMiddle, n, limit);
+            }
+            else
+            {
+                if (n < 0)
+                    return MappingRange(value, middle, max, OutputMin, OutputMiddle, n, limit);
+                else
+                    return MappingRange(value, middle, max, OutputMiddle, OutputMax, n, limit);
+            }
+        }
+        /// <summary>
+        /// 不对称范围映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">参数最小值</param>
+        /// <param name="middle">参数中间值</param>
+        /// <param name="max">参数最大值</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMiddle">输出中间值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static double MappingAsymmetryRange(double value, double min, double middle, double max, double OutputMin, double OutputMiddle, double OutputMax, int n = 1, bool limit = true)
+        {
+            if (double.IsNaN(value) || double.IsNaN(min) || double.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
+            if (double.IsNaN(OutputMin) || double.IsNaN(OutputMax))
+                return float.NaN;
             if (min > max)
             {
                 ValueAdjust.Exchange(min, max, out min, out max);
