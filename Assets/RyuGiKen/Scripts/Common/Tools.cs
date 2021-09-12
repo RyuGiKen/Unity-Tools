@@ -135,6 +135,161 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 文件名更换前缀
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="oldPrefix">原前缀</param>
+        /// <param name="newPrefix">新前缀</param>
+        /// <param name="OnlyReplace">仅替换原前缀</param>
+        /// <returns></returns>
+        public static string RenamePrefix(string fileName, string oldPrefix = "", string newPrefix = "", bool OnlyReplace = false)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || oldPrefix == null || newPrefix == null)
+                return null;
+            string newName = fileName;
+            bool hasOldPrefix = false;
+            if (!string.IsNullOrEmpty(oldPrefix))
+            {
+                int i = newName.IndexOf(oldPrefix, StringComparison.OrdinalIgnoreCase);
+                if (i == 0)
+                {
+                    hasOldPrefix = true;
+                    newName = newName.Remove(0, oldPrefix.Length);
+                }
+            }
+            if (!string.IsNullOrEmpty(newPrefix))
+            {
+                int i = newName.IndexOf(newPrefix, StringComparison.OrdinalIgnoreCase);
+                if (i != 0 && (hasOldPrefix || !OnlyReplace))
+                {
+                    newName = newName.Insert(0, newPrefix);
+                }
+            }
+            return newName;
+        }
+        /// <summary>
+        /// 文件名更换前缀
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <param name="oldPrefix">原前缀</param>
+        /// <param name="newPrefix">新前缀</param>
+        /// <param name="OnlyReplace">仅替换原前缀</param>
+        public static void FileRenamePrefix(this FileSystemInfo file, string oldPrefix = "", string newPrefix = "", bool OnlyReplace = false)
+        {
+            if (file == null)
+                return;
+            string newName = RenamePrefix(file.Name, oldPrefix, newPrefix, OnlyReplace);
+            if (newName != file.Name && !string.IsNullOrWhiteSpace(newName))
+                file.FileRename(newName);
+        }
+        /// <summary>
+        /// 文件名更换后缀
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原后缀</param>
+        /// <returns></returns>
+        public static string RenamePostfix(string fileName, string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || oldPostfix == null || newPostfix == null)
+                return null;
+            int TypeIndex = fileName.LastIndexOf('.');
+            string Type = "";
+            string newName = fileName;
+            bool hasOldPostfix = false;
+            if (TypeIndex >= 0)
+            {
+                Type = fileName.Substring(TypeIndex).Replace(".", "");
+                newName = newName.Remove(TypeIndex);
+            }
+
+            if (!string.IsNullOrEmpty(oldPostfix))
+            {
+                int i = newName.IndexOf(oldPostfix, StringComparison.OrdinalIgnoreCase);
+                if (i >= newName.Length - newPostfix.Length - 1)
+                {
+                    hasOldPostfix = true;
+                    newName = newName.Remove(i, oldPostfix.Length);
+                }
+            }
+            if (!string.IsNullOrEmpty(newPostfix))
+            {
+                int i = newName.IndexOf(newPostfix, StringComparison.OrdinalIgnoreCase);
+                if (i < newName.Length - newPostfix.Length - 1 && (hasOldPostfix || !OnlyReplace))
+                {
+                    newName = newName.Insert((newName.Length).Clamp(0), newPostfix);
+                }
+            }
+            return newName + (Type.Length < 1 ? "" : ("." + Type));
+        }
+        /// <summary>
+        /// 文件名更换后缀
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原后缀</param>
+        public static void FileRenamePostfix(this FileSystemInfo file, string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            if (file == null)
+                return;
+            string newName = RenamePostfix(file.Name, oldPostfix, newPostfix, OnlyReplace);
+            if (newName != file.Name && !string.IsNullOrWhiteSpace(newName))
+                file.FileRename(newName);
+        }
+        /// <summary>
+        /// 文件名更换前后缀
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="oldPrefix">原前缀</param>
+        /// <param name="newPrefix">新前缀</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原前后缀</param>
+        /// <returns></returns>
+        public static string RenamePrefixPostfix(string fileName, string oldPrefix = "", string newPrefix = "", string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            return RenamePostfix(RenamePrefix(fileName, oldPrefix, newPrefix, OnlyReplace), oldPostfix, newPostfix, OnlyReplace);
+        }
+        /// <summary>
+        /// 文件名更换前后缀
+        /// </summary>
+        /// <param name="oldPrefix">原前缀</param>
+        /// <param name="newPrefix">新前缀</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原前后缀</param>
+        public static void FileRenamePrefixPostfix(this FileSystemInfo file, string oldPrefix = "", string newPrefix = "", string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            if (file == null)
+                return;
+            string newName = RenamePrefixPostfix(file.Name, oldPrefix, newPrefix, oldPostfix, newPostfix, OnlyReplace);
+            if (newName != file.Name && !string.IsNullOrWhiteSpace(newName))
+                file.FileRename(newName);
+        }
+        /// <summary>
+        /// 文件重命名
+        /// </summary>
+        /// <param name="file">文件</param>
+        /// <param name="newName">新名称</param>
+        public static void FileRename<T>(this T file, string newName) where T: FileSystemInfo
+        {
+            if (file == null || string.IsNullOrWhiteSpace(newName))
+                return;
+            try
+            {
+                if (newName != file.Name)
+                {
+                    if(file is FileInfo)
+                        (file as FileInfo).MoveTo((file as FileInfo).DirectoryName + "\\" + newName);
+                    else if (file is DirectoryInfo)
+                        (file as DirectoryInfo).MoveTo((file as DirectoryInfo).Parent.FullName + "\\" + newName);
+                }
+            }
+            catch { }
+        }
+        /// <summary>
         /// 获得指定路径下所有子目录文件名
         /// </summary>
         /// <param name="path">路径</param>
@@ -142,7 +297,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<FileInfo> GetFileInfoAll(string path, string Type = "")
         {
-            if (path == null || path == "")
+            if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
 
             List<List<FileInfo>> files = new List<List<FileInfo>>();
@@ -163,7 +318,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<FileInfo> GetFileInfoAll(string path, string[] Type)
         {
-            if (path == null || path == "")
+            if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
 
             List<List<FileInfo>> files = new List<List<FileInfo>>();
@@ -184,7 +339,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<FileInfo> GetFileInfoAllWithOutType(string path, string[] Type)
         {
-            if (path == null || path == "")
+            if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
 
             List<List<FileInfo>> files = new List<List<FileInfo>>();
@@ -205,11 +360,13 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<FileInfo> GetFileInfos(string path, string Type = "")
         {
+            if (string.IsNullOrWhiteSpace(path))
+                path = Directory.GetCurrentDirectory();
             DirectoryInfo root = new DirectoryInfo(path);
             List<FileInfo> files = new List<FileInfo>();
             foreach (FileInfo file in root.GetFiles())
             {
-                if (Type == "")
+                if (string.IsNullOrWhiteSpace(Type))
                 {
                     files.Add(file);
                 }
@@ -228,6 +385,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<FileInfo> GetFileInfos(string path, string[] Type)
         {
+            if (string.IsNullOrWhiteSpace(path))
+                path = Directory.GetCurrentDirectory();
             DirectoryInfo root = new DirectoryInfo(path);
             List<FileInfo> files = new List<FileInfo>();
             foreach (FileInfo file in root.GetFiles())
@@ -250,6 +409,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<FileInfo> GetFileInfosWithOutType(string path, string[] Type)
         {
+            if (string.IsNullOrWhiteSpace(path))
+                path = Directory.GetCurrentDirectory();
             DirectoryInfo root = new DirectoryInfo(path);
             List<FileInfo> files = new List<FileInfo>();
             foreach (FileInfo file in root.GetFiles())
@@ -257,7 +418,7 @@ namespace RyuGiKen
                 bool EnabledFileType = true;
                 foreach (string type in Type)
                 {
-                    if (type == "" && type == null)
+                    if (string.IsNullOrWhiteSpace(type))
                         continue;
                     if (file.JudgeFileType(type))
                     {
@@ -277,6 +438,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<string> GetFileName<T>(this T[] files) where T : FileSystemInfo
         {
+            if (files == null || files.Length < 1)
+                return null;
             List<string> fileNames = new List<string>();
             foreach (T file in files)
             {
@@ -292,6 +455,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<string> GetFileFullName<T>(this T[] files) where T : FileSystemInfo
         {
+            if (files == null || files.Length < 1)
+                return null;
             List<string> fileNames = new List<string>();
             foreach (T file in files)
             {
@@ -327,10 +492,9 @@ namespace RyuGiKen
         /// <returns></returns>
         public static bool JudgeFileType(this FileInfo file, string Type)
         {
-            if (file == null || file.Name == "" || Type == null || Type == "")
+            if (file == null || string.IsNullOrWhiteSpace(file.Name) || string.IsNullOrWhiteSpace(Type))
                 return false;
-            string FileTypeName = file.Name.Substring(file.Name.Length - Type.Length - 1);
-            return FileTypeName.LastIndexOf("." + Type, StringComparison.OrdinalIgnoreCase) >= 0;
+            return JudgeFileType(file.Name, Type);
         }
     }
     /// <summary>
