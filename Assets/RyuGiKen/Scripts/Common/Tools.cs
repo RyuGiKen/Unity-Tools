@@ -183,6 +183,38 @@ namespace RyuGiKen
                 file.FileRename(newName);
         }
         /// <summary>
+        /// 文件名更换前缀
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="oldPrefix">原前缀</param>
+        /// <param name="newPrefix">新前缀</param>
+        /// <param name="OnlyReplace">仅替换原前缀</param>
+        public static void FilesRenamePrefix(this FileSystemInfo[] files, string oldPrefix = "", string newPrefix = "", bool OnlyReplace = false)
+        {
+            if (files == null || files.Length < 1)
+                return;
+            foreach (FileInfo file in files)
+            {
+                file.FileRenamePrefix(oldPrefix, newPrefix, OnlyReplace);
+            }
+        }
+        /// <summary>
+        /// 文件名更换前缀
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="oldPrefix">原前缀</param>
+        /// <param name="newPrefix">新前缀</param>
+        /// <param name="OnlyReplace">仅替换原前缀</param>
+        public static void FilesRenamePrefix(this List<FileSystemInfo> files, string oldPrefix = "", string newPrefix = "", bool OnlyReplace = false)
+        {
+            if (files == null || files.Count < 1)
+                return;
+            foreach (FileInfo file in files)
+            {
+                file.FileRenamePrefix(oldPrefix, newPrefix, OnlyReplace);
+            }
+        }
+        /// <summary>
         /// 文件名更换后缀
         /// </summary>
         /// <param name="fileName">文件名</param>
@@ -239,6 +271,38 @@ namespace RyuGiKen
                 file.FileRename(newName);
         }
         /// <summary>
+        /// 文件名更换后缀
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原后缀</param>
+        public static void FilesRenamePostfix(this FileSystemInfo[] files, string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            if (files == null || files.Length < 1)
+                return;
+            foreach (FileInfo file in files)
+            {
+                file.FileRenamePostfix(oldPostfix, newPostfix, OnlyReplace);
+            }
+        }
+        /// <summary>
+        /// 文件名更换后缀
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原后缀</param>
+        public static void FilesRenamePostfix(this List<FileSystemInfo> files, string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            if (files == null || files.Count < 1)
+                return;
+            foreach (FileInfo file in files)
+            {
+                file.FileRenamePostfix(oldPostfix, newPostfix, OnlyReplace);
+            }
+        }
+        /// <summary>
         /// 文件名更换前后缀
         /// </summary>
         /// <param name="fileName">文件名</param>
@@ -269,11 +333,43 @@ namespace RyuGiKen
                 file.FileRename(newName);
         }
         /// <summary>
+        /// 文件名更换前后缀
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原后缀</param>
+        public static void FilesRenamePrefixPostfix(this FileSystemInfo[] files, string oldPrefix = "", string newPrefix = "", string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            if (files == null || files.Length < 1)
+                return;
+            foreach (FileInfo file in files)
+            {
+                file.FileRenamePrefixPostfix(oldPrefix, newPrefix, oldPostfix, newPostfix, OnlyReplace);
+            }
+        }
+        /// <summary>
+        /// 文件名更换前后缀
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="oldPostfix">原后缀</param>
+        /// <param name="newPostfix">新后缀</param>
+        /// <param name="OnlyReplace">仅替换原后缀</param>
+        public static void FilesRenamePrefixPostfix(this List<FileSystemInfo> files, string oldPrefix = "", string newPrefix = "", string oldPostfix = "", string newPostfix = "", bool OnlyReplace = false)
+        {
+            if (files == null || files.Count < 1)
+                return;
+            foreach (FileInfo file in files)
+            {
+                file.FileRenamePrefixPostfix(oldPrefix, newPrefix, oldPostfix, newPostfix, OnlyReplace);
+            }
+        }
+        /// <summary>
         /// 文件重命名
         /// </summary>
         /// <param name="file">文件</param>
         /// <param name="newName">新名称</param>
-        public static void FileRename<T>(this T file, string newName) where T: FileSystemInfo
+        public static void FileRename<T>(this T file, string newName) where T : FileSystemInfo
         {
             if (file == null || string.IsNullOrWhiteSpace(newName))
                 return;
@@ -281,13 +377,41 @@ namespace RyuGiKen
             {
                 if (newName != file.Name)
                 {
-                    if(file is FileInfo)
+                    if (file is FileInfo)
                         (file as FileInfo).MoveTo((file as FileInfo).DirectoryName + "\\" + newName);
                     else if (file is DirectoryInfo)
                         (file as DirectoryInfo).MoveTo((file as DirectoryInfo).Parent.FullName + "\\" + newName);
                 }
             }
             catch { }
+        }
+        /// <summary>
+        /// 文件批量重命名
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="newNames">新名称</param>
+        public static void FilesRename(this FileSystemInfo[] files, string[] newNames)
+        {
+            if (files == null || files.Length < 1 || newNames == null || newNames.Length < 1)
+                return;
+            for (int i = 0; i < Math.Min(files.Length, newNames.Length); i++)
+            {
+                files[i].FileRename(newNames[i]);
+            }
+        }
+        /// <summary>
+        /// 文件批量重命名
+        /// </summary>
+        /// <param name="files">文件</param>
+        /// <param name="newNames">新名称</param>
+        public static void FilesRename(this List<FileSystemInfo> files, string[] newNames)
+        {
+            if (files == null || files.Count < 1 || newNames == null || newNames.Length < 1)
+                return;
+            for (int i = 0; i < Math.Min(files.Count, newNames.Length); i++)
+            {
+                files[i].FileRename(newNames[i]);
+            }
         }
         /// <summary>
         /// 获得指定路径下所有子目录文件名
@@ -436,7 +560,7 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="files"></param>
         /// <returns></returns>
-        public static List<string> GetFileName<T>(this T[] files) where T : FileSystemInfo
+        public static string[] GetFileName<T>(this T[] files) where T : FileSystemInfo
         {
             if (files == null || files.Length < 1)
                 return null;
@@ -445,7 +569,19 @@ namespace RyuGiKen
             {
                 fileNames.Add(file.Name);
             }
-            return fileNames;
+            return fileNames.ToArray();
+        }
+        /// <summary>
+        /// 获得文件名
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        public static string[] GetFileName<T>(this List<T> files) where T : FileSystemInfo
+        {
+            if (files == null || files.Count < 1)
+                return null;
+            return files.ToArray().GetFileName();
         }
         /// <summary>
         /// 获得文件路径
@@ -453,7 +589,7 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="files"></param>
         /// <returns></returns>
-        public static List<string> GetFileFullName<T>(this T[] files) where T : FileSystemInfo
+        public static string[] GetFileFullName<T>(this T[] files) where T : FileSystemInfo
         {
             if (files == null || files.Length < 1)
                 return null;
@@ -462,7 +598,19 @@ namespace RyuGiKen
             {
                 fileNames.Add(file.FullName);
             }
-            return fileNames;
+            return fileNames.ToArray();
+        }
+        /// <summary>
+        /// 获得文件路径
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        public static string[] GetFileFullName<T>(this List<T> files) where T : FileSystemInfo
+        {
+            if (files == null || files.Count < 1)
+                return null;
+            return files.ToArray().GetFileFullName();
         }
         /// <summary>
         /// 从文件名判断类型
