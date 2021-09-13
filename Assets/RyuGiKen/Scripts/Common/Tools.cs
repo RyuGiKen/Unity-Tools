@@ -2077,6 +2077,55 @@ namespace RyuGiKen
             return str;
         }
         /// <summary>
+        /// 字符串按格式组合
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator">间隔</param>
+        /// <param name="format">格式</param>
+        /// <returns></returns>
+        public static string Concat(this string[] str, string separator = null, string[] format = null)
+        {
+            if (str == null)
+                return null;
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (string.IsNullOrEmpty(str[i]))
+                    continue;
+                string temp = "";
+                if (int.TryParse(str[i], out int num))
+                {
+                    try
+                    {
+                        temp = num.ToString((format != null && format.Length > i) ? format[i] : "");
+                    }
+                    catch
+                    {
+                        temp = str[i];
+                    }
+                }
+                else if (double.TryParse(str[i], out double num2))
+                {
+                    try
+                    {
+                        temp = num2.ToString((format != null && format.Length > i) ? format[i] : "");
+                    }
+                    catch
+                    {
+                        temp = str[i];
+                    }
+                }
+                else
+                {
+                    temp = str[i];
+                }
+                if (i != 0 && !string.IsNullOrEmpty(separator))
+                    builder.Append(separator);
+                builder.Append(temp);
+            }
+            return builder.ToString();
+        }
+        /// <summary>
         /// 分离混合的字符串和数字
         /// </summary>
         /// <param name="str"></param>
@@ -2093,9 +2142,10 @@ namespace RyuGiKen
                     maybeNum[i] = true;
             }
             List<string> result = new List<string>();
+            StringBuilder builder = new StringBuilder();
             for (int i = 0; i < chars.Length; i++)
             {
-                StringBuilder builder = new StringBuilder();
+                builder.Clear();
                 for (int j = i; j < chars.Length; j++)
                 {
                     if (i == j || maybeNum[i] == maybeNum[j])
@@ -2441,10 +2491,10 @@ namespace RyuGiKen
         /// <param name="num"></param>
         /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
-        public static float ToDouble(this string num, float FailValue = 0)
+        public static double ToDouble(this string num, double FailValue = 0)
         {
-            float result = FailValue;
-            float.TryParse(num, out result);
+            double result = FailValue;
+            double.TryParse(num, out result);
             return result;
         }
         /// <summary>
@@ -2471,7 +2521,7 @@ namespace RyuGiKen
         /// <param name="num"></param>
         /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
-        public static double[] ToDouble(this string[] num, float FailValue = 0)
+        public static double[] ToDouble(this string[] num, double FailValue = 0)
         {
             if (num == null || num.Length < 1)
                 return null;
