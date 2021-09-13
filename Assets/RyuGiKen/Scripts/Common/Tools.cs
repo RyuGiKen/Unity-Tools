@@ -2077,6 +2077,42 @@ namespace RyuGiKen
             return str;
         }
         /// <summary>
+        /// 分离混合的字符串和数字
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string[] SplitNum(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return null;
+            char[] chars = str.ToCharArray();
+            bool[] maybeNum = new bool[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                    maybeNum[i] = true;
+            }
+            List<string> result = new List<string>();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                StringBuilder builder = new StringBuilder();
+                for (int j = i; j < chars.Length; j++)
+                {
+                    if (i == j || maybeNum[i] == maybeNum[j])
+                    {
+                        builder.Append(chars[j]);
+                    }
+                    else
+                    {
+                        i = j - 1;
+                        break;
+                    }
+                }
+                result.Add(builder.ToString());
+            }
+            return result.ToArray();
+        }
+        /// <summary>
         /// 找出字符串中第一个数字的序号
         /// </summary>
         /// <param name="number"></param>
