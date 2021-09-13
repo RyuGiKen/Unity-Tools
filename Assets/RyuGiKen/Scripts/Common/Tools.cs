@@ -1731,6 +1731,35 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 数组统一赋值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="value"></param>
+        public static void SetArrayAll<T>(this T[] array, T value)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = value;
+            }
+        }
+        /// <summary>
+        /// 输出统一赋值的数组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="Length">长度</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static T[] SetArrayAll<T>(uint Length = 1, T value = default(T))
+        {
+            T[] result = new T[Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = value;
+            }
+            return result;
+        }
+        /// <summary>
         /// 列表统一赋值
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -1744,17 +1773,20 @@ namespace RyuGiKen
             }
         }
         /// <summary>
-        /// 数组统一赋值
+        /// 输出统一赋值的数组
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="array"></param>
-        /// <param name="value"></param>
-        public static void SetArrayAll<T>(this T[] array, T value)
+        /// <param name="Length">长度</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public static List<T> SetListAll<T>(uint Length = 1, T value = default(T))
         {
-            for (int i = 0; i < array.Length; i++)
+            List<T> result = new List<T>();
+            for (int i = 0; i < Length; i++)
             {
-                array[i] = value;
+                result.Add(value);
             }
+            return result;
         }
         /// <summary>
         /// 乱序排序
