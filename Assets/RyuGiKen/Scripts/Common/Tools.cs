@@ -226,15 +226,8 @@ namespace RyuGiKen
         {
             if (string.IsNullOrWhiteSpace(fileName) || oldPostfix == null || newPostfix == null)
                 return null;
-            int TypeIndex = fileName.LastIndexOf('.');
-            string Type = "";
-            string newName = fileName;
+            GetFileNameAndType(fileName, out string newName, out string Type);
             bool hasOldPostfix = false;
-            if (TypeIndex >= 0)
-            {
-                Type = fileName.Substring(TypeIndex).Replace(".", "");
-                newName = newName.Remove(TypeIndex);
-            }
 
             if (!string.IsNullOrEmpty(oldPostfix))
             {
@@ -412,6 +405,42 @@ namespace RyuGiKen
             {
                 files[i].FileRename(newNames[i]);
             }
+        }
+        /// <summary>
+        /// 文件列表反向排序
+        /// </summary>
+        /// <param name="files"></param>
+        public static void SortFilesReverse(this List<FileInfo> files)
+        {
+            if (files.Count > 0)
+                files.Sort(delegate (FileInfo row02, FileInfo row01)
+                {
+                    int result = row01.Name.CompareTo(row02.Name);
+                    if (result == 0)
+                    {
+                        int result2 = row01.FullName.CompareTo(row02.FullName);
+                        return result2;
+                    }
+                    return result;
+                });
+        }
+        /// <summary>
+        /// 文件列表排序
+        /// </summary>
+        /// <param name="files"></param>
+        public static void SortFiles(this List<FileInfo> files)
+        {
+            if (files.Count > 0)
+                files.Sort(delegate (FileInfo row01, FileInfo row02)
+                {
+                    int result = row01.Name.CompareTo(row02.Name);
+                    if (result == 0)
+                    {
+                        int result2 = row01.FullName.CompareTo(row02.FullName);
+                        return result2;
+                    }
+                    return result;
+                });
         }
         /// <summary>
         /// 获得指定路径下所有子目录文件名
@@ -611,6 +640,133 @@ namespace RyuGiKen
             if (files == null || files.Count < 1)
                 return null;
             return files.ToArray().GetFileFullName();
+        }
+        /// <summary>
+        /// 获得文件名
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFileNameWithOutType(this FileInfo file)
+        {
+            if (file == null)
+                return null;
+            int TypeIndex = file.Name.LastIndexOf('.');
+            string newName = file.Name;
+            if (TypeIndex >= 0)
+            {
+                newName = newName.Remove(TypeIndex);
+            }
+            return newName;
+        }
+        /// <summary>
+        /// 获得文件名
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFileNameWithOutType(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+            int TypeIndex = fileName.LastIndexOf('.');
+            string newName = fileName;
+            if (TypeIndex >= 0)
+            {
+                newName = newName.Remove(TypeIndex);
+            }
+            return newName;
+        }
+        /// <summary>
+        /// 获得文件名和类型
+        /// </summary>
+        /// <returns></returns>
+        public static void GetFileNameAndType(this FileInfo file, out string name, out string type)
+        {
+            name = type = "";
+            if (file == null)
+                return;
+            int TypeIndex = file.Name.LastIndexOf('.');
+            type = "";
+            name = file.Name;
+            if (TypeIndex >= 0)
+            {
+                type = file.Name.Substring(TypeIndex).Replace(".", "");
+                name = name.Remove(TypeIndex);
+            }
+        }
+        /// <summary>
+        /// 获得文件名和类型
+        /// </summary>
+        /// <returns></returns>
+        public static void GetFileNameAndType(string fileName, out string name, out string type)
+        {
+            name = type = "";
+            if (string.IsNullOrWhiteSpace(fileName))
+                return;
+            int TypeIndex = fileName.LastIndexOf('.');
+            type = "";
+            name = fileName;
+            if (TypeIndex >= 0)
+            {
+                type = fileName.Substring(TypeIndex).Replace(".", "");
+                name = name.Remove(TypeIndex);
+            }
+        }
+        /// <summary>
+        /// 获得文件类型
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFileType(this FileInfo file)
+        {
+            if (file == null)
+                return null;
+            int TypeIndex = file.Name.LastIndexOf('.');
+            string Type = "";
+            if (TypeIndex >= 0)
+            {
+                Type = file.Name.Substring(TypeIndex).Replace(".", "");
+            }
+            return Type;
+        }
+        /// <summary>
+        /// 获得文件类型
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFileType(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+            int TypeIndex = fileName.LastIndexOf('.');
+            string Type = "";
+            if (TypeIndex >= 0)
+            {
+                Type = fileName.Substring(TypeIndex).Replace(".", "");
+            }
+            return Type;
+        }
+        /// <summary>
+        /// 获得文件类型
+        /// </summary>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        public static string[] GetFileType(this FileInfo[] files)
+        {
+            if (files == null || files.Length < 1)
+                return null;
+            List<string> fileTypes = new List<string>();
+            foreach (FileInfo file in files)
+            {
+                fileTypes.Add(file.GetFileType());
+            }
+            return fileTypes.ToArray();
+        }
+        /// <summary>
+        /// 获得文件类型
+        /// </summary>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        public static string[] GetFileType(this List<FileInfo> files)
+        {
+            if (files == null || files.Count < 1)
+                return null;
+            return files.ToArray().GetFileType();
         }
         /// <summary>
         /// 从文件名判断类型
@@ -1897,11 +2053,9 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
-        /// 列表相加。补充在后。
+        /// 列表相加。
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="list01"></param>
-        /// <param name="list02"></param>
         /// <returns></returns>
         public static List<T> ListAddition<T>(this List<List<T>> lists)
         {
@@ -2430,6 +2584,166 @@ namespace RyuGiKen
             return str;
         }
         /// <summary>
+        /// 生成序列
+        /// </summary>
+        /// <param name="Format">序列格式
+        /// <para>以大于小于号限制序列范围</para>
+        /// </param>
+        /// <param name="StartIndex">序列开始序号</param>
+        /// <param name="Count">序列长度</param>
+        /// <returns></returns>
+        public static string[] RenameSequence(string Format, int StartIndex, uint Count)
+        {
+            if (string.IsNullOrWhiteSpace(Format))
+                return null;
+            if (Count < 1)
+                return null;
+            string[] format = Format.Split(new char[] { '<', '>' });
+            if (format == null || format.Length != 3)
+                return null;
+            uint SequenceLength = (uint)format[1].Length;
+
+            string[] result = RenameSequence(format[0], format[1], SequenceLength, StartIndex, Count);
+            return result;
+        }
+        /// <summary>
+        /// 生成序列
+        /// </summary>
+        /// <param name="Prefix">前缀</param>
+        /// <param name="Postfix">后缀</param>
+        /// <param name="SequenceLength">序列位数</param>
+        /// <param name="StartIndex">序列开始序号</param>
+        /// <param name="Count">序列长度</param>
+        /// <returns></returns>
+        public static string[] RenameSequence(string Prefix, string Postfix, uint SequenceLength, int StartIndex, uint Count)
+        {
+            if (string.IsNullOrEmpty(Prefix))
+                Prefix = "";
+            if (string.IsNullOrEmpty(Postfix))
+                Postfix = "";
+            if (Count < 1)
+                return null;
+            string[] result = new string[Count];
+            string[] sequence = new string[Count];
+            int curIndex = StartIndex;
+            for (int i = 0; i < Count; i++)
+            {
+                sequence[i] = (curIndex++).ToString("D" + SequenceLength.ToString());
+                result[i] = Prefix + sequence[i] + Postfix;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 生成序列
+        /// </summary>
+        /// <param name="Prefix">前缀</param>
+        /// <param name="Postfix">后缀</param>
+        /// <param name="SequenceLength">序列位数</param>
+        /// <param name="StartIndex">序列开始序号</param>
+        /// <param name="Count">序列长度</param>
+        /// <returns></returns>
+        public static string[] RenameSequence(string[] Prefix, string[] Postfix, uint SequenceLength, int StartIndex, uint Count)
+        {
+            if (Prefix == null)
+                Prefix = new string[0];
+            if (Postfix == null)
+                Postfix = new string[0];
+            if (Count < 1)
+                return null;
+            string[] result = new string[Count];
+            string[] sequence = new string[Count];
+            int curIndex = StartIndex;
+            for (int i = 0; i < Count; i++)
+            {
+                sequence[i] = (curIndex++).ToString("D" + SequenceLength.ToString());
+                result[i] = (i < Prefix.Length ? Prefix[i] : "") + sequence[i] + (i < Postfix.Length ? Postfix[i] : "");
+            }
+            return result;
+        }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 生成序列
+        /// </summary>
+        /// <param name="Prefix">前缀</param>
+        /// <param name="Postfix">后缀</param>
+        /// <param name="SequenceLength">序列位数</param>
+        /// <param name="SequenceRange">序列范围</param>
+        /// <returns></returns>
+        public static string[] RenameSequence(string Prefix, string Postfix, uint SequenceLength, Vector2Int SequenceRange)
+        {
+            FindMinAndMax(SequenceRange.x, SequenceRange.y, out int min, out int max);
+            return RenameSequence(Prefix, Postfix, SequenceLength, min, (max - min).ToUInteger());
+        }
+        /// <summary>
+        /// 生成序列
+        /// </summary>
+        /// <param name="Prefix">前缀</param>
+        /// <param name="Postfix">后缀</param>
+        /// <param name="SequenceLength">序列位数</param>
+        /// <param name="SequenceRange">序列范围</param>
+        /// <returns></returns>
+        public static string[] RenameSequence(string[] Prefix, string[] Postfix, uint SequenceLength, Vector2Int SequenceRange)
+        {
+            FindMinAndMax(SequenceRange.x, SequenceRange.y, out int min, out int max);
+            return RenameSequence(Prefix, Postfix, SequenceLength, min, (max - min).ToUInteger());
+        }
+        /// <summary>
+        /// 生成序列
+        /// </summary>
+        /// <param name="Format">序列格式</param>
+        /// <param name="SequenceRange">序列范围</param>
+        /// <returns></returns>
+        public static string[] RenameSequence(string Format, Vector2Int SequenceRange)
+        {
+            FindMinAndMax(SequenceRange.x, SequenceRange.y, out int min, out int max);
+            return RenameSequence(Format, min, (max - min).ToUInteger());
+        }
+#endif
+        /// <summary>
+        /// 序列重命名
+        /// </summary>
+        /// <param name="Names">名称</param>
+        /// <param name="SequenceLength_Old">原序列长度</param>
+        /// <param name="SequenceLength">序列长度</param>
+        /// <param name="StartIndex">序列开始序号</param>
+        /// <returns></returns>
+        public static string[] RenameSequence(string[] Names, uint SequenceLength_Old, uint SequenceLength, int StartIndex)
+        {
+            if (Names == null || Names.Length < 1)
+                return null;
+            string[] Prefix = new string[Names.Length];
+            string[] Postfix = new string[Names.Length];
+            List<string[]> temp = new List<string[]>();
+            for (int i = 0; i < Names.Length; i++)
+            {
+                temp.Add(Names[i].SplitNum(SequenceLength_Old));
+            }
+            for (int i = 0; i < temp.Count; i++)
+            {
+                int j = 0;
+                for (; j < temp[i].Length; j++)
+                {
+                    if (int.TryParse(temp[i][j], out int num))
+                    {
+                        break;
+                    }
+                }
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int k = 0; k < j; k++)
+                {
+                    stringBuilder.Append(temp[i][k]);
+                }
+                Prefix[i] = stringBuilder.ToString();
+                stringBuilder.Clear();
+                for (int k = j + 1; k < temp[i].Length; k++)
+                {
+                    stringBuilder.Append(temp[i][k]);
+                }
+                Postfix[i] = stringBuilder.ToString();
+            }
+            return RenameSequence(Prefix, Postfix, SequenceLength, StartIndex, Names.Length.ToUInteger());
+        }
+        /// <summary>
         /// 字符串按格式组合
         /// </summary>
         /// <param name="str"></param>
@@ -2499,9 +2813,9 @@ namespace RyuGiKen
             for (int i = 0; i < chars.Length; i++)
             {
                 builder.Clear();
-                for (int j = i; j < chars.Length; j++)
+                for (int j = i; j <= chars.Length; j++)
                 {
-                    if (i == j || maybeNum[i] == maybeNum[j])
+                    if (j < chars.Length && (i == j || maybeNum[i] == maybeNum[j]))
                     {
                         builder.Append(chars[j]);
                     }
@@ -2527,40 +2841,15 @@ namespace RyuGiKen
                 return null;
             if (str.Length <= MinNumCount)
                 return new string[] { str };
-            char[] chars = str.ToCharArray();
-            bool[] maybeNum = new bool[chars.Length];
-            for (int i = 0; i < chars.Length; i++)
-            {
-                if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
-                    maybeNum[i] = true;
-            }
-            List<string> result = new List<string>();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                builder.Clear();
-                for (int j = 0; i + j < chars.Length; j++)
-                {
-                    if (j == 0 || maybeNum[i] == maybeNum[i + j])
-                    {
-                        builder.Append(chars[i + j]);
-                    }
-                    else
-                    {
-                        i += j - 1;
-                        break;
-                    }
-                }
-                result.Add(builder.ToString());
-            }
-            for (int i = result.Count - 1; i >= 0; i--)
+            string[] result = ValueAdjust.SplitNum(str);
+            for (int i = result.Length - 1; i >= 0; i--)
             {
                 if (string.IsNullOrEmpty(result[i]))
                     continue;
                 int count = result[i].CountSequenceNumInString();
                 if ((count != 0 && count < MinNumCount) || (count == 0 && result[i].Length < MinNumCount))
                 {
-                    if (i == 0 && result.Count > 1)
+                    if (i == 0 && result.Length > 1)
                     {
                         if (int.TryParse(result[i + 1], out int num))
                         {
@@ -2582,7 +2871,7 @@ namespace RyuGiKen
                     result[i] = null;
                 }
             }
-            return result.ToArray().ClearNullItem();
+            return result.ClearNullItem();
         }
         /// <summary>
         /// 统计字符串中数字个数
@@ -3250,6 +3539,115 @@ namespace RyuGiKen
             for (int i = 0; i < num.Length; i++)
             {
                 result[i] = num[i].ToInteger(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 字符串转整数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint ToUInteger(this string num, uint FailValue = 0)
+        {
+            uint result = FailValue;
+            uint.TryParse(num, out result);
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static uint ToUInteger(this int num)
+        {
+            return (uint)(num.Clamp(0));
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint ToUInteger(this float num, uint FailValue = 0)
+        {
+            return float.IsNaN(num) ? FailValue : (uint)Round(num.Clamp(0));
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint ToUInteger(this double num, uint FailValue = 0)
+        {
+            return double.IsNaN(num) ? FailValue : (uint)Round(num.Clamp(0));
+        }
+        /// <summary>
+        /// 字符串转整数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint[] ToUInteger(this string[] num, uint FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            uint[] result = new uint[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToUInteger(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint[] ToUInteger(this int[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            uint[] result = new uint[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToUInteger();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint[] ToUInteger(this float[] num, uint FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            uint[] result = new uint[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToUInteger(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint[] ToUInteger(this double[] num, uint FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            uint[] result = new uint[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToUInteger(FailValue);
             }
             return result;
         }
