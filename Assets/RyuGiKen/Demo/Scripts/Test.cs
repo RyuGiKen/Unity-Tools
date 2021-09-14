@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using RyuGiKen;
@@ -159,7 +161,7 @@ public class Test : MonoBehaviour
         if (int.TryParse(ResolutionInput[0].text, out Width) && int.TryParse(ResolutionInput[1].text, out Height))
         {
             if (Width > 0 && Height > 0)
-            {                
+            {
                 if (int.TryParse(ResolutionInput[2].text, out X) && int.TryParse(ResolutionInput[3].text, out Y))
                 {
                     if (X >= 0 && Y >= 0)
@@ -168,7 +170,7 @@ public class Test : MonoBehaviour
                         Display.main.SetRenderingResolution(Width, Height);
                 }
                 else
-                Screen.SetResolution(Width, Height, (FullScreenMode)FullScreenToggle.value);
+                    Screen.SetResolution(Width, Height, (FullScreenMode)FullScreenToggle.value);
                 Invoke(nameof(UpdateResolutionInput), 0.5f);
                 ShowScreenInfo();
             }
@@ -185,7 +187,7 @@ public class Test : MonoBehaviour
         }
         for (int i = 0; i < count; i++)
         {
-            lineRenderers[0].SetPosition(i, new Vector3(i, Random.Range(0f, 10f), 0));
+            lineRenderers[0].SetPosition(i, new Vector3(i, UnityEngine.Random.Range(0f, 10f), 0));
             result[0][i] = lineRenderers[0].GetPosition(i).y;
         }
 
