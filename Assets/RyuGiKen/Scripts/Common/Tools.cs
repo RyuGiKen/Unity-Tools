@@ -961,6 +961,15 @@ namespace RyuGiKen
         {
             return (int)Math.Floor(value);
         }
+        /// <summary>
+        /// 返回大于或等于指定小数的最小整数
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static int CeilToInt(float value)
+        {
+            return (int)Math.Ceiling(value);
+        }
     }
     public struct Color
     {
@@ -2195,13 +2204,173 @@ namespace RyuGiKen
             return result.ToArray();
         }
         /// <summary>
+        /// 分离混合的字符串和数字
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="MinNumCount">最少数字长度</param>
+        /// <returns></returns>
+        public static string[] SplitNum(this string str, uint MinNumCount)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return null;
+            if (str.Length <= MinNumCount)
+                return new string[] { str };
+            char[] chars = str.ToCharArray();
+            bool[] maybeNum = new bool[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                    maybeNum[i] = true;
+            }
+            List<string> result = new List<string>();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                builder.Clear();
+                for (int j = 0; i + j < chars.Length; j++)
+                {
+                    if (j == 0 || maybeNum[i] == maybeNum[i + j])
+                    {
+                        builder.Append(chars[i + j]);
+                    }
+                    else
+                    {
+                        i += j - 1;
+                        break;
+                    }
+                }
+                result.Add(builder.ToString());
+            }
+            for (int i = result.Count - 1; i >= 0; i--)
+            {
+                if (string.IsNullOrEmpty(result[i]))
+                    continue;
+                int count = result[i].CountSequenceNumInString();
+                if ((count != 0 && count < MinNumCount) || (count == 0 && result[i].Length < MinNumCount))
+                {
+                    if (i == 0 && result.Count > 1)
+                    {
+                        if (int.TryParse(result[i + 1], out int num))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            result[i + 1] = result[i] + result[i + 1];
+                        }
+                    }
+                    else
+                    {
+                        if (int.TryParse(result[i - 1], out int num) && result[i - 1].CountSequenceNumInString() >= MinNumCount)
+                        {
+                            continue;
+                        }
+                        result[i - 1] = result[i - 1] + result[i];
+                    }
+                    result[i] = null;
+                }
+            }
+            return result.ToArray().ClearNullItem();
+        }
+        /// <summary>
+        /// 统计字符串中数字个数
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int CountNumInString(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
+            int result = 0;
+            byte[] tempbyte = System.Text.Encoding.ASCII.GetBytes(str);
+            for (int i = 0; i < str.Length; i++)
+            {
+                if ((tempbyte[i] >= 48) && (tempbyte[i] <= 57))
+                {
+                    result++;
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 统计字符串中连续数字长度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int CountSequenceNumInString(this string str)
+        {
+            return CountSequenceNumInString(str, out int[] length);
+        }
+        /// <summary>
+        /// 统计字符串中连续数字长度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static int CountSequenceNumInString(this string str, out int[] length)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                length = new int[] { 0 };
+                return 0;
+            }
+            List<int> result = new List<int>();
+            byte[] tempbyte = System.Text.Encoding.ASCII.GetBytes(str);
+            bool lastIsNum = false;
+            int temp = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                bool isNum = (tempbyte[i] >= 48) && (tempbyte[i] <= 57);
+                if (isNum)
+                {
+                    temp++;
+                }
+                else
+                {
+                    if (isNum != lastIsNum)
+                    {
+                        result.Add(temp);
+                        temp = 0;
+                    }
+                }
+                lastIsNum = isNum;
+            }
+            if (temp != 0)
+                result.Add(temp);
+            length = result.ToArray();
+            ValueAdjust.FindMinAndMax(result, out int min, out int max);
+            return max;
+        }
+        /// <summary>
         /// 找出字符串中第一个数字的序号
         /// </summary>
         /// <param name="number"></param>
         /// <returns></returns>
-        public static int FindIndexOfNumInString(this string number)
+        public static int FindIndexOfNumInString(this string str)
         {
-            return number.IndexOfAny("0123456789".ToCharArray());
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
+            return str.IndexOfAny("0123456789".ToCharArray());
+        }
+        /// <summary>
+        /// 统计字符串中字母个数
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int CountLetterInString(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
+            int result = 0;
+            byte[] tempbyte = System.Text.Encoding.ASCII.GetBytes(str);
+            for (int i = 0; i < str.Length; i++)
+            {
+                if ((tempbyte[i] >= 65) && (tempbyte[i] <= 90) || ((tempbyte[i] >= 97) && (tempbyte[i] <= 122)))
+                {
+                    result++;
+                }
+            }
+            return result;
         }
         /// <summary>
         /// 找出字符串中第一个字母的序号
@@ -2210,6 +2379,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static int FindIndexOfLetterInString(this string str)
         {
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
             //return str.IndexOfAny("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".ToCharArray());
             byte[] tempbyte = System.Text.Encoding.ASCII.GetBytes(str);
             for (int i = 0; i < str.Length; i++)
@@ -2231,6 +2402,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static bool Contain(this string source, string value)
         {
+            if (string.IsNullOrEmpty(source))
+                return false;
             return (source.IndexOf(value, StringComparison.Ordinal) >= 0);
         }
         /// <summary>
@@ -2242,6 +2415,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static bool ContainIgnoreCase(this string source, string value)
         {
+            if (string.IsNullOrEmpty(source))
+                return false;
             return (source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 #if UNITY_EDITOR || UNITY_STANDALONE
@@ -2999,15 +3174,61 @@ namespace RyuGiKen
         /// <param name="array"></param>
         /// <param name="min"></param>
         /// <param name="max"></param>
+        public static void FindMinAndMax(int[] array, out int min, out int max)
+        {
+            if (array == null || array.Length < 1)
+            {
+                min = max = 0;
+                return;
+            }
+            min = int.MaxValue;
+            max = int.MinValue;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] < min)
+                    min = array[i];
+                if (array[i] > max)
+                    max = array[i];
+            }
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         public static void FindMinAndMax(float[] array, out float min, out float max)
         {
-            min = float.MinValue;
-            max = float.MaxValue;
             if (array == null || array.Length < 1)
             {
                 min = max = float.NaN;
                 return;
             }
+            min = float.MaxValue;
+            max = float.MinValue;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] < min)
+                    min = array[i];
+                if (array[i] > max)
+                    max = array[i];
+            }
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(double[] array, out double min, out double max)
+        {
+            if (array == null || array.Length < 1)
+            {
+                min = max = double.NaN;
+                return;
+            }
+            min = double.MaxValue;
+            max = double.MinValue;
             for (int i = 0; i < array.Length; i++)
             {
                 if (array[i] < min)
@@ -3022,19 +3243,15 @@ namespace RyuGiKen
         /// <param name="list"></param>
         /// <param name="min"></param>
         /// <param name="max"></param>
-        public static void FindMinAndMax(List<float> list, out float min, out float max)
+        public static void FindMinAndMax(List<int> list, out int min, out int max)
         {
-
             if (list == null || list.Count < 1)
             {
-                min = max = float.NaN;
+                min = max = 0;
                 return;
             }
-            else
-            {
-                min = float.MinValue;
-                max = float.MaxValue;
-            }
+            min = int.MaxValue;
+            max = int.MinValue;
             for (int i = 0; i < list.Count; i++)
             {
                 if (list[i] < min)
@@ -3046,14 +3263,59 @@ namespace RyuGiKen
         /// <summary>
         /// 找出最大最小值
         /// </summary>
-        /// <param name="array"></param>
-        public static Vector2 FindMinAndMax(float[] array)
+        /// <param name="list"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(List<float> list, out float min, out float max)
         {
-            Vector2 result;
+            if (list == null || list.Count < 1)
+            {
+                min = max = float.NaN;
+                return;
+            }
+            min = float.MaxValue;
+            max = float.MinValue;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] < min)
+                    min = list[i];
+                if (list[i] > max)
+                    max = list[i];
+            }
+        }
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        public static void FindMinAndMax(List<double> list, out double min, out double max)
+        {
+            if (list == null || list.Count < 1)
+            {
+                min = max = double.NaN;
+                return;
+            }
+            min = double.MaxValue;
+            max = double.MinValue;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] < min)
+                    min = list[i];
+                if (list[i] > max)
+                    max = list[i];
+            }
+        }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="array"></param>
+        public static Vector2Int FindMinAndMax(int[] array)
+        {
             if (array == null || array.Length < 1)
-                return new Vector2(float.NaN, float.NaN);
-            else
-                result = new Vector2(float.MinValue, float.MaxValue);
+                return Vector2Int.zero;
+            Vector2Int result = new Vector2Int(int.MaxValue, int.MinValue);
             for (int i = 0; i < array.Length; i++)
             {
                 if (array[i] < result.x)
@@ -3063,17 +3325,92 @@ namespace RyuGiKen
             }
             return result;
         }
+#else
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="array"></param>
+        public static Vector2 FindMinAndMax(int[] array)
+        {
+            if (array == null || array.Length < 1)
+                return Vector2.zero;
+            Vector2 result = new Vector2(int.MaxValue, int.MinValue);
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] < result.x)
+                    result.x = array[i];
+                if (array[i] > result.y)
+                    result.y = array[i];
+            }
+            return result;
+        }
+#endif
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="array"></param>
+        public static Vector2 FindMinAndMax(float[] array)
+        {
+            if (array == null || array.Length < 1)
+                return new Vector2(float.NaN, float.NaN);
+            Vector2 result = new Vector2(float.MaxValue, float.MinValue);
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] < result.x)
+                    result.x = array[i];
+                if (array[i] > result.y)
+                    result.y = array[i];
+            }
+            return result;
+        }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="list"></param>
+        public static Vector2Int FindMinAndMax(List<int> list)
+        {
+            if (list == null || list.Count < 1)
+                return Vector2Int.zero;
+            Vector2Int result = new Vector2Int(int.MaxValue, int.MinValue);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] < result.x)
+                    result.x = list[i];
+                if (list[i] > result.y)
+                    result.y = list[i];
+            }
+            return result;
+        }
+#else
+        /// <summary>
+        /// 找出最大最小值
+        /// </summary>
+        /// <param name="list"></param>
+        public static Vector2 FindMinAndMax(List<int> list)
+        {
+            if (list == null || list.Count < 1)
+                return Vector2.zero;
+            Vector2 result = new Vector2(int.MaxValue, int.MinValue);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] < result.x)
+                    result.x = list[i];
+                if (list[i] > result.y)
+                    result.y = list[i];
+            }
+            return result;
+        }
+#endif
         /// <summary>
         /// 找出最大最小值
         /// </summary>
         /// <param name="list"></param>
         public static Vector2 FindMinAndMax(List<float> list)
         {
-            Vector2 result;
             if (list == null || list.Count < 1)
                 return new Vector2(float.NaN, float.NaN);
-            else
-                result = new Vector2(float.MinValue, float.MaxValue);
+            Vector2 result = new Vector2(float.MaxValue, float.MinValue);
             for (int i = 0; i < list.Count; i++)
             {
                 if (list[i] < result.x)
