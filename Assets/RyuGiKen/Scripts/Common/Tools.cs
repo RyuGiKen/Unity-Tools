@@ -18,6 +18,9 @@ using Debug = UnityEngine.Debug;
 #endif
 /// <summary>
 /// RyuGiKen's Tools
+/// <para>
+/// git@github.com:RyuGiKen/Unity-Tools.git
+/// </para>
 /// </summary>
 namespace RyuGiKen
 {
@@ -4821,20 +4824,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float[] ToWeight(this int[] array)
         {
-            if (array == null || array.Length < 1)
-                return null;
-            float sum = 0;
-            float[] result = new float[array.Length];
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (array[i] > 0)
-                    sum += array[i];
-            }
-            for (int i = 0; i < array.Length; i++)
-            {
-                result[i] = (array[i] > 0 ? array[i] : 0) / sum;
-            }
-            return result;
+            return ToWeight(array.ToFloat());
         }
         /// <summary>
         /// 按权重映射
@@ -4906,6 +4896,63 @@ namespace RyuGiKen
         public static List<double> ToWeight(this List<double> list)
         {
             return ToWeight(list.ToArray()).ToList();
+        }
+        /// <summary>
+        /// 输出等权重映射范围
+        /// </summary>
+        /// <param name="count">数量</param>
+        /// <returns></returns>
+        public static float[] ToWeightRange(uint count)
+        {
+            double[] temp = new double[count];
+            temp.SetArrayAll(1);
+            return ToWeightRange(temp).ToFloat();
+        }
+        /// <summary>
+        /// 按权重映射范围
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static float[] ToWeightRange(this int[] array)
+        {
+            return ToWeightRange(array.ToDouble()).ToFloat();
+        }
+        /// <summary>
+        /// 按权重映射范围
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static float[] ToWeightRange(this float[] array)
+        {
+            return ToWeightRange(array.ToDouble()).ToFloat();
+        }
+        /// <summary>
+        /// 按权重映射范围
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static double[] ToWeightRange(this double[] array)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            double sum = 0;
+            double[] temp = new double[array.Length];
+            double[] result = new double[array.Length + 1];
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i] > 0)
+                    sum += array[i];
+            }
+            for (int i = 0; i < array.Length; i++)
+            {
+                temp[i] = (array[i] > 0 ? array[i] : 0) / sum;
+            }
+            result[0] = 0;
+            for (int i = 1; i < result.Length; i++)
+            {
+                result[i] = temp[i - 1] + result[i - 1];
+            }
+            return result;
         }
         /// <summary>
         /// 求和
@@ -5121,6 +5168,55 @@ namespace RyuGiKen
         /// 映射
         /// </summary>
         /// <param name="value">参数</param>
+        /// <param name="range">参数范围节点</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float MappingRange(float value, float[] range, float OutputMin, float OutputMax, int n = 1, bool limit = true)
+        {
+            if (OutputMin.IsNaN() || OutputMax.IsNaN())
+                return float.NaN;
+            if (OutputMin > OutputMax)
+                ValueAdjust.Exchange(OutputMin, OutputMax, out OutputMin, out OutputMax);
+            if (range == null || range.Length < 2)
+                return OutputMin;
+            float result = float.NaN;
+            for (int i = 0; i < range.Length; i++)
+            {
+                for (int j = 0; j < range.Length; j++)
+                {
+                    if (i == j)
+                        continue;
+                    if (i < j && range[i] > range[j])
+                    {
+                        Exchange(ref range[i], ref range[j]);
+                    }
+                }
+            }
+            float[] tempRange = ToWeightRange(range.Length.ToUInteger() - 1);
+            for (int i = 0; i < tempRange.Length; i++)
+            {
+                tempRange[i] = OutputMin + tempRange[i] * (OutputMax - OutputMin);
+            }
+            for (int i = 1; i < range.Length; i++)
+            {
+                if ((i == range.Length - 1 && value >= range[i]) || (i == 1 && value <= range[0]) || (value >= range[i - 1]) && value <= range[i])
+                {
+                    result = MappingRange(value, range[i - 1], range[i], tempRange[i - 1], tempRange[i], n, limit);
+                    break;
+                }
+            }
+            if (limit)
+                return result.Clamp(OutputMin, OutputMax);
+            else
+                return result;
+        }
+        /// <summary>
+        /// 映射
+        /// </summary>
+        /// <param name="value">参数</param>
         /// <param name="min">参数最小值</param>
         /// <param name="max">参数最大值</param>
         /// <param name="OutputMin">输出最小值</param>
@@ -5131,10 +5227,10 @@ namespace RyuGiKen
         public static float MappingRange(float value, float min, float max, float OutputMin, float OutputMax, int n = 1, bool limit = true)
         {
             float result, percent;
-            if (float.IsNaN(value) || float.IsNaN(min) || float.IsNaN(max) || min == max || OutputMin == OutputMax)
-                return OutputMin;
             if (float.IsNaN(OutputMin) || float.IsNaN(OutputMax))
                 return float.NaN;
+            if (float.IsNaN(value) || float.IsNaN(min) || float.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
             if (min > max)
             {
                 ValueAdjust.Exchange(min, max, out min, out max);
@@ -5171,10 +5267,10 @@ namespace RyuGiKen
         public static double MappingRange(double value, double min, double max, double OutputMin, double OutputMax, int n = 1, bool limit = true)
         {
             double result, percent;
-            if (double.IsNaN(value) || double.IsNaN(min) || double.IsNaN(max) || min == max || OutputMin == OutputMax)
-                return OutputMin;
             if (double.IsNaN(OutputMin) || double.IsNaN(OutputMax))
                 return double.NaN;
+            if (double.IsNaN(value) || double.IsNaN(min) || double.IsNaN(max) || min == max || OutputMin == OutputMax)
+                return OutputMin;
             if (min > max)
             {
                 ValueAdjust.Exchange(min, max, out min, out max);
