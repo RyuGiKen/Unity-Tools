@@ -3008,7 +3008,7 @@ namespace RyuGiKen
                 return 0;
             for (int i = 0; i < str.Length; i++)
             {
-                if (str[i].IsChineseCharacterInString())
+                if (str[i].IsChineseCharacter())
                     return i;
             }
             return -1;
@@ -3018,12 +3018,30 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        public static bool IsChineseCharacterInString(this char c)
+        public static bool IsChineseCharacter(this char c)
         {
             if (c >= 0x4e00 && c <= 0x9fbb)
                 return true;
             else
                 return false;
+        }
+        /// <summary>
+        /// 输出文本占位宽度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static int GetTextLength(this string str, int size)
+        {
+            int result = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i].IsChineseCharacter())
+                    result += 2 * size;
+                else
+                    result += size;
+            }
+            return result;
         }
         /// <summary>
         /// 是否包含指定字符串
@@ -5538,160 +5556,247 @@ namespace RyuGiKen
             return sign + sTime;
         }
         /// <summary>
-        /// 汉字整数数字显示（最大正负99999）
+        /// 汉字数字显示（最大正负99999）
         /// </summary>
         /// <param name="N"></param>
         /// <returns></returns>
-        public static string NumShowCN(this float N)//汉字数字显示
+        public static string NumShowCN(this double N)
         {
-            float num;
-            string NumZ = "";//结果
-            string RoundE = "";//汉字数字万位
-            string RoundD = "";//汉字数字千位
-            string RoundC = "";//汉字数字百位
-            string RoundB = "";//汉字数字十位
-            string RoundA = "";//汉字数字个位
-            int E = 0;//数字万位
-            int D = 0;//数字千位
-            int C = 0;//数字百位
-            int B = 0;//数字十位
-            int A = 0;//数字个位
-
-            if (N < 0)
-            { num = -N; }
-            else
-            { num = N; }
-            if (num < 1)
+            if (N.IsNaN())
+                return "";
+            return NumShowCN(N.ToString());
+        }
+        /// <summary>
+        /// 汉字数字显示（最大正负99999）
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string NumShowCN(this float N)
+        {
+            if (N.IsNaN())
+                return "";
+            return NumShowCN(N.ToString());
+        }
+        /// <summary>
+        /// 汉字数字转浮点数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static double NumCNToDouble(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return double.NaN;
+            string result = "";
+            for (int i = 0; i < N.Length; i++)
             {
-                RoundE = "";
-                RoundD = "";
-                RoundC = "";
-                RoundB = "";
-                RoundA = "零";
+                switch (N[i])
+                {
+                    case '一': result += "1"; break;
+                    case '二': result += "2"; break;
+                    case '三': result += "3"; break;
+                    case '四': result += "4"; break;
+                    case '五': result += "5"; break;
+                    case '六': result += "6"; break;
+                    case '七': result += "7"; break;
+                    case '八': result += "8"; break;
+                    case '九': result += "9"; break;
+                    case '零': result += "0"; break;
+                    case '点': result += "."; break;
+                    case '负': result += "-"; break;
+                }
             }
-            else if (num > 99999)
+            return result.ToDouble(double.NaN);
+        }
+        /// <summary>
+        /// 汉字数字转浮点数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static float NumCNToFloat(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return float.NaN;
+            return N.NumCNToDouble().ToFloat();
+        }
+        /// <summary>
+        /// 汉字数字转整数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static int NumCNToInteger(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return 0;
+            return N.NumCNToFloat().ToInteger();
+        }
+        /// <summary>
+        /// 汉字数字显示
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string NumShowCN(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return "";
+            string result = "";
+            int index = N.IndexOf('.');
+            if (index < 0)
             {
-                RoundE = "九万";
-                RoundD = "九千";
-                RoundC = "九百";
-                RoundB = "九十";
-                RoundA = "九";
-            }
-            else
-            {
-                //数字万位
-                if (num > 9999)
+                for (int i = 0; i < N.Length; i++)
                 {
-                    E = Mathf.FloorToInt(num / 10000);
-                    switch (E)
-                    {
-                        case 1: RoundE = "一万"; break;
-                        case 2: RoundE = "二万"; break;
-                        case 3: RoundE = "三万"; break;
-                        case 4: RoundE = "四万"; break;
-                        case 5: RoundE = "五万"; break;
-                        case 6: RoundE = "六万"; break;
-                        case 7: RoundE = "七万"; break;
-                        case 8: RoundE = "八万"; break;
-                        case 9: RoundE = "九万"; break;
-                        default: RoundE = ""; break;
-                    }
-                }
-                //数字千位
-                if (num > 999)
-                {
-                    D = Mathf.FloorToInt((num - E * 10000) / 1000);
-                    switch (D)
-                    {
-                        case 1: RoundD = "一千"; break;
-                        case 2: RoundD = "二千"; break;
-                        case 3: RoundD = "三千"; break;
-                        case 4: RoundD = "四千"; break;
-                        case 5: RoundD = "五千"; break;
-                        case 6: RoundD = "六千"; break;
-                        case 7: RoundD = "七千"; break;
-                        case 8: RoundD = "八千"; break;
-                        case 9: RoundD = "九千"; break;
-                        default: RoundD = ""; break;
-                    }
-                }
-                //数字百位
-                if (num > 99)
-                {
-                    C = Mathf.FloorToInt((num - E * 10000 - D * 1000) / 100);
-                    switch (C)
-                    {
-                        case 1: RoundC = "一百"; break;
-                        case 2: RoundC = "二百"; break;
-                        case 3: RoundC = "三百"; break;
-                        case 4: RoundC = "四百"; break;
-                        case 5: RoundC = "五百"; break;
-                        case 6: RoundC = "六百"; break;
-                        case 7: RoundC = "七百"; break;
-                        case 8: RoundC = "八百"; break;
-                        case 9: RoundC = "九百"; break;
-                        default: RoundC = ""; break;
-                    }
-                }
-                //数字十位
-                if (num > 9)
-                {
-                    B = Mathf.FloorToInt((num - E * 10000 - D * 1000 - C * 100) / 10);
-                    switch (B)
-                    {
-                        case 1: RoundB = "一十"; break;
-                        case 2: RoundB = "二十"; break;
-                        case 3: RoundB = "三十"; break;
-                        case 4: RoundB = "四十"; break;
-                        case 5: RoundB = "五十"; break;
-                        case 6: RoundB = "六十"; break;
-                        case 7: RoundB = "七十"; break;
-                        case 8: RoundB = "八十"; break;
-                        case 9: RoundB = "九十"; break;
-                        default: RoundB = ""; break;
-                    }
-                }
-                //数字个位
-                A = Mathf.FloorToInt(num - E * 10000 - D * 1000 - C * 100 - B * 10);
-                switch (A)
-                {
-                    case 1: RoundA = "一"; break;
-                    case 2: RoundA = "二"; break;
-                    case 3: RoundA = "三"; break;
-                    case 4: RoundA = "四"; break;
-                    case 5: RoundA = "五"; break;
-                    case 6: RoundA = "六"; break;
-                    case 7: RoundA = "七"; break;
-                    case 8: RoundA = "八"; break;
-                    case 9: RoundA = "九"; break;
-                    default: RoundA = ""; break;
+                    result += NumShowCN(N[i]);
                 }
 
-                if (E == 0 && D == 0 && C == 0 && B == 1)
+            }
+            else
+            {
+                string[] temp = N.Split('.');
+                result = NumShowCN(temp[0].ToInteger());
+                string temp2 = N.Substring(index);
+                for (int i = 0; i < temp2.Length; i++)
                 {
-                    RoundB = "十";
-                }
-                else if (E > 0 && D == 0 && C > 0 && B == 0 && A > 0)
-                {
-                    RoundD = "零";
-                    RoundB = "零";
-                }
-                else if (C > 0 && B == 0 && A > 0)
-                {
-                    RoundB = "零";
-                }
-                else if ((D > 0 && C == 0 && B > 0) || (D > 0 && C == 0 && B == 0 && A > 0))
-                {
-                    RoundC = "零";
-                }
-                else if ((E > 0 && D == 0 && C == 0 && B == 0 && A > 0) || (E > 0 && D == 0 && C == 0 && B > 0) || (E > 0 && D == 0 && C > 0))
-                {
-                    RoundD = "零";
+                    result += NumShowCN(temp2[i]);
                 }
             }
-            NumZ = (N < 0 ? "负" : "") + RoundE + RoundD + RoundC + RoundB + RoundA;
-            //Debug.Log(NumZ);
-            return NumZ;
+            return result;
+        }
+        /// <summary>
+        /// 汉字数字显示（直接转换）
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string NumShowCN(this char N)
+        {
+            string result = "";
+            switch (N)
+            {
+                case '1': result = "一"; break;
+                case '2': result = "二"; break;
+                case '3': result = "三"; break;
+                case '4': result = "四"; break;
+                case '5': result = "五"; break;
+                case '6': result = "六"; break;
+                case '7': result = "七"; break;
+                case '8': result = "八"; break;
+                case '9': result = "九"; break;
+                case '0': result = "零"; break;
+                case '.': result = "点"; break;
+                case '-': result = "负"; break;
+                default: result = ""; break;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 汉字数字整数显示（最大正负99999）
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string NumShowCN(this int N)
+        {
+            if (N == 0)
+            {
+                return "零";
+            }
+            else if (N > -10 && N < 10)
+            {
+                string temp = "";
+                switch (N)
+                {
+                    case 1: temp = "一"; break;
+                    case 2: temp = "二"; break;
+                    case 3: temp = "三"; break;
+                    case 4: temp = "四"; break;
+                    case 5: temp = "五"; break;
+                    case 6: temp = "六"; break;
+                    case 7: temp = "七"; break;
+                    case 8: temp = "八"; break;
+                    case 9: temp = "九"; break;
+                }
+                return (N < 0 ? "负" : "") + temp;
+            }
+            int MaxLength = 5;
+            int num = Math.Abs(N);
+            string[] DigitString = new string[MaxLength];
+            DigitString.SetArrayAll("");
+            int[] Digit = new int[MaxLength];
+            Digit.SetArrayAll(0);
+
+            if (GetNumDigit(num) > MaxLength)
+            {
+                DigitString[4] = "九万";
+                DigitString[3] = "九千";
+                DigitString[2] = "九百";
+                DigitString[1] = "九十";
+                DigitString[0] = "九";
+            }
+            else
+            {
+                for (int i = MaxLength - 1; i >= 0; i--)
+                {
+                    if (i < GetNumDigit(num))
+                    {
+                        float temp = num;
+                        for (int j = MaxLength - 1; j > i; j--)
+                        {
+                            temp -= Digit[j] * Math.Pow(10, j).ToFloat();
+                        }
+                        Digit[i] = Mathf.FloorToInt(temp / Math.Pow(10, i).ToFloat());
+                    }
+                    if (Digit[i] != 0)
+                    {
+                        DigitString[i] = NumShowCN(Digit[i].ToString()[0]);
+                        switch (i)
+                        {
+                            case 8: DigitString[i] += "亿"; break;
+                            case 7: DigitString[i] += "千万"; break;
+                            case 6: DigitString[i] += "百万"; break;
+                            case 5: DigitString[i] += "十万"; break;
+                            case 4: DigitString[i] += "万"; break;
+                            case 3: DigitString[i] += "千"; break;
+                            case 2: DigitString[i] += "百"; break;
+                            case 1: DigitString[i] += "十"; break;
+                        }
+                    }
+                }
+                bool[] isZero = new bool[MaxLength];
+                for (int i = 0; i < MaxLength; i++)
+                {
+                    isZero[i] = (Digit[i] == 0);
+                }
+                bool temp2 = true;
+                for (int i = 2; i < MaxLength; i++)
+                {
+                    if (!isZero[i])
+                        temp2 = false;
+                }
+                if (temp2 && Digit[1] == 1)
+                {
+                    DigitString[1] = "十";
+                }
+                else if (!isZero[4] && isZero[3] && !isZero[2] && isZero[1] && !isZero[0])
+                {
+                    DigitString[3] = "零";
+                    DigitString[1] = "零";
+                }
+                else if (!isZero[2] && isZero[1] && !isZero[0])
+                {
+                    DigitString[1] = "零";
+                }
+                else if ((!isZero[3] && isZero[2] && !isZero[1]) || (!isZero[3] && isZero[2] && isZero[1] && !isZero[0]))
+                {
+                    DigitString[2] = "零";
+                }
+                else if ((!isZero[4] && isZero[3] && isZero[2] && isZero[1] && !isZero[0]) || (!isZero[4] && isZero[3] && isZero[2] && !isZero[1]) || (!isZero[4] && isZero[3] && !isZero[2]))
+                {
+                    DigitString[3] = "零";
+                }
+            }
+            string result = (N < 0 ? "负" : "");
+            for (int i = MaxLength - 1; i >= 0; i--)
+            {
+                result += DigitString[i];
+            }
+            return result;
         }
     }
     /// <summary>
@@ -5716,7 +5821,7 @@ namespace RyuGiKen
         /// </summary>
         public float alpha;
         /// <summary>
-        /// 
+        /// 新建HSV颜色
         /// </summary>
         /// <param name="H">色调[0，360]</param>
         /// <param name="S">饱和度[0，1]</param>
@@ -5730,7 +5835,7 @@ namespace RyuGiKen
             this.alpha = a;
         }
         /// <summary>
-        /// 
+        /// 新建HSV颜色
         /// </summary>
         /// <param name="color"></param>
         public HSVColor(Color color)
@@ -5908,7 +6013,7 @@ namespace RyuGiKen
         /// <param name="RGBA"></param>
         /// <param name="percent"></param>
         /// <returns></returns>
-        public static Color ColorSaturationChange(Color RGBA, float percent)//更改颜色饱和度（颜色，指定量百分比系数[0，1]）
+        public static Color ColorSaturationChange(Color RGBA, float percent)
         {
             HSVColor temp = ConvertRgbToHsv(RGBA);
             temp.Saturation = percent;
@@ -5926,7 +6031,7 @@ namespace RyuGiKen
         /// <param name="RGBA"></param>
         /// <param name="percent"></param>
         /// <returns></returns>
-        public static Color ColorValueChange(Color RGBA, float percent)//更改颜色明度（颜色，指定量百分比系数[0，1]）
+        public static Color ColorValueChange(Color RGBA, float percent)
         {
             HSVColor temp = ConvertRgbToHsv(RGBA);
             temp.Value = percent;
@@ -5944,7 +6049,7 @@ namespace RyuGiKen
         /// <param name="RGBA"></param>
         /// <param name="percent"></param>
         /// <returns></returns>
-        public static Color ColorAlphaChange(Color RGBA, float percent)//更改颜色透明度（颜色，指定量百分比系数[0，1]）
+        public static Color ColorAlphaChange(Color RGBA, float percent)
         {
             return new Color(RGBA.r, RGBA.g, RGBA.b, percent);
         }
