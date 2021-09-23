@@ -2998,6 +2998,34 @@ namespace RyuGiKen
             return -1;
         }
         /// <summary>
+        /// 找出字符串中第一个汉字的序号
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int FindIndexOfChineseCharacterInString(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i].IsChineseCharacterInString())
+                    return i;
+            }
+            return -1;
+        }
+        /// <summary>
+        /// 是否汉字
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static bool IsChineseCharacterInString(this char c)
+        {
+            if (c >= 0x4e00 && c <= 0x9fbb)
+                return true;
+            else
+                return false;
+        }
+        /// <summary>
         /// 是否包含指定字符串
         /// </summary>
         /// <param name="source"></param>
