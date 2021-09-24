@@ -2145,6 +2145,26 @@ namespace RyuGiKen
             return list;
         }
         /// <summary>
+        /// 个别转列表
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static List<T> ToList<T>(this T obj)
+        {
+            return new List<T>() { obj };
+        }
+        /// <summary>
+        /// 个别转数组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static T[] ToArray<T>(this T obj)
+        {
+            return new T[] { obj };
+        }
+        /// <summary>
         /// 列表转数组
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -2877,6 +2897,122 @@ namespace RyuGiKen
             return result.ClearNullItem();
         }
         /// <summary>
+        /// 统计字符串中特定字符个数
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int CountCharInString(this string str, char c)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
+            int result = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] == c)
+                {
+                    result++;
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 统计字符串中连续特定字符个数
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int CountSequenceCharInString(this string str, char c)
+        {
+            return CountSequenceCharInString(str, c, out int[] length);
+        }
+        /// <summary>
+        /// 统计字符串中连续特定字符个数
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int CountSequenceCharInString(this string str, char c, out int[] length)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+            {
+                length = new int[] { 0 };
+                return 0;
+            }
+            List<int> result = new List<int>();
+            bool lastIsC = false;
+            int temp = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                bool isC = str[i] == c;
+                if (isC)
+                {
+                    temp++;
+                }
+                else
+                {
+                    if (isC != lastIsC)
+                    {
+                        result.Add(temp);
+                        temp = 0;
+                    }
+                }
+                lastIsC = isC;
+            }
+            if (temp != 0)
+                result.Add(temp);
+            length = result.ToArray();
+            ValueAdjust.FindMinAndMax(result, out int min, out int max);
+            return max;
+        }
+        /// <summary>
+        /// 字符串是否全为特定字符
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static bool IsFullChar(this string str, char c)
+        {
+            if (string.IsNullOrEmpty(str))
+                return false;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] != c)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        /// <summary>
+        /// 移除字符串中连续特定字符
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static string ClearSequenceCharInString(this string str, char c)
+        {
+            if (string.IsNullOrEmpty(str))
+                return "";
+            if (str.IndexOf(c) < 0 || str.Length < 2)
+                return str;
+            string[] temp = new string[str.Length];
+            for (int i = 0; i < str.Length; i++)
+            {
+                temp[i] = str[i].ToString();
+            }
+            for (int i = 0; i < temp.Length; i++)
+            {
+                if (i >= temp.Length - 1)
+                {
+                    if (str[i] == c && str[i - 1] == c)
+                        temp[i] = "";
+                }
+                else if (str[i] == c && str[i + 1] == c)
+                    temp[i] = "";
+                else if (i > 0 && str[i] == c && str[i - 1] == c)
+                    temp[i] = "";
+            }
+            return string.Concat(temp);
+        }
+        /// <summary>
         /// 统计字符串中数字个数
         /// </summary>
         /// <param name="str"></param>
@@ -3044,11 +3180,20 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 是否相同（忽略大小写）
+        /// </summary>
+        /// <param name="c1"></param>
+        /// <param name="c2"></param>
+        /// <returns></returns>
+        public static bool CompareIgnoreCase(this char c1, char c2)
+        {
+            return c1 == char.ToLower(c2) || c1 == char.ToUpper(c2);
+        }
+        /// <summary>
         /// 是否包含指定字符串
         /// </summary>
         /// <param name="source"></param>
         /// <param name="value"></param>
-        /// <param name="comparisonType"></param>
         /// <returns></returns>
         public static bool Contain(this string source, string value)
         {
@@ -3061,7 +3206,6 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="source"></param>
         /// <param name="value"></param>
-        /// <param name="comparisonType"></param>
         /// <returns></returns>
         public static bool ContainIgnoreCase(this string source, string value)
         {
@@ -3616,6 +3760,15 @@ namespace RyuGiKen
         /// 转整数
         /// </summary>
         /// <param name="num"></param>
+        /// <returns></returns>
+        public static uint ToUInteger(this long num)
+        {
+            return (uint)(num.Clamp(0));
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
         /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
         public static uint ToUInteger(this float num, uint FailValue = 0)
@@ -3653,9 +3806,24 @@ namespace RyuGiKen
         /// 转整数
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
         public static uint[] ToUInteger(this int[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            uint[] result = new uint[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToUInteger();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static uint[] ToUInteger(this long[] num)
         {
             if (num == null || num.Length < 1)
                 return null;
@@ -3701,11 +3869,153 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 字符串转整数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static long ToInteger64(this string num, long FailValue = 0)
+        {
+            long result = FailValue;
+            long.TryParse(num, out result);
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static long ToInteger64(this int num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static long ToInteger64(this uint num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static long ToInteger64(this float num, long FailValue = 0)
+        {
+            return float.IsNaN(num) ? FailValue : (long)Round(num);
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static long ToInteger64(this double num, long FailValue = 0)
+        {
+            return double.IsNaN(num) ? FailValue : (long)Round(num);
+        }
+        /// <summary>
+        /// 字符串转整数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static long[] ToInteger64(this string[] num, long FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            long[] result = new long[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger64(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static long[] ToInteger64(this int[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            long[] result = new long[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger64();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static long[] ToInteger64(this uint[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            long[] result = new long[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger64();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static long[] ToInteger64(this float[] num, long FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            long[] result = new long[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger64(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static long[] ToInteger64(this double[] num, long FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            long[] result = new long[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger64(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
         /// 取绝对值
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         public static int Abs(this int value)
+        {
+            return Math.Abs(value);
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static long Abs(this long value)
         {
             return Math.Abs(value);
         }
@@ -3802,6 +4112,20 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 限位。返回不小于min的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static long Clamp(this long value, long min)
+        {
+            long result = 0;
+            if (value < min)
+                result = min;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
@@ -3860,6 +4184,24 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
+        public static long Clamp(this long value, long min, long max)
+        {
+            long result = 0;
+            if (min > max)
+                ValueAdjust.Exchange(min, max, out min, out max);
+            if (value < min)
+                result = min;
+            else if (value > max)
+                result = max;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static int Clamp(this int value, float min, float max)
         {
             int result = 0;
@@ -3890,6 +4232,23 @@ namespace RyuGiKen
             }
             return size * (Num < 0 && outputMinus ? -1 : 1);
             //return Math.Abs((int)Num).ToString().Length * (Num < 0 ? -1 : 1);
+        }
+        /// <summary>
+        /// 计算数字位数（取整）
+        /// </summary>
+        /// <param name="Num"></param>
+        /// <param name="outputMinus">输出符号</param>
+        /// <returns></returns>
+        public static int GetNumDigit(this double Num, bool outputMinus = false)
+        {
+            int size = 0;//位数
+            double num = Math.Abs(Num);
+            while (num >= 1)//获取位数
+            {
+                num /= 10;
+                size++;
+            }
+            return size * (Num < 0 && outputMinus ? -1 : 1);
         }
         /// <summary>
         /// 找出最大最小值
@@ -4178,6 +4537,21 @@ namespace RyuGiKen
                     result.y = list[i];
             }
             return result;
+        }
+        /// <summary>
+        /// 判定是否在范围内
+        /// </summary>
+        /// <param name="CurrentValue">当前值</param>
+        /// <param name="MinValue">最小值</param>
+        /// <param name="MaxValue">最大值</param>
+        /// <returns></returns>
+        public static bool InRange(this int CurrentValue, int MinValue, int MaxValue)
+        {
+            if (MinValue > MaxValue)
+            {
+                Exchange(MinValue, MaxValue, out MinValue, out MaxValue);
+            }
+            return CurrentValue >= MinValue && CurrentValue <= MaxValue;
         }
         /// <summary>
         /// 判定是否在范围内
@@ -5004,13 +5378,22 @@ namespace RyuGiKen
         /// 求和
         /// </summary>
         /// <param name="array"></param>
+        /// <param name="startIndex">起始序号</param>
+        /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static int Sum(this int[] array)
+        public static int Sum(this int[] array, int startIndex = 0, int endIndex = -1)
         {
             if (array == null || array.Length < 1)
                 return 0;
+            startIndex = startIndex.Clamp(0, array.Length - 1);
+            if (!endIndex.InRange(0, array.Length - 1))
+                endIndex = array.Length - 1;
+            if (startIndex > endIndex)
+            {
+                Exchange(startIndex, endIndex, out startIndex, out endIndex);
+            }
             int sum = 0;
-            for (int i = 0; i < array.Length; i++)
+            for (int i = startIndex; i <= endIndex; i++)
             {
                 sum += array[i];
             }
@@ -5020,29 +5403,35 @@ namespace RyuGiKen
         /// 求和
         /// </summary>
         /// <param name="list"></param>
+        /// <param name="startIndex">起始序号</param>
+        /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static int Sum(this List<int> list)
+        public static int Sum(this List<int> list, int startIndex = 0, int endIndex = -1)
         {
             if (list == null || list.Count < 1)
                 return 0;
-            int sum = 0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                sum += list[i];
-            }
-            return sum;
+            return list.ToArray().Sum(startIndex, endIndex);
         }
         /// <summary>
         /// 求和
         /// </summary>
         /// <param name="array"></param>
+        /// <param name="startIndex">起始序号</param>
+        /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static float Sum(this float[] array)
+        public static float Sum(this float[] array, int startIndex = 0, int endIndex = -1)
         {
             if (array == null || array.Length < 1)
                 return float.NaN;
+            startIndex = startIndex.Clamp(0, array.Length - 1);
+            if (!endIndex.InRange(0, array.Length - 1))
+                endIndex = array.Length - 1;
+            if (startIndex > endIndex)
+            {
+                Exchange(startIndex, endIndex, out startIndex, out endIndex);
+            }
             float sum = 0;
-            for (int i = 0; i < array.Length; i++)
+            for (int i = startIndex; i <= endIndex; i++)
             {
                 if (!float.IsNaN(array[i]))
                     sum += array[i];
@@ -5053,30 +5442,35 @@ namespace RyuGiKen
         /// 求和
         /// </summary>
         /// <param name="list"></param>
+        /// <param name="startIndex">起始序号</param>
+        /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static float Sum(this List<float> list)
+        public static float Sum(this List<float> list, int startIndex = 0, int endIndex = -1)
         {
             if (list == null || list.Count < 1)
                 return float.NaN;
-            float sum = 0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (!float.IsNaN(list[i]))
-                    sum += list[i];
-            }
-            return sum;
+            return list.ToArray().Sum(startIndex, endIndex);
         }
         /// <summary>
         /// 求和
         /// </summary>
         /// <param name="array"></param>
+        /// <param name="startIndex">起始序号</param>
+        /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static double Sum(this double[] array)
+        public static double Sum(this double[] array, int startIndex = 0, int endIndex = -1)
         {
             if (array == null || array.Length < 1)
                 return double.NaN;
+            startIndex = startIndex.Clamp(0, array.Length - 1);
+            if (!endIndex.InRange(0, array.Length - 1))
+                endIndex = array.Length - 1;
+            if (startIndex > endIndex)
+            {
+                Exchange(startIndex, endIndex, out startIndex, out endIndex);
+            }
             double sum = 0;
-            for (int i = 0; i < array.Length; i++)
+            for (int i = startIndex; i <= endIndex; i++)
             {
                 if (!double.IsNaN(array[i]))
                     sum += array[i];
@@ -5087,18 +5481,14 @@ namespace RyuGiKen
         /// 求和
         /// </summary>
         /// <param name="list"></param>
+        /// <param name="startIndex">起始序号</param>
+        /// <param name="endIndex">结束序号</param>
         /// <returns></returns>
-        public static double Sum(this List<double> list)
+        public static double Sum(this List<double> list, int startIndex = 0, int endIndex = -1)
         {
             if (list == null || list.Count < 1)
                 return double.NaN;
-            double sum = 0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (!double.IsNaN(list[i]))
-                    sum += list[i];
-            }
-            return sum;
+            return list.ToArray().Sum(startIndex, endIndex);
         }
         /// <summary>
         /// x在[a，b]范围输出[-1，1]
@@ -5111,10 +5501,20 @@ namespace RyuGiKen
         /// <returns>[-1，1]</returns>
         public static float ToPercentPlusMinus01(float value, float min, float max, float n = 1, bool limit = true)
         {
-            if (min == max)
-            { return 0; }
-            else
-                return ToPercent01(value, min, max, n, limit) * 2 - 1;
+            return ToPercent01(value, min, max, n, limit) * 2 - 1;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[-1，1]
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[-1，1]</returns>
+        public static double ToPercentPlusMinus01(double value, double min, double max, float n = 1, bool limit = true)
+        {
+            return ToPercent01(value, min, max, n, limit) * 2 - 1;
         }
         /// <summary>
         /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
@@ -5128,8 +5528,43 @@ namespace RyuGiKen
         public static float ToPercent01(float value, float min, float max, float n = 1, bool limit = true)
         {
             float result;
-            if (min == max)
-            { return 0; }
+            if (float.IsNaN(value) || float.IsNaN(min) || float.IsNaN(max))
+                return float.NaN;
+            else if (min == max)
+                return 0;
+            else if (min > max)
+            {
+                Exchange(min, max, out min, out max);
+            }
+            if (n < 0)
+            {
+                result = (value - max) * 1f / (min - max);//输出[1,0]
+            }
+            else
+            {
+                result = (value - min) * 1f / (max - min);//输出[0,1]
+            }
+            if (limit)
+                return Clamp(result);
+            else
+                return result;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static double ToPercent01(double value, double min, double max, float n = 1, bool limit = true)
+        {
+            double result;
+            if (double.IsNaN(value) || double.IsNaN(min) || double.IsNaN(max))
+                return double.NaN;
+            else if (min == max)
+                return 0;
             else if (min > max)
             {
                 Exchange(min, max, out min, out max);
@@ -5556,85 +5991,161 @@ namespace RyuGiKen
             return sign + sTime;
         }
         /// <summary>
-        /// 汉字数字显示（最大正负99999）
+        /// 汉字数字显示
         /// </summary>
         /// <param name="N"></param>
         /// <returns></returns>
-        public static string NumShowCN(this double N)
+        public static string ToChineseDigit(this double N)
         {
             if (N.IsNaN())
                 return "";
-            return NumShowCN(N.ToString());
-        }
-        /// <summary>
-        /// 汉字数字显示（最大正负99999）
-        /// </summary>
-        /// <param name="N"></param>
-        /// <returns></returns>
-        public static string NumShowCN(this float N)
-        {
-            if (N.IsNaN())
-                return "";
-            return NumShowCN(N.ToString());
-        }
-        /// <summary>
-        /// 汉字数字转浮点数
-        /// </summary>
-        /// <param name="N"></param>
-        /// <returns></returns>
-        public static double NumCNToDouble(this string N)
-        {
-            if (string.IsNullOrWhiteSpace(N))
-                return double.NaN;
             string result = "";
-            for (int i = 0; i < N.Length; i++)
+            string str = N.ToString();
+            int index = str.IndexOf('.');
+            if (index < 0)
             {
-                switch (N[i])
+                result = ToChineseDigit(N.ToInteger64());
+            }
+            else
+            {
+                string[] temp = N.ToString().Split('.');
+                result = ToChineseDigit(temp[0].ToInteger());
+                string temp2 = N.ToString().Substring(index);
+                for (int i = 0; i < temp2.Length; i++)
                 {
-                    case '一': result += "1"; break;
-                    case '二': result += "2"; break;
-                    case '三': result += "3"; break;
-                    case '四': result += "4"; break;
-                    case '五': result += "5"; break;
-                    case '六': result += "6"; break;
-                    case '七': result += "7"; break;
-                    case '八': result += "8"; break;
-                    case '九': result += "9"; break;
-                    case '零': result += "0"; break;
-                    case '点': result += "."; break;
-                    case '负': result += "-"; break;
+                    result += ToChineseDigit(temp2[i]);
                 }
             }
-            return result.ToDouble(double.NaN);
-        }
-        /// <summary>
-        /// 汉字数字转浮点数
-        /// </summary>
-        /// <param name="N"></param>
-        /// <returns></returns>
-        public static float NumCNToFloat(this string N)
-        {
-            if (string.IsNullOrWhiteSpace(N))
-                return float.NaN;
-            return N.NumCNToDouble().ToFloat();
-        }
-        /// <summary>
-        /// 汉字数字转整数
-        /// </summary>
-        /// <param name="N"></param>
-        /// <returns></returns>
-        public static int NumCNToInteger(this string N)
-        {
-            if (string.IsNullOrWhiteSpace(N))
-                return 0;
-            return N.NumCNToFloat().ToInteger();
+            return result;
         }
         /// <summary>
         /// 汉字数字显示
         /// </summary>
         /// <param name="N"></param>
         /// <returns></returns>
-        public static string NumShowCN(this string N)
+        public static string ToChineseDigit(this float N)
+        {
+            if (N.IsNaN())
+                return "";
+            return ToChineseDigit(N.ToDouble());
+        }
+        /// <summary>
+        /// 汉字数字转浮点数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static double ChineseDigitToDouble(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return double.NaN;
+            List<string> digit = new List<string>() { "零", "十", "百", "千", "万", "十万", "百万", "千万", "亿", "十亿", "百亿", "千亿", "万亿", "十万亿", "百万亿", "千万亿" };
+            int MaxLength = digit.Count;
+            bool negative = N[0] == '负';
+            int index = N.IndexOf('点');
+            string temp = index < 0 ? N.Replace("负", "") : N.Replace("负", "").Substring(0, index - 1);
+            string result = "";
+
+            if (temp == "零")
+            {
+                result = "0";
+            }
+            else if (digit.IndexOf(N) > 0)
+            {
+                result = Math.Pow(10, digit.IndexOf(N)).ToInteger64().ToString();
+            }
+            else
+            {
+                long num = 0;
+                long numtemp = 0;
+                int index2 = -1;
+                for (int i = MaxLength - 1; i > 0; i--)
+                {
+                    index2 = temp.IndexOf(digit[i]);
+                    if (index2 > 0)
+                    {
+                        numtemp = temp[index2 - 1].ChineseDigitToString().ToInteger() * Math.Pow(10, i).ToInteger64();
+                        num += numtemp;
+                        temp = temp.Substring(index2 + 1);
+                    }
+                }
+                numtemp = temp.Replace("零", "")[0].ChineseDigitToString().ToInteger64();
+                num += numtemp;
+                result += num.ToString();
+            }
+            if (index >= 0)
+            {
+                string temp2 = N.Substring(index);
+                for (int i = 0; i < temp2.Length; i++)
+                {
+                    result += temp2[i].ChineseDigitToString();
+                }
+            }
+            return (negative ? -1 : 1) * result.ToDouble(double.NaN);
+        }
+        /// <summary>
+        /// 汉字数字转浮点数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static float ChineseDigitToFloat(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return float.NaN;
+            return N.ChineseDigitToDouble().ToFloat();
+        }
+        /// <summary>
+        /// 汉字数字转整数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static int ChineseDigitToInteger(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return 0;
+            return N.ChineseDigitToDouble().ToInteger();
+        }
+        /// <summary>
+        /// 汉字数字转整数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static long ChineseDigitToInteger64(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return 0;
+            return N.ChineseDigitToDouble().ToInteger64();
+        }
+        /// <summary>
+        /// 汉字数字转整数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string ChineseDigitToString(this char N)
+        {
+            string result = "";
+            switch (N)
+            {
+                case '一': result += "1"; break;
+                case '二': result += "2"; break;
+                case '三': result += "3"; break;
+                case '四': result += "4"; break;
+                case '五': result += "5"; break;
+                case '六': result += "6"; break;
+                case '七': result += "7"; break;
+                case '八': result += "8"; break;
+                case '九': result += "9"; break;
+                case '零': result += "0"; break;
+                case '点': result += "."; break;
+                case '负': result = "-"; break;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 汉字数字显示
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string ToChineseDigit(this string N)
         {
             if (string.IsNullOrWhiteSpace(N))
                 return "";
@@ -5642,20 +6153,20 @@ namespace RyuGiKen
             int index = N.IndexOf('.');
             if (index < 0)
             {
-                for (int i = 0; i < N.Length; i++)
-                {
-                    result += NumShowCN(N[i]);
-                }
-
+                //for (int i = 0; i < N.Length; i++)
+                //{
+                //    result += ToChineseDigit(N[i]);
+                //}
+                result = ToChineseDigit(N.ToDouble(double.NaN).ToInteger64());
             }
             else
             {
                 string[] temp = N.Split('.');
-                result = NumShowCN(temp[0].ToInteger());
+                result = ToChineseDigit(temp[0].ToInteger());
                 string temp2 = N.Substring(index);
                 for (int i = 0; i < temp2.Length; i++)
                 {
-                    result += NumShowCN(temp2[i]);
+                    result += ToChineseDigit(temp2[i]);
                 }
             }
             return result;
@@ -5665,7 +6176,7 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="N"></param>
         /// <returns></returns>
-        public static string NumShowCN(this char N)
+        public static string ToChineseDigit(this char N)
         {
             string result = "";
             switch (N)
@@ -5682,16 +6193,24 @@ namespace RyuGiKen
                 case '0': result = "零"; break;
                 case '.': result = "点"; break;
                 case '-': result = "负"; break;
-                default: result = ""; break;
             }
             return result;
         }
         /// <summary>
-        /// 汉字数字整数显示（最大正负99999）
+        /// 汉字数字整数显示
         /// </summary>
         /// <param name="N"></param>
         /// <returns></returns>
-        public static string NumShowCN(this int N)
+        public static string ToChineseDigit(this int N)
+        {
+            return ToChineseDigit(N.ToInteger64());
+        }
+        /// <summary>
+        /// 汉字数字整数显示
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string ToChineseDigit(this long N)
         {
             if (N == 0)
             {
@@ -5714,8 +6233,9 @@ namespace RyuGiKen
                 }
                 return (N < 0 ? "负" : "") + temp;
             }
-            int MaxLength = 5;
-            int num = Math.Abs(N);
+            string[] digit = new string[16] { "零", "十", "百", "千", "万", "十万", "百万", "千万", "亿", "十亿", "百亿", "千亿", "万亿", "十万亿", "百万亿", "千万亿" };
+            int MaxLength = digit.Length;
+            long num = Math.Abs(N);
             string[] DigitString = new string[MaxLength];
             DigitString.SetArrayAll("");
             int[] Digit = new int[MaxLength];
@@ -5723,11 +6243,11 @@ namespace RyuGiKen
 
             if (GetNumDigit(num) > MaxLength)
             {
-                DigitString[4] = "九万";
-                DigitString[3] = "九千";
-                DigitString[2] = "九百";
-                DigitString[1] = "九十";
-                DigitString[0] = "九";
+                DigitString[0] = ToChineseDigit(9);
+                for (int i = 1; i < MaxLength; i++)
+                {
+                    DigitString[i] = ToChineseDigit(9) + digit[i];
+                }
             }
             else
             {
@@ -5735,30 +6255,23 @@ namespace RyuGiKen
                 {
                     if (i < GetNumDigit(num))
                     {
-                        float temp = num;
+                        double temp = num;
                         for (int j = MaxLength - 1; j > i; j--)
                         {
-                            temp -= Digit[j] * Math.Pow(10, j).ToFloat();
+                            temp -= Digit[j] * Math.Pow(10, j);
                         }
-                        Digit[i] = Mathf.FloorToInt(temp / Math.Pow(10, i).ToFloat());
+                        Digit[i] = Math.Floor(temp / Math.Pow(10, i)).ToInteger();
                     }
-                    if (Digit[i] != 0)
+                    //if (Digit[i] != 0)
                     {
-                        DigitString[i] = NumShowCN(Digit[i].ToString()[0]);
-                        switch (i)
+                        DigitString[i] = ToChineseDigit(Digit[i].ToString()[0]);
+                        if (i > 0 && i < MaxLength && Digit[i] != 0)
                         {
-                            case 8: DigitString[i] += "亿"; break;
-                            case 7: DigitString[i] += "千万"; break;
-                            case 6: DigitString[i] += "百万"; break;
-                            case 5: DigitString[i] += "十万"; break;
-                            case 4: DigitString[i] += "万"; break;
-                            case 3: DigitString[i] += "千"; break;
-                            case 2: DigitString[i] += "百"; break;
-                            case 1: DigitString[i] += "十"; break;
+                            DigitString[i] += digit[i];
                         }
                     }
                 }
-                bool[] isZero = new bool[MaxLength];
+                /*bool[] isZero = new bool[MaxLength];
                 for (int i = 0; i < MaxLength; i++)
                 {
                     isZero[i] = (Digit[i] == 0);
@@ -5772,8 +6285,8 @@ namespace RyuGiKen
                 if (temp2 && Digit[1] == 1)
                 {
                     DigitString[1] = "十";
-                }
-                else if (!isZero[4] && isZero[3] && !isZero[2] && isZero[1] && !isZero[0])
+                }*/
+                /*else if (!isZero[4] && isZero[3] && !isZero[2] && isZero[1] && !isZero[0])
                 {
                     DigitString[3] = "零";
                     DigitString[1] = "零";
@@ -5789,12 +6302,29 @@ namespace RyuGiKen
                 else if ((!isZero[4] && isZero[3] && isZero[2] && isZero[1] && !isZero[0]) || (!isZero[4] && isZero[3] && isZero[2] && !isZero[1]) || (!isZero[4] && isZero[3] && !isZero[2]))
                 {
                     DigitString[3] = "零";
+                }*/
+                foreach (int i in new int[] { 1, 5, 9, 13 })
+                {
+                    if (Digit[i] == 1)
+                        DigitString[i] = digit[i];
                 }
             }
             string result = (N < 0 ? "负" : "");
             for (int i = MaxLength - 1; i >= 0; i--)
             {
                 result += DigitString[i];
+            }
+            while (result[0] == '零')
+            {
+                result = result.Substring(1);
+            }
+            while (result[result.Length - 1] == '零')
+            {
+                result = result.Remove(result.Length - 1);
+            }
+            while (result.Contain("零零"))
+            {
+                result = result.Replace("零零", "零");
             }
             return result;
         }
