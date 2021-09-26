@@ -1467,6 +1467,7 @@ namespace RyuGiKen
             this.x = X;
             this.y = Y;
         }
+        public static implicit operator Vector3(Vector2 v) { return new Vector3(v.x, v.y, 0); }
         public static Vector2 operator +(Vector2 a, Vector2 b) { return new Vector2(a.x + b.x, a.y + b.y); }
         public static Vector2 operator -(Vector2 a, Vector2 b) { return new Vector2(a.x - b.x, a.y - b.y); }
     }
@@ -1483,6 +1484,7 @@ namespace RyuGiKen
             this.y = Y;
             this.z = Z;
         }
+        public static implicit operator Vector2(Vector3 v) { return new Vector2(v.x, v.y); }
         public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z); }
         public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.x - b.x, a.y - b.y, a.z + b.z); }
     }
@@ -2150,7 +2152,7 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(this T obj)
+        public static List<T> ToListOne<T>(this T obj)
         {
             return new List<T>() { obj };
         }
@@ -2160,7 +2162,7 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static T[] ToArray<T>(this T obj)
+        public static T[] ToArrayOne<T>(this T obj)
         {
             return new T[] { obj };
         }
@@ -3512,6 +3514,33 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
+        public static double ToDouble(this uint num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double ToDouble(this long num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double ToDouble(this decimal num)
+        {
+            return (double)num;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
         public static double ToDouble(this float num)
         {
             return num;
@@ -3545,7 +3574,55 @@ namespace RyuGiKen
             double[] result = new double[num.Length];
             for (int i = 0; i < num.Length; i++)
             {
-                result[i] = num[i];
+                result[i] = num[i].ToDouble();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double[] ToDouble(this uint[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            double[] result = new double[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDouble();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double[] ToDouble(this long[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            double[] result = new double[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDouble();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转双精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static double[] ToDouble(this decimal[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            double[] result = new double[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDouble();
             }
             return result;
         }
@@ -3561,7 +3638,161 @@ namespace RyuGiKen
             double[] result = new double[num.Length];
             for (int i = 0; i < num.Length; i++)
             {
-                result[i] = num[i];
+                result[i] = num[i].ToDouble();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 字符串转浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static decimal ToDecimal(this string num, decimal FailValue = 0)
+        {
+            decimal result = FailValue;
+            decimal.TryParse(num, out result);
+            return result;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal ToDecimal(this int num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal ToDecimal(this uint num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal ToDecimal(this long num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal ToDecimal(this double num)
+        {
+            return (decimal)num;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal ToDecimal(this float num)
+        {
+            return (decimal)num;
+        }
+        /// <summary>
+        /// 字符串转浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static decimal[] ToDecimal(this string[] num, decimal FailValue = 0)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            decimal[] result = new decimal[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDecimal(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal[] ToDecimal(this int[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            decimal[] result = new decimal[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDecimal();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal[] ToDecimal(this uint[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            decimal[] result = new decimal[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDecimal();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal[] ToDecimal(this long[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            decimal[] result = new decimal[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDecimal();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转高精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal[] ToDecimal(this double[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            decimal[] result = new decimal[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDecimal();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转高精度浮点数，失败为0
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static decimal[] ToDecima(this float[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            decimal[] result = new decimal[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToDecimal();
             }
             return result;
         }
@@ -3585,6 +3816,33 @@ namespace RyuGiKen
         public static float ToFloat(this int num)
         {
             return num;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float ToFloat(this uint num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float ToFloat(this long num)
+        {
+            return num;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float ToFloat(this decimal num)
+        {
+            return (float)num;
         }
         /// <summary>
         /// 转单精度浮点数，失败为0
@@ -3631,7 +3889,55 @@ namespace RyuGiKen
             float[] result = new float[num.Length];
             for (int i = 0; i < num.Length; i++)
             {
-                result[i] = num[i];
+                result[i] = num[i].ToFloat();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float[] ToFloat(this uint[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            float[] result = new float[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToFloat();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float[] ToFloat(this long[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            float[] result = new float[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToFloat();
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转单精度浮点数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static float[] ToFloat(this decimal[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            float[] result = new float[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToFloat();
             }
             return result;
         }
@@ -3685,6 +3991,15 @@ namespace RyuGiKen
             return double.IsNaN(num) ? FailValue : (int)Round(num);
         }
         /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static int ToInteger(this decimal num)
+        {
+            return (int)Round(num);
+        }
+        /// <summary>
         /// 字符串转整数，失败为0
         /// </summary>
         /// <param name="num"></param>
@@ -3732,6 +4047,22 @@ namespace RyuGiKen
             for (int i = 0; i < num.Length; i++)
             {
                 result[i] = num[i].ToInteger(FailValue);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static int[] ToInteger(this decimal[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            int[] result = new int[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger();
             }
             return result;
         }
@@ -3784,6 +4115,15 @@ namespace RyuGiKen
         public static uint ToUInteger(this double num, uint FailValue = 0)
         {
             return double.IsNaN(num) ? FailValue : (uint)Round(num.Clamp(0));
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static uint ToUInteger(this decimal num)
+        {
+            return (uint)Round(num.Clamp(0));
         }
         /// <summary>
         /// 字符串转整数，失败为0
@@ -3869,6 +4209,23 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <param name="FailValue">转换失败时的值</param>
+        /// <returns></returns>
+        public static uint[] ToUInteger(this decimal[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            uint[] result = new uint[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToUInteger();
+            }
+            return result;
+        }
+        /// <summary>
         /// 字符串转整数，失败为0
         /// </summary>
         /// <param name="num"></param>
@@ -3917,6 +4274,15 @@ namespace RyuGiKen
         public static long ToInteger64(this double num, long FailValue = 0)
         {
             return double.IsNaN(num) ? FailValue : (long)Round(num);
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static long ToInteger64(this decimal num)
+        {
+            return (long)Round(num);
         }
         /// <summary>
         /// 字符串转整数，失败为0
@@ -4002,6 +4368,22 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static long[] ToInteger64(this decimal[] num)
+        {
+            if (num == null || num.Length < 1)
+                return null;
+            long[] result = new long[num.Length];
+            for (int i = 0; i < num.Length; i++)
+            {
+                result[i] = num[i].ToInteger64();
+            }
+            return result;
+        }
+        /// <summary>
         /// 取绝对值
         /// </summary>
         /// <param name="value"></param>
@@ -4034,6 +4416,15 @@ namespace RyuGiKen
         /// <param name="value"></param>
         /// <returns></returns>
         public static double Abs(this double value)
+        {
+            return Math.Abs(value);
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static decimal Abs(this decimal value)
         {
             return Math.Abs(value);
         }
@@ -4126,6 +4517,20 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 限位。返回不小于min的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static decimal Clamp(this decimal value, decimal min)
+        {
+            decimal result = 0;
+            if (value < min)
+                result = min;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
@@ -4151,6 +4556,24 @@ namespace RyuGiKen
         public static double Clamp(this double value, double min, double max)
         {
             double result = 0;
+            if (min > max)
+                ValueAdjust.Exchange(min, max, out min, out max);
+            if (value < min)
+                result = min;
+            else if (value > max)
+                result = max;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static decimal Clamp(this decimal value, decimal min, decimal max)
+        {
+            decimal result = 0;
             if (min > max)
                 ValueAdjust.Exchange(min, max, out min, out max);
             if (value < min)
@@ -4782,6 +5205,16 @@ namespace RyuGiKen
         /// <param name="digits">位数</param>
         /// <returns></returns>
         public static double Round(this double value, int digits = 0)
+        {
+            return Math.Round(value, digits);
+        }
+        /// <summary>
+        /// 精确到小数点后几位（值，位数）
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="digits">位数</param>
+        /// <returns></returns>
+        public static decimal Round(this decimal value, int digits = 0)
         {
             return Math.Round(value, digits);
         }
@@ -5995,12 +6428,10 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="N"></param>
         /// <returns></returns>
-        public static string ToChineseDigit(this double N)
+        public static string ToChineseDigit(this decimal N)
         {
-            if (N.IsNaN())
-                return "";
             string result = "";
-            string str = N.ToString();
+            string str = N.ToString("F29");
             int index = str.IndexOf('.');
             if (index < 0)
             {
@@ -6008,9 +6439,45 @@ namespace RyuGiKen
             }
             else
             {
-                string[] temp = N.ToString().Split('.');
-                result = ToChineseDigit(temp[0].ToInteger());
-                string temp2 = N.ToString().Substring(index);
+                string[] temp = str.Split('.');
+                result = ToChineseDigit(temp[0].ToInteger64());
+                string temp2 = str.Substring(index);
+                while (temp2[temp2.Length - 1] == '0')
+                {
+                    temp2 = temp2.Remove(temp2.Length - 1);
+                }
+                for (int i = 0; i < temp2.Length; i++)
+                {
+                    result += ToChineseDigit(temp2[i]);
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 汉字数字显示
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string ToChineseDigit(this double N)
+        {
+            if (N.IsNaN())
+                return "";
+            string result = "";
+            string str = N.ToString("F16");
+            int index = str.IndexOf('.');
+            if (index < 0)
+            {
+                result = ToChineseDigit(N.ToInteger64());
+            }
+            else
+            {
+                string[] temp = str.Split('.');
+                result = ToChineseDigit(temp[0].ToInteger64());
+                string temp2 = str.Substring(index);
+                while (temp2[temp2.Length - 1] == '0')
+                {
+                    temp2 = temp2.Remove(temp2.Length - 1);
+                }
                 for (int i = 0; i < temp2.Length; i++)
                 {
                     result += ToChineseDigit(temp2[i]);
@@ -6065,10 +6532,13 @@ namespace RyuGiKen
                     {
                         numtemp = temp[index2 - 1].ChineseDigitToString().ToInteger() * Math.Pow(10, i).ToInteger64();
                         num += numtemp;
-                        temp = temp.Substring(index2 + 1);
+                        temp = temp.Substring(index2 + digit[i].Length);
                     }
                 }
-                numtemp = temp.Replace("零", "")[0].ChineseDigitToString().ToInteger64();
+                if (temp.Replace("零", "").Length > 0)
+                    numtemp = temp.Replace("零", "")[0].ChineseDigitToString().ToInteger64();
+                else
+                    numtemp = temp.ChineseDigitToString().ToInteger64();
                 num += numtemp;
                 result += num.ToString();
             }
@@ -6081,6 +6551,62 @@ namespace RyuGiKen
                 }
             }
             return (negative ? -1 : 1) * result.ToDouble(double.NaN);
+        }
+        /// <summary>
+        /// 汉字数字转浮点数
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static decimal ChineseDigitToDecimal(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return 0;
+            List<string> digit = new List<string>() { "零", "十", "百", "千", "万", "十万", "百万", "千万", "亿", "十亿", "百亿", "千亿", "万亿", "十万亿", "百万亿", "千万亿" };
+            int MaxLength = digit.Count;
+            bool negative = N[0] == '负';
+            int index = N.IndexOf('点');
+            string temp = index < 0 ? N.Replace("负", "") : N.Replace("负", "").Substring(0, index - 1);
+            string result = "";
+
+            if (temp == "零")
+            {
+                result = "0";
+            }
+            else if (digit.IndexOf(N) > 0)
+            {
+                result = Math.Pow(10, digit.IndexOf(N)).ToInteger64().ToString();
+            }
+            else
+            {
+                long num = 0;
+                long numtemp = 0;
+                int index2 = -1;
+                for (int i = MaxLength - 1; i > 0; i--)
+                {
+                    index2 = temp.IndexOf(digit[i]);
+                    if (index2 > 0)
+                    {
+                        numtemp = temp[index2 - 1].ChineseDigitToString().ToInteger() * Math.Pow(10, i).ToInteger64();
+                        num += numtemp;
+                        temp = temp.Substring(index2 + digit[i].Length);
+                    }
+                }
+                if (temp.Replace("零", "").Length > 0)
+                    numtemp = temp.Replace("零", "")[0].ChineseDigitToString().ToInteger64();
+                else
+                    numtemp = temp.ChineseDigitToString().ToInteger64();
+                num += numtemp;
+                result += num.ToString();
+            }
+            if (index >= 0)
+            {
+                string temp2 = N.Substring(index);
+                for (int i = 0; i < temp2.Length; i++)
+                {
+                    result += temp2[i].ChineseDigitToString();
+                }
+            }
+            return (negative ? -1 : 1) * result.ToDecimal();
         }
         /// <summary>
         /// 汉字数字转浮点数
@@ -6139,6 +6665,22 @@ namespace RyuGiKen
                 case '负': result = "-"; break;
             }
             return result;
+        }
+        /// <summary>
+        /// 汉字数字转整数（直接转换）
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
+        public static string ChineseDigitToString(this string N)
+        {
+            if (string.IsNullOrWhiteSpace(N))
+                return "";
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < N.Length; i++)
+            {
+                stringBuilder.Append(N[i].ChineseDigitToString());
+            }
+            return stringBuilder.ToString();
         }
         /// <summary>
         /// 汉字数字显示
@@ -6303,9 +6845,18 @@ namespace RyuGiKen
                 {
                     DigitString[3] = "零";
                 }*/
+                int firstIndex = 0;
+                for (int i = MaxLength - 1; i >= 0; i--)
+                {
+                    if (string.IsNullOrEmpty(DigitString[i]))
+                    {
+                        firstIndex = i;
+                        break;
+                    }
+                }
                 foreach (int i in new int[] { 1, 5, 9, 13 })
                 {
-                    if (Digit[i] == 1)
+                    if (Digit[i] == 1 && (firstIndex == i || Digit[i + 1] == 0))
                         DigitString[i] = digit[i];
                 }
             }
@@ -6394,6 +6945,7 @@ namespace RyuGiKen
             return ("(" + Hue + "," + Saturation + "," + Value + "," + alpha + ")");
 #endif
         }
+        public static implicit operator Color(HSVColor v) { return v.ToColor(); }
     }
     /// <summary>
     /// 颜色调整
