@@ -9,7 +9,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Xml;
 #if UNITY_EDITOR || UNITY_STANDALONE
-using WindowsAPI;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -4507,6 +4506,20 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
+        public static uint Clamp(this uint value, uint min)
+        {
+            uint result = 0;
+            if (value < min)
+                result = min;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static long Clamp(this long value, long min)
         {
             long result = 0;
@@ -4592,6 +4605,24 @@ namespace RyuGiKen
         public static int Clamp(this int value, int min, int max)
         {
             int result = 0;
+            if (min > max)
+                ValueAdjust.Exchange(min, max, out min, out max);
+            if (value < min)
+                result = min;
+            else if (value > max)
+                result = max;
+            else
+                result = value;
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static uint Clamp(this uint value, uint min, uint max)
+        {
+            uint result = 0;
             if (min > max)
                 ValueAdjust.Exchange(min, max, out min, out max);
             if (value < min)
@@ -5408,16 +5439,30 @@ namespace RyuGiKen
         /// <summary>
         /// 范围内随机取值
         /// </summary>
-        /// <param name="RangeX"></param>
-        /// <param name="RangeY"></param>
+        /// <param name="Range"></param>
         /// <returns></returns>
         public static float RandomValueInRange(Vector2 Range, IntersperseMode type = IntersperseMode.Average)
         {
+            if (Range == null)
+                return float.NaN;
             if (Range.x == Range.y)
                 return Range.x;
+            return RandomValueInRange(Range.x, Range.y, type);
+        }
+        /// <summary>
+        /// 范围内随机取值
+        /// </summary>
+        /// <param name="Range"></param>
+        /// <returns></returns>
+        public static float RandomValueInRange(float Min, float Max, IntersperseMode type = IntersperseMode.Average)
+        {
+            if (float.IsNaN(Min) || float.IsNaN(Max))
+                return float.NaN;
+            if (Min == Max)
+                return Min;
             float result = 0;
-            float min = Math.Min(Range.x, Range.y);
-            float max = Math.Max(Range.x, Range.y);
+            float min = Math.Min(Min, Max);
+            float max = Math.Max(Min, Max);
             float middle = (min + max) * 0.5f;
             float dis = max - min;
             switch (type)
