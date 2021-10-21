@@ -1659,6 +1659,21 @@ namespace RyuGiKen
             }
             return result;
         }
+        /// <summary>
+        /// 三维坐标数组转二维坐标数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="valueZ"></param>
+        /// <returns></returns>
+        public static Vector2[] ToVector2(this Vector3[] value)
+        {
+            Vector2[] result = new Vector2[value.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = value[i].ToVector2();
+            }
+            return result;
+        }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 全局方向转局部角度
@@ -1724,6 +1739,35 @@ namespace RyuGiKen
         /// <param name="value"></param>
         /// <param name="type">XY</param>
         /// <returns></returns>
+        public static Vector2[] SetVectorValue(Vector2[] array, int[] value, string type)
+        {
+            Vector2[] result = new Vector2[array.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = array[i];
+                if (i < value.Length)
+                {
+                    switch (type)
+                    {
+                        case "x":
+                        case "X":
+                            result[i].x = value[i];
+                            break;
+                        case "y":
+                        case "Y":
+                            result[i].y = value[i];
+                            break;
+                    }
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 二维坐标数组批量设置单轴值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type">XY</param>
+        /// <returns></returns>
         public static Vector2[] SetVectorValue(Vector2[] array, float[] value, string type)
         {
             Vector2[] result = new Vector2[array.Length];
@@ -1741,6 +1785,39 @@ namespace RyuGiKen
                         case "y":
                         case "Y":
                             result[i].y = value[i];
+                            break;
+                    }
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 三维坐标数组批量设置单轴值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type">XYZ</param>
+        /// <returns></returns>
+        public static Vector3[] SetVectorValue(Vector3[] array, int[] value, string type)
+        {
+            Vector3[] result = new Vector3[array.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = array[i];
+                if (i < value.Length)
+                {
+                    switch (type)
+                    {
+                        case "x":
+                        case "X":
+                            result[i].x = value[i];
+                            break;
+                        case "y":
+                        case "Y":
+                            result[i].y = value[i];
+                            break;
+                        case "z":
+                        case "Z":
+                            result[i].z = value[i];
                             break;
                     }
                 }
@@ -5443,8 +5520,10 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float RandomValueInRange(Vector2 Range, IntersperseMode type = IntersperseMode.Average)
         {
+#if UNITY_EDITOR || UNITY_STANDALONE
             if (Range == null)
                 return float.NaN;
+#endif
             if (Range.x == Range.y)
                 return Range.x;
             return RandomValueInRange(Range.x, Range.y, type);
@@ -5525,6 +5604,89 @@ namespace RyuGiKen
             result.z = RandomValueInRange(RangeZ, type);
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 平滑处理
+        /// </summary>
+        /// <param name="line">线段</param>
+        /// <param name="type">类型</param>
+        /// <param name="size">平滑范围</param>
+        /// <param name="iterations">插值倍数（1为原数量）</param>
+        /// <returns></returns>
+        public static Vector3[] Smoothing(this LineRenderer line, Vector3 type, int size = 1, int iterations = 1)
+        {
+            if (!line || line.positionCount < 2)
+                return null;
+            if (type == null || type == Vector3.zero)
+                type = Vector3.up;
+
+            Vector3[] result = new Vector3[line.positionCount];
+            line.GetPositions(result);
+            result = Smoothing(result, type, size, iterations);
+            line.positionCount = result.Length;
+            for (int i = 0; i < result.Length; i++)
+            {
+                line.SetPosition(i, result[i]);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 平滑处理
+        /// </summary>
+        /// <param name="array">数据</param>
+        /// <param name="type">类型</param>
+        /// <param name="size">平滑范围</param>
+        /// <param name="iterations">插值倍数（1为原数量）</param>
+        /// <returns></returns>
+        public static Vector2[] Smoothing(this Vector2[] array, Vector2 type, int size = 1, int iterations = 1)
+        {
+            if (array == null || array.Length < 2)
+                return null;
+            if (type == null || type == Vector2.zero)
+                type = Vector2.up;
+
+            float[][] temp = new float[2][];
+            temp[0] = type.x != 0 ? array.GetVectorValue("X").Smoothing(size, iterations, true) : null;
+            temp[1] = type.y != 0 ? array.GetVectorValue("Y").Smoothing(size, iterations, true) : null;
+            Vector2[] result = new Vector2[(array.Length - 1) * iterations + 1];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new Vector3();
+                result[i].x = temp[0] == null ? 0 : temp[0][i];
+                result[i].y = temp[1] == null ? 0 : temp[1][i];
+            }
+            return result;
+        }
+        /// <summary>
+        /// 平滑处理
+        /// </summary>
+        /// <param name="array">数据</param>
+        /// <param name="type">类型</param>
+        /// <param name="size">平滑范围</param>
+        /// <param name="iterations">插值倍数（1为原数量）</param>
+        /// <returns></returns>
+        public static Vector3[] Smoothing(this Vector3[] array, Vector3 type, int size = 1, int iterations = 1)
+        {
+            if (array == null || array.Length < 2)
+                return null;
+            if (type == null || type == Vector3.zero)
+                type = Vector3.up;
+
+            float[][] temp = new float[3][];
+            temp[0] = type.x != 0 ? array.GetVectorValue("X").Smoothing(size, iterations, true) : null;
+            temp[1] = type.y != 0 ? array.GetVectorValue("Y").Smoothing(size, iterations, true) : null;
+            temp[2] = type.z != 0 ? array.GetVectorValue("Z").Smoothing(size, iterations, true) : null;
+            Vector3[] result = new Vector3[(array.Length - 1) * iterations + 1];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new Vector3();
+                result[i].x = temp[0] == null ? 0 : temp[0][i];
+                result[i].y = temp[1] == null ? 0 : temp[1][i];
+                result[i].z = temp[2] == null ? 0 : temp[2][i];
+            }
+            return result;
+        }
+#endif
         /// <summary>
         /// 平滑处理
         /// </summary>
@@ -5627,7 +5789,7 @@ namespace RyuGiKen
         {
             float result = 0;
             float sum = 0;
-            if (startIndex == -1 && endIndex == -1)
+            if (startIndex < 0 && endIndex < 0)
             {
                 startIndex = 0;
                 endIndex = array.Length - 1;
@@ -5641,7 +5803,7 @@ namespace RyuGiKen
                 startIndex = Clamp(startIndex, 0, array.Length - 1);
                 endIndex = Clamp(endIndex, 0, array.Length - 1);
             }
-            if (index == -1)//全部求平均
+            if (index < 0)//全部求平均
             {
                 for (int i = startIndex; i < endIndex + 1; i++)
                 {
@@ -5694,7 +5856,7 @@ namespace RyuGiKen
         public static Vector3 GetAverage(this Vector3[] array, int startIndex = -1, int endIndex = -1)
         {
             Vector3 Max = new Vector3();
-            if (startIndex == -1 && endIndex == -1)
+            if (startIndex < 0 && endIndex < 0)
             {
                 startIndex = 0;
                 endIndex = array.Length - 1;
@@ -6098,7 +6260,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 输出在范围内的等比变化数组
         /// </summary>
@@ -6122,7 +6283,6 @@ namespace RyuGiKen
         {
             return MappingRange(value, range.x, range.y, OutputRange.x, OutputRange.y, n, limit);
         }
-#endif
         /// <summary>
         /// 映射
         /// </summary>
