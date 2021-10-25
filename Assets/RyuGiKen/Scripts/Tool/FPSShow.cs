@@ -85,9 +85,9 @@ namespace RyuGiKen.Tools
                 if (Input.GetKeyDown(hideKey))
                 {
                     hide = !hide;
+                    if (!hide)
+                        FPSLog = true;
                 }
-                if (!hide)
-                    FPSLog = true;
                 FPSText.enabled = !hide;
                 ShowFPS();
             }

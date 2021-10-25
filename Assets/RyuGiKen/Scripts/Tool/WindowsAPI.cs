@@ -30,6 +30,18 @@ namespace WindowsAPI
         //[DllImport("user32.dll", EntryPoint = "SetScrollInfo", CallingConvention = CallingConvention.StdCall)]
         //public static extern int SetScrollInfo(IntPtr hwnd, int fnBar, [In] ref SCROLLINFO lpsi, bool fRedraw);
         /// <summary>
+        /// 限制屏幕旋转
+        /// <para>0不指定</para>
+        /// <para>1横屏</para>
+        /// <para>2竖屏</para>
+        /// <para>3横屏</para>
+        /// <para>4竖屏</para>
+        /// </summary>
+        /// <param name="orientation"></param>
+        /// <returns></returns>
+        [DllImport("user32.dll")]
+        public static extern bool SetDisplayAutoRotationPreferences(int orientation);
+        /// <summary>
         /// 设置窗口区域
         /// </summary>
         /// <param name="hwnd"></param>
