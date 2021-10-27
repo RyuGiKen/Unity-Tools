@@ -53,7 +53,7 @@ namespace RyuGiKen.Tools
         /// </summary>
         public void ChangeValue()
         {
-            value = m_InputField.text.ToInteger().Clamp(ValueRange.x, ValueRange.y);
+            value = m_InputField.text.ToFloat().Clamp(ValueRange.x, ValueRange.y);
             UpdateText();
         }
         /// <summary>
