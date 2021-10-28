@@ -38,7 +38,7 @@ namespace RyuGiKen.Tools
             }
         }
         [ContextMenu("获取A0的所有子孙")]
-        void GetDescendants_A0()
+        public void GetDescendants_A0()
         {
             Transform A0 = Object_A[0];
             Transform[] descendants = Object_A[0].GetDescendants();
@@ -48,7 +48,7 @@ namespace RyuGiKen.Tools
             Object_A.ClearRepeatingItem();
         }
         [ContextMenu("获取A的所有子孙")]
-        void GetDescendants_A()
+        public void GetDescendants_A()
         {
             Transform A0 = Object_A[0];
             List<Transform> descendants = new List<Transform>();
@@ -62,7 +62,7 @@ namespace RyuGiKen.Tools
             Object_A.ClearRepeatingItem();
         }
         [ContextMenu("获取B0的所有子孙")]
-        void GetDescendants_B0()
+        public void GetDescendants_B0()
         {
             Transform B0 = Object_B[0];
             Transform[] descendants = Object_B[0].GetDescendants();
@@ -72,7 +72,7 @@ namespace RyuGiKen.Tools
             Object_B.ClearRepeatingItem();
         }
         [ContextMenu("获取B的所有子孙")]
-        void GetDescendants_B()
+        public void GetDescendants_B()
         {
             Transform B0 = Object_B[0];
             List<Transform> descendants = new List<Transform>();
@@ -86,13 +86,13 @@ namespace RyuGiKen.Tools
             Object_B.ClearRepeatingItem();
         }
         [ContextMenu("移除重复项")]
-        void ClearRepeating()
+        public void ClearRepeating()
         {
             Object_A.ClearRepeatingItem();
             Object_B.ClearRepeatingItem();
         }
         [ContextMenu("重复项置空")]
-        void SetRepeatingNull()
+        public void SetRepeatingNull()
         {
             Object_A.SetRepeatingItemNull();
             Object_B.SetRepeatingItemNull();

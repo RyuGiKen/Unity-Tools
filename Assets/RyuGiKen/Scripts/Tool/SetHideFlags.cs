@@ -17,7 +17,7 @@ namespace RyuGiKen.Tools
         /// 设置目标的HideFlags
         /// </summary>
         [ContextMenu("设置目标的HideFlags")]
-        void SetTarget()
+        public void SetTarget()
         {
             if (TargetObject)
                 TargetObject.hideFlags = m_HideFlags;
@@ -28,7 +28,7 @@ namespace RyuGiKen.Tools
         /// 设置所有对象的HideFlags
         /// </summary>
         [ContextMenu("设置所有对象的HideFlags")]
-        void SetAll()
+        public void SetAll()
         {
             GameObject[] Objects = Resources.FindObjectsOfTypeAll<GameObject>();
             Debug.Log("找到" + Objects.Length + "个对象");

@@ -26,7 +26,7 @@ namespace RyuGiKen.Tools
         /// 子对象倒转排序
         /// </summary>
         [ContextMenu("子对象倒转排序")]
-        public void TurnSort()
+        public void InvertedOrder()
         {
             for (int i = 0; i < this.transform.childCount - 1; i++)
             {
@@ -37,7 +37,7 @@ namespace RyuGiKen.Tools
         /// 子对象按名称排序
         /// </summary>
         [ContextMenu("子对象按名称排序")]
-        public void Sort()
+        public void SortByName()
         {
             foreach (Transform item in GetTransforms(gameObject))
             {
@@ -62,6 +62,24 @@ namespace RyuGiKen.Tools
                 return transforms.ToArray();
             }
             return null;
+        }
+        /// <summary>
+        /// 批量移除子对象
+        /// </summary>
+        [ContextMenu("批量移除子对象")]
+        public void DestroyChildren()
+        {
+            GameObject[] Objects = ObjectAdjust.GetChildren(this.gameObject);
+            for (int i = Objects.Length - 1; i >= 0; i--)
+            {
+                if (Objects[i])
+                {
+                    if (Application.isPlaying)
+                        Object.Destroy(Objects[i]);
+                    else
+                        Object.DestroyImmediate(Objects[i]);
+                }
+            }
         }
         /// <summary>
         /// 批量移除隐藏子对象

@@ -95,5 +95,13 @@ namespace RyuGiKen.Tools
             Switch();
             audioSource?.Play();
         }
+        /// <summary>
+        /// 停止播放
+        /// </summary>
+        [ContextMenu("停止播放")]
+        public void StopPlay()
+        {
+            audioSource?.Stop();
+        }
     }
 }

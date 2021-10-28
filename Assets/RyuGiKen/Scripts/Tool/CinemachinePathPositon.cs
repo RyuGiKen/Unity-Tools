@@ -78,7 +78,7 @@ namespace RyuGiKen.Tools
         /// 移除子对象
         /// </summary>
         [ContextMenu("移除子对象")]
-        void ClearChildren()
+        public void ClearChildren()
         {
             for (int i = this.transform.childCount - 1; i >= 0; i--)
             {
@@ -89,7 +89,7 @@ namespace RyuGiKen.Tools
         /// 调整子对象数量
         /// </summary>
         [ContextMenu("调整子对象数量")]
-        void BuildChildren()
+        public void BuildChildren()
         {
             if (ChildPrefab.Length < 1 || Paths == null || Paths.Length < 1 || Paths[0] == null)
                 return;
@@ -229,7 +229,7 @@ namespace RyuGiKen.Tools
         /// 刷新子对象位置
         /// </summary>
         [ContextMenu("刷新子对象位置")]
-        void UpdateChildren()
+        public void UpdateChildren()
         {
             float distanceAlongPath = 0;
             int Index = 0;
