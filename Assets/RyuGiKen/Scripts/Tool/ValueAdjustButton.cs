@@ -13,7 +13,19 @@ namespace RyuGiKen.Tools
         [Tooltip("输入框")] public InputField m_InputField;
         [Tooltip("显示文本")] public Text m_Text;
 
-        public float value;
+        [SerializeField] private float value;
+        public float m_Value
+        {
+            set
+            {
+                this.value = value;
+                UpdateText();
+            }
+            get
+            {
+                return value;
+            }
+        }
         [Tooltip("精度")] public int digit;
         [Tooltip("限制")] public bool LimitValue;
         [Tooltip("值范围")] public Vector2 ValueRange;
@@ -32,29 +44,35 @@ namespace RyuGiKen.Tools
         }
         public void ShowInputField()
         {
-            m_InputField.text = value.ToString("F" + digit);
-            //m_InputField.SetActive(true);
-            m_Text.transform.parent.SetActive(false);
+            if (m_InputField && m_Text)
+            {
+                m_InputField.text = value.ToString("F" + digit);
+                m_InputField.textComponent.SetActive(true);
+                m_Text.transform.parent.SetActive(false);
+            }
         }
         public void HideInputField()
         {
-            //m_InputField.SetActive(false);
-            m_Text.transform.parent.SetActive(true);
+            if (m_InputField && m_Text)
+            {
+                m_InputField.textComponent.SetActive(false);
+                m_Text.transform.parent.SetActive(true);
+            }
         }
         /// <summary>
         /// 更新显示文本
         /// </summary>
         public void UpdateText()
         {
-            m_Text.text = Prefix + value.ToString("F" + digit) + Postfix;
+            if (m_Text)
+                m_Text.text = Prefix + value.ToString("F" + digit) + Postfix;
         }
         /// <summary>
         /// 输入框改变数值后
         /// </summary>
         public void ChangeValue()
         {
-            value = m_InputField.text.ToFloat().Clamp(ValueRange.x, ValueRange.y);
-            UpdateText();
+            m_Value = (m_InputField ? m_InputField.text.ToFloat() : m_Value).Clamp(ValueRange.x, ValueRange.y);
         }
         /// <summary>
         /// 值减少
