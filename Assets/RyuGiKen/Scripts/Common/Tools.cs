@@ -2171,6 +2171,23 @@ namespace RyuGiKen
             return resultList;
         }
         /// <summary>
+        /// 数组增加项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static T[] Add<T>(this T[] array, T item)
+        {
+            T[] result = new T[array.Length + 1];
+            for (int i = 0; i < array.Length; i++)
+            {
+                result[i] = array[i];
+            }
+            result[array.Length] = item;
+            return result;
+        }
+        /// <summary>
         /// 列表相加。补充在后。
         /// </summary>
         /// <typeparam name="T"></typeparam>
