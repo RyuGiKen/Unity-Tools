@@ -32,6 +32,11 @@ namespace RyuGiKen.Tools
         [Tooltip("调整幅度")] public float AdjustSize = 1;
         [Tooltip("前缀")] public string Prefix;
         [Tooltip("后缀")] public string Postfix;
+        private void Awake()
+        {
+            DecreaseButton.onClick.AddListener(ValueDecrease);
+            IncreaseButton.onClick.AddListener(ValueIncrease);
+        }
 
         void Start()
         {
