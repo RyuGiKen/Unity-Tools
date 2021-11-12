@@ -1594,6 +1594,87 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_STANDALONE || UNITY_EDITOR
+        /// <summary>
+        /// 四元数转四维坐标
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector4 ToVector4(this Quaternion value)
+        {
+            return new Vector4(value.x, value.y, value.z, value.w);
+        }
+#endif
+        /// <summary>
+        /// 二维坐标转四维坐标
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="valueZ"></param>
+        /// <param name="valueW"></param>
+        /// <returns></returns>
+        public static Vector4 ToVector4(this Vector2 value, float valueZ = 0, float valueW = 0)
+        {
+            return new Vector4(value.x, value.y, valueZ, valueW);
+        }
+        /// <summary>
+        /// 二维坐标数组转四维坐标数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="valueZ"></param>
+        /// <param name="valueW"></param>
+        /// <returns></returns>
+        public static Vector4[] ToVector4(this Vector2[] value, float valueZ = 0, float valueW = 0)
+        {
+            Vector4[] result = new Vector4[value.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = value[i].ToVector4(valueZ, valueW);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 三维坐标转四维坐标
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="valueW"></param>
+        /// <returns></returns>
+        public static Vector4 ToVector4(this Vector3 value, float valueW = 0)
+        {
+            return new Vector4(value.x, value.y, valueW);
+        }
+        /// <summary>
+        /// 三维坐标数组转四维坐标数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="valueW"></param>
+        /// <returns></returns>
+        public static Vector4[] ToVector4(this Vector3[] value, float valueW = 0)
+        {
+            Vector4[] result = new Vector4[value.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = value[i].ToVector4(valueW);
+            }
+            return result;
+        }
+        /// <summary>
+        /// x,y,z,w数组转四维坐标数组
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <param name="w"></param>
+        /// <returns></returns>
+        public static Vector4[] ToVector4(float[] x, float[] y, float[] z, float[] w)
+        {
+            FindMinAndMax(new int[] { x.Length, y.Length, z.Length, w.Length }, out int min, out int max);
+            Vector4[] result = new Vector4[min];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new Vector4(x[i], y[i], z[i], w[i]);
+            }
+            return result;
+        }
         /// <summary>
         /// 二维坐标转三维坐标
         /// </summary>

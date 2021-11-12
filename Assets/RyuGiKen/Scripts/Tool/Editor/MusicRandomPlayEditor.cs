@@ -5,6 +5,7 @@ using UnityEditor;
 namespace RyuGiKen.Tools
 {
     [CustomEditor(typeof(MusicRandomPlay))]
+    [CanEditMultipleObjects]
     public class MusicRandomPlayEditor : Editor
     {
         public override void OnInspectorGUI()

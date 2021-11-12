@@ -14,30 +14,30 @@ namespace RyuGiKen.Tools
 
             if (transform)
             {
-                GUILayout.Label("Posiition：\t\t " + transform.position);
-                GUILayout.Label("localPosition：\t " + transform.localPosition);
-                GUILayout.Label("eulerAngles：\t " + transform.eulerAngles);
-                GUILayout.Label("localEulerAngles：\t " + transform.localEulerAngles);
-                GUILayout.Label("rotation：\t\t " + transform.rotation);
-                GUILayout.Label("localRotation：\t " + transform.localRotation);
-                GUILayout.Label("lossyScale：\t " + transform.lossyScale);
-                GUILayout.Label("localScale：\t " + transform.localScale);
-                GUILayout.Space(10);
-                GUILayout.Label("up：\t\t " + transform.up);
-                GUILayout.Label("right：\t\t " + transform.right);
-                GUILayout.Label("forward：\t\t " + transform.forward);
+                EditorGUILayout.Vector3Field("Posiition", transform.position);
+                EditorGUILayout.Vector3Field("localPosition", transform.localPosition);
+                EditorGUILayout.Vector3Field("eulerAngles", transform.eulerAngles);
+                EditorGUILayout.Vector3Field("localEulerAngles", transform.localEulerAngles);
+                EditorGUILayout.Vector4Field("rotation", transform.rotation.ToVector4());
+                EditorGUILayout.Vector4Field("localRotation", transform.localRotation.ToVector4());
+                EditorGUILayout.Vector3Field("lossyScale", transform.lossyScale);
+                EditorGUILayout.Vector3Field("localScale", transform.localScale);
+                EditorGUILayout.Space();
+                EditorGUILayout.Vector3Field("up", transform.up);
+                EditorGUILayout.Vector3Field("right", transform.right);
+                EditorGUILayout.Vector3Field("forward", transform.forward);
                 if (transform is RectTransform)
                 {
                     RectTransform rectTransform = transform as RectTransform;
-                    GUILayout.Space(15);
-                    GUILayout.Label("anchoredPosition：\t " + rectTransform.anchoredPosition);
-                    GUILayout.Label("anchoredPosition3D:\t " + rectTransform.anchoredPosition3D);
-                    GUILayout.Label("offsetMin：\t " + rectTransform.offsetMin);
-                    GUILayout.Label("offsetMax：\t " + rectTransform.offsetMax);
-                    GUILayout.Label("sizeDelta：\t " + rectTransform.sizeDelta);
-                    GUILayout.Label("anchorMin：\t " + rectTransform.anchorMin);
-                    GUILayout.Label("anchorMax：\t " + rectTransform.anchorMax);
-                    GUILayout.Label("rect：\t\t " + rectTransform.rect.ToString().Replace("width", "\n\t\t width"));
+                    EditorGUILayout.Space();
+                    EditorGUILayout.Vector2Field("anchoredPosition", rectTransform.anchoredPosition);
+                    EditorGUILayout.Vector3Field("anchoredPosition3D", rectTransform.anchoredPosition3D);
+                    EditorGUILayout.Vector2Field("offsetMin", rectTransform.offsetMin);
+                    EditorGUILayout.Vector2Field("offsetMax", rectTransform.offsetMax);
+                    EditorGUILayout.Vector2Field("sizeDelta", rectTransform.sizeDelta);
+                    EditorGUILayout.Vector2Field("anchorMin", rectTransform.anchorMin);
+                    EditorGUILayout.Vector2Field("anchorMax", rectTransform.anchorMax);
+                    EditorGUILayout.Vector4Field("rect：", new Vector4(rectTransform.rect.x, rectTransform.rect.y, rectTransform.rect.width, rectTransform.rect.height));
                 }
             }
         }
