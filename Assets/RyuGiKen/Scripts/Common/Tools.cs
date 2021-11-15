@@ -1604,7 +1604,6 @@ namespace RyuGiKen
         {
             return new Vector4(value.x, value.y, value.z, value.w);
         }
-#endif
         /// <summary>
         /// 二维坐标转四维坐标
         /// </summary>
@@ -1675,6 +1674,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#endif
         /// <summary>
         /// 二维坐标转三维坐标
         /// </summary>
