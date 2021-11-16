@@ -17,7 +17,7 @@ namespace RyuGiKen.Tools
         [Tooltip("隐藏")] public bool hide = true;//默认隐藏
         public Text FPSText;
         float passTime;
-        float m_FPS;
+        public float m_FPS;
         int FrameCount;
         [Tooltip("统计时间")] public float fixTime = 1;
         [Tooltip("切换按键")] public KeyCode hideKey = KeyCode.F7;
@@ -126,7 +126,7 @@ namespace RyuGiKen.Tools
             if (passTime > fixTime)
             {
                 m_FPS = (float)Math.Round(FrameCount / passTime);
-                FPSText.text = "FPS  " + m_FPS.ToString() + "  L" + QualitySettings.GetQualityLevel().ToString();
+                FPSText.text = "FPS  " + m_FPS.ToString("F0") + "  L" + QualitySettings.GetQualityLevel().ToString();
                 passTime = 0.0f;
                 FrameCount = 0;
                 if (FPSLog)
