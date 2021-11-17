@@ -2215,6 +2215,183 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 检查路径输入
+        /// </summary>
+        /// <param name="path">输入</param>
+        /// <param name="fileType">文件类型</param>
+        /// <param name="createPath">如无则创建目录</param>
+        /// <returns>输出</returns>
+        public static string CheckFilePath(string path, string fileType, bool createPath)
+        {
+            return CheckPathInAssets(path, fileType, createPath, out string OutputPath, out string OutputFileName);
+        }
+        /// <summary>
+        /// 检查路径输入
+        /// </summary>
+        /// <param name="path">输入</param>
+        /// <param name="fileType">文件类型</param>
+        /// <param name="createPath">如无则创建目录</param>
+        /// <param name="OutputPath">输出路径</param>
+        /// <param name="OutputFileName">输出文件名</param>
+        /// <returns>输出</returns>
+        public static string CheckFilePath(string path, string fileType, bool createPath, out string OutputPath, out string OutputFileName)
+        {
+            string OutputFullName = "";
+            OutputPath = "";
+            OutputFileName = "";
+
+            List<string> tempString = ValueAdjust.SplitPath(path).ToList();
+            for (int i = 0; i < tempString.Count; i++)
+            {
+                if (i >= tempString.Count - 1)
+                {
+                    if (path[path.Length - 1] == '/' || path[path.Length - 1] == '\\')
+                    {
+                        OutputPath += tempString[i] + "\\";
+                        OutputFileName = "";
+                    }
+                    else
+                    {
+                        OutputFileName = tempString[i];
+                    }
+                    if (tempString[tempString.Count - 1].LastIndexOf("." + fileType, StringComparison.OrdinalIgnoreCase) < 0)
+                        OutputFileName += "." + fileType;
+                    break;
+                }
+                else
+                    OutputPath += tempString[i] + "\\";
+            }
+            OutputFullName = OutputPath + OutputFileName;
+            //Debug.Log(OutputFullName);
+
+            if (!Directory.Exists(OutputPath) && createPath)
+                Directory.CreateDirectory(OutputPath);
+
+            return OutputFullName;
+        }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 检查路径输入（工程根目录）
+        /// </summary>
+        /// <param name="path">输入</param>
+        /// <param name="fileType">文件类型</param>
+        /// <param name="createPath">如无则创建目录</param>
+        /// <returns>输出</returns>
+        public static string CheckPathInRoot(string path, string fileType, bool createPath)
+        {
+            return CheckPathInRoot(path, fileType, createPath, out string OutputPath, out string OutputFileName);
+        }
+        /// <summary>
+        /// 检查路径输入（工程根目录）
+        /// </summary>
+        /// <param name="path">输入</param>
+        /// <param name="fileType">文件类型</param>
+        /// <param name="createPath">如无则创建目录</param>
+        /// <param name="OutputPath">输出路径</param>
+        /// <param name="OutputFileName">输出文件名</param>
+        /// <returns>输出</returns>
+        public static string CheckPathInRoot(string path, string fileType, bool createPath, out string OutputPath, out string OutputFileName)
+        {
+            string OutputFullName = "";
+            OutputPath = "";
+            OutputFileName = "";
+
+            List<string> tempString = ValueAdjust.SplitPath(path).ToList();
+
+            for (int i = 0; i < tempString.Count; i++)
+            {
+                if (i >= tempString.Count - 1)
+                {
+                    OutputFileName = tempString[i];
+                    if (tempString[tempString.Count - 1].LastIndexOf("." + fileType, StringComparison.OrdinalIgnoreCase) < 0)
+                        OutputFileName += "." + fileType;
+                    break;
+                }
+                else
+                    OutputPath += tempString[i] + "\\";
+            }
+            OutputFullName = OutputPath + OutputFileName;
+            //Debug.Log(OutputFullName);
+
+            if (createPath)
+            {
+                if (path.IndexOf(':') == 1)
+                {
+                    if (!Directory.Exists(OutputPath))
+                        Directory.CreateDirectory(OutputPath);
+                }
+                else
+                {
+                    DirectoryInfo directory = new DirectoryInfo(Application.dataPath).Parent;
+                    if (!Directory.Exists(directory.FullName + "/" + OutputPath))
+                        Directory.CreateDirectory(directory.FullName + "/" + OutputPath);
+                }
+            }
+            return OutputFullName;
+        }
+        /// <summary>
+        /// 检查路径输入（Assets文件夹内）
+        /// </summary>
+        /// <param name="path">输入</param>
+        /// <param name="fileType">文件类型</param>
+        /// <param name="createPath">如无则创建目录</param>
+        /// <returns>输出</returns>
+        public static string CheckPathInAssets(string path, string fileType, bool createPath)
+        {
+            return CheckPathInAssets(path, fileType, createPath, out string OutputPath, out string OutputFileName);
+        }
+        /// <summary>
+        /// 检查路径输入（Assets文件夹内）
+        /// </summary>
+        /// <param name="path">输入</param>
+        /// <param name="fileType">文件类型</param>
+        /// <param name="createPath">如无则创建目录</param>
+        /// <param name="OutputPath">输出路径</param>
+        /// <param name="OutputFileName">输出文件名</param>
+        /// <returns>输出</returns>
+        public static string CheckPathInAssets(string path, string fileType, bool createPath, out string OutputPath, out string OutputFileName)
+        {
+            string OutputFullName = "";
+            OutputPath = "";
+            OutputFileName = "";
+
+            List<string> tempString = ValueAdjust.SplitPath(path).ToList();
+            if (tempString[0] != "Assets" && path.IndexOf(':') != 1)
+                tempString.Insert(0, "Assets");
+
+            for (int i = 0; i < tempString.Count; i++)
+            {
+                if (i >= tempString.Count - 1)
+                {
+                    OutputFileName = tempString[i];
+                    if (tempString[tempString.Count - 1].LastIndexOf("." + fileType, StringComparison.OrdinalIgnoreCase) < 0)
+                        OutputFileName += "." + fileType;
+                    break;
+                }
+                else
+                    OutputPath += tempString[i] + "\\";
+            }
+            OutputFullName = OutputPath + OutputFileName;
+            //Debug.Log(OutputFullName);
+
+            if (createPath)
+            {
+                if (path.IndexOf(':') == 1)
+                {
+                    if (!Directory.Exists(OutputPath))
+                        Directory.CreateDirectory(OutputPath);
+                }
+                else
+                {
+                    DirectoryInfo directory = new DirectoryInfo(Application.dataPath).Parent;
+                    if (!Directory.Exists(directory.FullName + "/" + OutputPath))
+                        Directory.CreateDirectory(directory.FullName + "/" + OutputPath);
+                }
+            }
+            return OutputFullName;
+        }
+#endif
+        /// <summary>
         /// 列表相加。
         /// </summary>
         /// <typeparam name="T"></typeparam>

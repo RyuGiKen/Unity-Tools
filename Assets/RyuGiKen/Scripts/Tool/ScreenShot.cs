@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 namespace RyuGiKen.Tools
 {
@@ -55,8 +56,15 @@ namespace RyuGiKen.Tools
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 fileName = Application.productName + "_" + DateTime.Now.ToString().Replace(":", "_").Replace("/", "_").Replace("\\", "_");
-            if (!GetFile.JudgeFileType(fileName, ".png"))
-                fileName += ".png";
+
+            if (fileName.IndexOf(':') == 1)
+            {
+                fileName = ValueAdjust.CheckFilePath(fileName, "png", true);
+            }
+            else
+            {
+                fileName = ValueAdjust.CheckPathInRoot(fileName, "png", true);
+            }
 
             if (GameView)
             {
