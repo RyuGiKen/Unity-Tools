@@ -9,6 +9,23 @@ namespace RyuGiKen.Tools
     public class FPSShowEditor : Editor
     {
         bool ShowInspector = false;
+        SerializedProperty hide;
+        SerializedProperty UnscaledDeltaTime;
+        SerializedProperty FPSLog;
+        SerializedProperty LockFrameRate;
+        SerializedProperty autoAdjustQualityLevel;
+        SerializedProperty adjustMinFPS;
+        SerializedProperty adjustMaxFPS;
+        void OnEnable()
+        {
+            hide = serializedObject.FindProperty("hide");
+            UnscaledDeltaTime = serializedObject.FindProperty("UnscaledDeltaTime");
+            FPSLog = serializedObject.FindProperty("FPSLog");
+            LockFrameRate = serializedObject.FindProperty("LockFrameRate");
+            autoAdjustQualityLevel = serializedObject.FindProperty("autoAdjustQualityLevel");
+            adjustMinFPS = serializedObject.FindProperty("adjustMinFPS");
+            adjustMaxFPS = serializedObject.FindProperty("adjustMaxFPS");
+        }
         public override void OnInspectorGUI()
         {
             string[] Name = new string[9];
@@ -40,6 +57,7 @@ namespace RyuGiKen.Tools
                     break;
             }
             ShowInspector = EditorGUILayout.Foldout(ShowInspector, Name[0]);
+            serializedObject.Update();
             if (ShowInspector)
             {
                 base.OnInspectorGUI();
@@ -47,18 +65,19 @@ namespace RyuGiKen.Tools
             else
             {
                 FPSShow fps = target as FPSShow;
-                fps.hide = !EditorGUILayout.ToggleLeft(Name[1], !fps.hide);
+                hide.boolValue = !EditorGUILayout.ToggleLeft(Name[1], !hide.boolValue);
                 EditorGUILayout.IntField(Name[2], (int)fps.m_FPS);
-                fps.UnscaledDeltaTime = EditorGUILayout.Toggle(Name[3], fps.UnscaledDeltaTime);
-                fps.FPSLog = EditorGUILayout.Toggle(Name[4], fps.FPSLog);
-                fps.LockFrameRate = EditorGUILayout.IntField(Name[5], fps.LockFrameRate);
-                fps.autoAdjustQualityLevel = EditorGUILayout.ToggleLeft(Name[6], fps.autoAdjustQualityLevel);
+                UnscaledDeltaTime.boolValue = EditorGUILayout.Toggle(Name[3], UnscaledDeltaTime.boolValue);
+                FPSLog.boolValue = EditorGUILayout.Toggle(Name[4], FPSLog.boolValue);
+                LockFrameRate.intValue = EditorGUILayout.DelayedIntField(Name[5], LockFrameRate.intValue.Clamp(-1));
+                autoAdjustQualityLevel.boolValue = EditorGUILayout.ToggleLeft(Name[6], autoAdjustQualityLevel.boolValue);
                 if (fps.autoAdjustQualityLevel)
                 {
-                    fps.adjustMinFPS = EditorGUILayout.IntField(Name[7], fps.adjustMinFPS);
-                    fps.adjustMaxFPS = EditorGUILayout.IntField(Name[7], fps.adjustMaxFPS.Clamp(fps.adjustMinFPS));
+                    adjustMinFPS.intValue = EditorGUILayout.DelayedIntField(Name[7], adjustMinFPS.intValue.Clamp(0));
+                    adjustMaxFPS.intValue = EditorGUILayout.DelayedIntField(Name[7], adjustMaxFPS.intValue.Clamp(adjustMinFPS.intValue + 1));
                 }
             }
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

@@ -66,11 +66,11 @@ namespace RyuGiKen.Tools
         {
             if (Input.GetKeyUp(KeyCode.F1))//按F1降低画质
             {
-                AdjustQualityLevel(false);
+                AdjustQualityLevel(-1);
             }
             if (Input.GetKeyUp(KeyCode.F2))//按F2提高画质
             {
-                AdjustQualityLevel(true);
+                AdjustQualityLevel(1);
             }
             if (Input.GetKeyUp(KeyCode.F3))//按F3限制帧数为60;
             {
@@ -99,8 +99,8 @@ namespace RyuGiKen.Tools
                     deltaTime = 0;
                 if (deltaTime <= -10)
                 {
-                    AdjustQualityLevel(false);
                     deltaTime = 0;
+                    AdjustQualityLevel(-1);
                 }
             }
             else if (autoAdjustQualityLevel && m_FPS > adjustMaxFPS && Time.timeScale > 0)//自动提高画质
@@ -111,7 +111,8 @@ namespace RyuGiKen.Tools
                     deltaTime = 0;
                 if (deltaTime >= 10)
                 {
-                    AdjustQualityLevel(true);
+                    deltaTime = 0;
+                    AdjustQualityLevel(1);
                 }
             }
         }
@@ -140,17 +141,21 @@ namespace RyuGiKen.Tools
             }
             //FPSText.text = "FPS  " + Mathf.RoundToInt(1.0f / deltaTime).ToString();
         }
-        public static void AdjustQualityLevel(bool isRise)
+        /// <summary>
+        /// 调整画质等级
+        /// </summary>
+        /// <param name="type">大于0增加，小于0减少</param>
+        public static void AdjustQualityLevel(int type = 0)
         {
             deltaTime = 0;
             QualitySettings.vSyncCount = 0;
-            if (isRise)
+            if (type > 0)
             {
-                QualitySettings.IncreaseLevel();
+                QualitySettings.IncreaseLevel(false);
             }
-            else
+            else if (type < 0)
             {
-                QualitySettings.DecreaseLevel();
+                QualitySettings.DecreaseLevel(false);
             }
         }
         public static string Path = Application.streamingAssetsPath;

@@ -9,6 +9,21 @@ namespace RyuGiKen.Tools
     public class ValueAdjustButtonEditor : Editor
     {
         bool ShowInspector = false;
+        SerializedProperty value;
+        SerializedProperty digit;
+        SerializedProperty LimitValue;
+        SerializedProperty ValueRange;
+        SerializedProperty Prefix;
+        SerializedProperty Postfix;
+        void OnEnable()
+        {
+            value = serializedObject.FindProperty("value");
+            digit = serializedObject.FindProperty("digit");
+            LimitValue = serializedObject.FindProperty("LimitValue");
+            ValueRange = serializedObject.FindProperty("ValueRange");
+            Prefix = serializedObject.FindProperty("Prefix");
+            Postfix = serializedObject.FindProperty("Postfix");
+        }
         public override void OnInspectorGUI()
         {
             string[] Name = new string[8];
@@ -38,6 +53,7 @@ namespace RyuGiKen.Tools
                     break;
             }
             ShowInspector = EditorGUILayout.Foldout(ShowInspector, Name[0]);
+            serializedObject.Update();
             if (ShowInspector)
             {
                 base.OnInspectorGUI();
@@ -46,24 +62,28 @@ namespace RyuGiKen.Tools
             {
                 ValueAdjustButton button = target as ValueAdjustButton;
                 //EditorGUILayout.LabelField("输出结果：" + button.Prefix + button.m_Value.ToString("F" + button.digit) + button.Postfix);
-                EditorGUILayout.DelayedTextField(Name[1], button.Prefix + button.m_Value.ToString("F" + button.digit) + button.Postfix);
+                string temp = EditorGUILayout.TextField(Name[1], Prefix.stringValue + value.floatValue.ToString("F" + digit.intValue) + Postfix.stringValue);
                 EditorGUILayout.Space();
-                button.LimitValue = EditorGUILayout.ToggleLeft(Name[2], button.LimitValue);
+                LimitValue.boolValue = EditorGUILayout.ToggleLeft(Name[2], LimitValue.boolValue);
                 if (button.LimitValue)
                 {
-                    button.m_Value = EditorGUILayout.Slider(Name[3], button.m_Value, button.ValueRange.x, button.ValueRange.y);
-                    button.ValueRange = EditorGUILayout.Vector2Field(Name[4], button.ValueRange);
+                    value.floatValue = EditorGUILayout.Slider(Name[3], value.floatValue, button.ValueRange.x, button.ValueRange.y);
+                    ValueRange.vector2Value = EditorGUILayout.Vector2Field(Name[4], ValueRange.vector2Value);
                 }
                 else
                 {
-                    button.m_Value = EditorGUILayout.FloatField(Name[3], button.m_Value);
+                    value.floatValue = EditorGUILayout.FloatField(Name[3], value.floatValue);
                 }
                 EditorGUILayout.Space();
-                button.digit = EditorGUILayout.IntSlider(Name[5], button.digit, 0, 8);
+                digit.intValue = EditorGUILayout.IntSlider(Name[5], digit.intValue, 0, 8);
                 EditorGUILayout.Space();
-                button.Prefix = EditorGUILayout.DelayedTextField(Name[6], button.Prefix);
-                button.Postfix = EditorGUILayout.DelayedTextField(Name[7], button.Postfix);
+                Prefix.stringValue = EditorGUILayout.TextField(Name[6], Prefix.stringValue);
+                Postfix.stringValue = EditorGUILayout.TextField(Name[7], Postfix.stringValue);
+
+                if (button.m_Text && button.m_Text.text != temp)
+                    button.UpdateText();
             }
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

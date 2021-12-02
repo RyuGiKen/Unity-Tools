@@ -23,6 +23,7 @@ using Debug = UnityEngine.Debug;
 /// </summary>
 namespace RyuGiKen
 {
+    public delegate void MyEvent();
     /// <summary>
     /// 获取文件
     /// </summary>

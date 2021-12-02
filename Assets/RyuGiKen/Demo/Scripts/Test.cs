@@ -16,6 +16,11 @@ public class Test : MonoBehaviour
     public List<string> PrintData;
     [SerializeField] LineRenderer[] lineRenderers;
     public DrawData drawer;
+
+    public Slider slider;
+    public CircleSlider circleSlider;
+    public AutoRoll box;
+    public ValueAdjustButton button;
     void Awake()
     {
         instance = this;
@@ -30,11 +35,16 @@ public class Test : MonoBehaviour
         ShowSystemInfo();
         Invoke(nameof(UpdateResolutionInput), 2f);
         SmoothingLines();
+
+        slider.minValue = circleSlider.MinValue = button.ValueRange.x;
+        slider.maxValue = circleSlider.MaxValue = button.ValueRange.y;
+        button.m_Value = box.rollSpeed;
     }
     void Update()
     {
         m_Text[1].text = ValueAdjust.ShowTime(Time.time);
         drawer.RecordData = ValueAdjust.ToList(FPSShow.Data_FPS.ToArray());
+        box.rollSpeed = slider.value = circleSlider.Value = button.m_Value;
     }
     private void LateUpdate()
     {
