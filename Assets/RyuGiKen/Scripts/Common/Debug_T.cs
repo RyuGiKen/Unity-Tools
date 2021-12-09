@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.IO;
 using UnityEngine;
@@ -111,7 +112,7 @@ namespace RyuGiKen.Tools
             CanPrint = false;//清空前需暂停打印
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
-            File.WriteAllText(Path + "/Log.txt", string.Empty);
+            File.WriteAllText(Path + "/Log.txt", string.Empty, Encoding.UTF8);
             CanPrint = originEnable;
             if (sw != null)
             {
@@ -125,7 +126,7 @@ namespace RyuGiKen.Tools
             if (sw == null)
             {
                 Path = Application.streamingAssetsPath;
-                sw = new StreamWriter(Path + "/Log.txt", true);
+                sw = new StreamWriter(Path + "/Log.txt", true, Encoding.UTF8);
             }
         }
         private void OnApplicationQuit()

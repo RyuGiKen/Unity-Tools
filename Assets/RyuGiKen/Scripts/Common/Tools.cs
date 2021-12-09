@@ -1539,6 +1539,30 @@ namespace RyuGiKen
     public static class ValueAdjust
     {
         /// <summary>
+        /// 转速转角速度
+        /// </summary>
+        /// <param name="RPM">转速(圈每分)</param>
+        /// <param name="SpeedFactor">减速比</param>
+        /// <returns>角速度(度每秒)</returns>
+        public static float RPMtoSpeed(float RPM, float SpeedFactor)
+        {
+            if (float.IsNaN(SpeedFactor) || SpeedFactor <= 0)
+                return 0;
+            return RPM * (6f / SpeedFactor);
+        }
+        /// <summary>
+        /// 角速度转转速
+        /// </summary>
+        /// <param name="AngleSpeed">角速度(度每秒)</param>
+        /// <param name="SpeedFactor">减速比</param>
+        /// <returns>转速(圈每分)</returns>
+        public static float SpeedtoRPM(float AngleSpeed, float SpeedFactor)
+        {
+            if (float.IsNaN(SpeedFactor) || SpeedFactor <= 0)
+                return 0;
+            return AngleSpeed / (6f / SpeedFactor);
+        }
+        /// <summary>
         /// 转换速度
         /// </summary>
         /// <param name="type">原单位</param>

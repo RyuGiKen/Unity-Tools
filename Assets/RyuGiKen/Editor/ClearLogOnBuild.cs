@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build;
@@ -18,12 +19,12 @@ public class ClearLogOnBuild : IPreprocessBuildWithReport
 			Directory.CreateDirectory(Application.streamingAssetsPath);
 		try
 		{
-			File.WriteAllText(Application.streamingAssetsPath + "/Log.txt", string.Empty);
+			File.WriteAllText(Application.streamingAssetsPath + "/Log.txt", string.Empty, Encoding.UTF8);
 		}
 		catch { }
 		try
 		{
-			File.WriteAllText(Application.streamingAssetsPath + "/FpsRecord.txt", string.Empty);
+			File.WriteAllText(Application.streamingAssetsPath + "/FpsRecord.txt", string.Empty, Encoding.UTF8);
 		}
 		catch { }
 	}

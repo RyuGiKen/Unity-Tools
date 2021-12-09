@@ -40,6 +40,11 @@ namespace RyuGiKen.Tools
             QualitySettings.vSyncCount = 0;
             RefreshTargetFPS();
         }
+        private void Reset()
+        {
+            if (FPSText == null)
+            { FPSText = GetComponent<Text>(); }
+        }
         private void Start()
         {
             RefreshTargetFPS();
@@ -167,7 +172,7 @@ namespace RyuGiKen.Tools
             {
                 if (!Directory.Exists(Path))
                     Directory.CreateDirectory(Path);
-                sw = new StreamWriter(Path + "/FpsRecord.txt", true);
+                sw = new StreamWriter(Path + "/FpsRecord.txt", true, System.Text.Encoding.UTF8);
                 for (int i = 0; i < 2; i++)
                     if (Data_FPS.Count > 2)
                         Data_FPS.RemoveAt(0);
