@@ -99,7 +99,7 @@ namespace RyuGiKen.Tools
                     m_MaxAngle.floatValue = temp.Clamp(0, 359.999f);
 
                 EditorGUILayout.Slider("Angle", (target as CircleSlider).Angle, (target as CircleSlider).MinAngle, (target as CircleSlider).MaxAngle);
-                EditorGUILayout.Slider(m_FillAngleRange, (target as CircleSlider).MinAngle, (target as CircleSlider).MaxAngle);
+                EditorGUILayout.Slider(m_FillAngleRange, 0, (target as CircleSlider).MaxAngle - (target as CircleSlider).MinAngle);
                 EditorGUILayout.PropertyField(fillClockwise);
 
                 EditorGUI.BeginChangeCheck();
