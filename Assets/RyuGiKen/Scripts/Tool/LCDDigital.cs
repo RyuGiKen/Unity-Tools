@@ -139,6 +139,8 @@ namespace RyuGiKen.Tools
             {
                 case Style.GradientAndShadow:
                 case Style.GradientAndOutLineAndShadow:
+                case Style.SolidColorAndShadow:
+                case Style.SolidColorAndOutLineAndShadow:
                     images[3].enabled = true;
                     images[3].color = m_Color;
                     break;

@@ -3411,6 +3411,56 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 统计数组中指定项个数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static int CountItem<T>(this T[] array, T item)
+        {
+            if (array == null || array.Length < 1)
+                return 0;
+            int result = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array is Object[] && (array[i] as Object) == (item as Object))
+                {
+                    result++;
+                }
+                else if (array[i].Equals(item))
+                {
+                    result++;
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 统计列表中指定项个数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static int CountItem<T>(this List<T> list, T item)
+        {
+            if (list == null || list.Count < 1)
+                return 0;
+            int result = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list is Object[] && (list[i] as Object) == (item as Object))
+                {
+                    result++;
+                }
+                else if (list[i].Equals(item))
+                {
+                    result++;
+                }
+            }
+            return result;
+        }
+        /// <summary>
         /// 统计字符串中连续数字长度
         /// </summary>
         /// <param name="str"></param>
