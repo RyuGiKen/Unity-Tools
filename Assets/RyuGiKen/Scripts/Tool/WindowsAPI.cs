@@ -93,6 +93,12 @@ namespace WindowsAPI
         /// </summary>
         [DllImport("user32.dll")] public static extern IntPtr GetDesktopWindow();
         /// <summary>
+        /// 激活指定窗口
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <param name="fAltTab"></param>
+        [DllImport("user32.dll")] public static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+        /// <summary>
         /// 该函数设置指定窗口的显示状态。
         /// </summary>
         [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int State);
@@ -111,6 +117,14 @@ namespace WindowsAPI
         /// <summary>
         /// 改变一个子窗口，弹出式窗口式顶层窗口的尺寸，位置和Z序。
         /// </summary>
+        /// <param name="hWnd">窗体句柄</param>
+        /// <param name="hWndInsertAfter">1置后，0置顶之后，-1置顶，-2置前（取消置顶）</param>
+        /// <param name="X"></param>
+        /// <param name="Y"></param>
+        /// <param name="Width"></param>
+        /// <param name="Height"></param>
+        /// <param name="flags">1不改变大小，2不改变位置，4不改变顺序，8不重绘，0x10不激活，0x40显示，0x80隐藏</param>
+        /// <returns></returns>
         [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int X, int Y, int Width, int Height, uint flags);
         /// <summary>
         /// 打开剪切板

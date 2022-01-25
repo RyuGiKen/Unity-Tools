@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using WindowsAPI;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -15,23 +16,25 @@ namespace RyuGiKen.Tools
         public static SetDisplay instance;
         const int WS_POPUP = 0x800000;
         const int GWL_STYLE = -16;
-        const int HWND_TOPMOST = -1;
         const uint SWP_SHOWWINDOW = 0x0040;
         [Tooltip("窗口宽")] int WindowWidth = 1920;
         [Tooltip("窗口高")] int WindowHeight = 1080;
         [Tooltip("窗口左上角的X")] int WindowPosX = 1920;
         [Tooltip("窗口左上角的Y")] int WindowPosY = 0;
-        [Tooltip("窗口句柄")] IntPtr HWndIntPtr;
+        /// <summary>
+        /// 窗口句柄
+        /// </summary>
+        public static IntPtr HWndIntPtr;
         /// <summary>
         /// 鼠标测试位置，右左上下，主屏左上角为原点
         /// </summary>
-        Vector2Int[] TestMousePos = {
+        static Vector2Int[] TestMousePos = {
             new Vector2Int(1920 + 50, 0),
             new Vector2Int(-1920, 0),
             new Vector2Int(0, -1080 + 50),
             new Vector2Int(0, 1080 + 50),
         };
-        [Tooltip("鼠标位置误差范围")] int ErrorRange = 500;//>2
+        [Tooltip("鼠标位置误差范围")] static int ErrorRange = 500;//>2
         [Tooltip("覆盖鼠标位置")] bool OverrideMouse;
         [Tooltip("覆盖鼠标位置")] Vector2 OverrideMousePos;
         bool UseSecondScreen;
@@ -51,26 +54,38 @@ namespace RyuGiKen.Tools
             {
                 UseSecondScreen = xmlData.ContainIgnoreCase("True") || xmlData == "1";
             }
-
-            if (Display.displays.Length > 1 && UseSecondScreen && this.enabled)//多显示器
+            if (Application.platform == RuntimePlatform.WindowsPlayer)
             {
-                WindowWidth = Display.displays[1].systemWidth;
-                WindowHeight = Display.displays[1].systemHeight;
-                WindowPosX = Display.displays[0].systemWidth;
-                WindowPosY = 0;
-                ErrorRange = Mathf.Clamp(ErrorRange, 2, Mathf.Min(Display.displays[0].systemWidth, Display.displays[0].systemHeight, Display.displays[1].systemWidth, Display.displays[1].systemHeight) - 5);
-                TestMousePos[0] = new Vector2Int(Display.displays[0].systemWidth + Display.displays[1].systemWidth / 2, Display.displays[1].systemHeight / 2);
-                TestMousePos[1] = new Vector2Int(-Display.displays[1].systemWidth, Display.displays[1].systemHeight / 2);
-                TestMousePos[2] = new Vector2Int(Display.displays[0].systemWidth / 2, -Display.displays[1].systemHeight / 2);
-                TestMousePos[3] = new Vector2Int(Display.displays[0].systemWidth / 2, Display.displays[0].systemHeight + Display.displays[1].systemHeight / 2);
-
+                //HWndIntPtr = (IntPtr)WindowsAPI.User32.FindWindow(null, Application.productName);//工程名，非进程名。非英文会因为编码格式问题找不到窗口。可能误判同名窗口。
+                HWndIntPtr = GetProcessWnd();
+                //HWndIntPtr = WindowsAPI.User32.GetForegroundWindow();//仅检测前台窗体，不一定为Unity。
+            }
+            if (UseSecondScreen)
+            {
+                if (Display.displays.Length > 1)//多显示器
+                {
+                    WindowWidth = Display.displays[1].systemWidth;
+                    WindowHeight = Display.displays[1].systemHeight;
+                    WindowPosX = Display.displays[0].systemWidth;
+                    WindowPosY = 0;
+                    ErrorRange = Mathf.Clamp(ErrorRange, 2, Mathf.Min(Display.displays[0].systemWidth, Display.displays[0].systemHeight, Display.displays[1].systemWidth, Display.displays[1].systemHeight) - 5);
+                    TestMousePos[0] = new Vector2Int(Display.displays[0].systemWidth + Display.displays[1].systemWidth / 2, Display.displays[1].systemHeight / 2);
+                    TestMousePos[1] = new Vector2Int(-Display.displays[1].systemWidth, Display.displays[1].systemHeight / 2);
+                    TestMousePos[2] = new Vector2Int(Display.displays[0].systemWidth / 2, -Display.displays[1].systemHeight / 2);
+                    TestMousePos[3] = new Vector2Int(Display.displays[0].systemWidth / 2, Display.displays[0].systemHeight + Display.displays[1].systemHeight / 2);
+                    User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
+                    if (Application.platform == RuntimePlatform.WindowsPlayer)
+                    {
+                        SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
+                        Invoke(nameof(TestRight), 0.1f);//判定右
+                    }
+                }
+            }
+            else
+            {
                 if (Application.platform == RuntimePlatform.WindowsPlayer)
                 {
-                    //HWndIntPtr = (IntPtr)WindowsAPI.User32.FindWindow(null, Application.productName);//工程名，非进程名。非英文会因为编码格式问题找不到窗口。可能误判同名窗口。
-                    HWndIntPtr = GetProcessWnd();
-                    //HWndIntPtr = WindowsAPI.User32.GetForegroundWindow();//仅检测前台窗体，不一定为Unity。
-                    SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
-                    Invoke(nameof(TestRight), 0.1f);//判定右
+                    User32.SetForegroundWindow(HWndIntPtr);
                 }
             }
         }
@@ -78,7 +93,7 @@ namespace RyuGiKen.Tools
         {
             if (OverrideMouse)
             {
-                WindowsAPI.User32.SetCursorPos((int)OverrideMousePos.x, (int)OverrideMousePos.y);
+                User32.SetCursorPos((int)OverrideMousePos.x, (int)OverrideMousePos.y);
             }
         }
         void SetOverrideMousePos(float X, float Y, bool Override)
@@ -94,7 +109,6 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = Input.mousePosition;
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[0].x, ErrorRange);
             string info = "Target：" + TestMousePos[0] + " Mouse：" + mousePosition + " 副屏在主屏右方：" + result + " \r\n";
-
             Debug_T.Log(info);
             SetOverrideMousePos(TestMousePos[1].x, TestMousePos[1].y, true);
             if (result)
@@ -110,7 +124,6 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = Input.mousePosition;
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[1].x, ErrorRange);
             string info = "Target：" + TestMousePos[1] + " Mouse：" + mousePosition + " 副屏在主屏左方：" + result + " \r\n";
-
             Debug_T.Log(info);
             SetOverrideMousePos(TestMousePos[2].x, TestMousePos[2].y, true);
             if (result)
@@ -126,7 +139,6 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = Input.mousePosition;
             bool result = ValueAdjust.JudgeRange(Display.displays[0].systemHeight - mousePosition.y, TestMousePos[2].y, ErrorRange);
             string info = "Target：" + TestMousePos[2] + " Mouse：" + mousePosition + " 副屏在主屏上方：" + result + " \r\n";
-
             Debug_T.Log(info);
             SetOverrideMousePos(TestMousePos[3].x, TestMousePos[3].y, true);
             if (result)
@@ -142,7 +154,6 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = Input.mousePosition;
             bool result = ValueAdjust.JudgeRange(Display.displays[0].systemHeight - mousePosition.y, TestMousePos[3].y, ErrorRange);
             string info = "Target：" + TestMousePos[3] + " Mouse：" + mousePosition + " 副屏在主屏下方：" + result + " \r\n";
-
             Debug_T.Log(info);
             if (result)
                 SetPosition(0, 1);//下
@@ -162,7 +173,7 @@ namespace RyuGiKen.Tools
             Screen.SetResolution(WindowWidth, WindowHeight, false);
             yield return new WaitForSeconds(0.01f);
             OverrideMouse = false;
-            WindowsAPI.User32.SetWindowLong(HWndIntPtr, GWL_STYLE, WS_POPUP);//无边框
+            User32.SetWindowLong(HWndIntPtr, GWL_STYLE, WS_POPUP);//无边框
             X = Mathf.Clamp(X, -1, 1);
             Y = Mathf.Clamp(Y, -1, 1);
             switch (X + "," + Y)
@@ -189,8 +200,34 @@ namespace RyuGiKen.Tools
                     WindowPosY = -Display.displays[1].systemHeight;
                     break;
             }
-            bool result = WindowsAPI.User32.SetWindowPos(HWndIntPtr, HWND_TOPMOST, WindowPosX, WindowPosY, WindowWidth, WindowHeight, SWP_SHOWWINDOW);//设置屏幕大小和位置
+            bool result = User32.SetWindowPos(HWndIntPtr, 1, WindowPosX, WindowPosY, WindowWidth, WindowHeight, SWP_SHOWWINDOW);//设置屏幕大小和位置
             Debug_T.Log("副屏设置" + result);
+        }
+        /// <summary>
+        /// 窗口置顶
+        /// </summary>
+        public static void SetForegroundWindow()
+        {
+            if (Application.platform == RuntimePlatform.WindowsPlayer)
+            {
+                switch (Screen.fullScreenMode)
+                {
+                    case FullScreenMode.ExclusiveFullScreen:
+                    case FullScreenMode.FullScreenWindow:
+                        User32.SetWindowPos(HWndIntPtr, -1, 0, 0, 0, 0, SWP_SHOWWINDOW);
+                        //User32.SwitchToThisWindow(HWndIntPtr, true);
+                        User32.SetForegroundWindow(HWndIntPtr);
+                        User32.SetWindowPos(HWndIntPtr, -2, 0, 0, 0, 0, SWP_SHOWWINDOW);
+                        break;
+                    case FullScreenMode.MaximizedWindow:
+                    case FullScreenMode.Windowed:
+                        User32.SetWindowPos(HWndIntPtr, -1, 0, 0, 0, 0, 1 | 2);
+                        //User32.SwitchToThisWindow(HWndIntPtr, true);
+                        User32.SetForegroundWindow(HWndIntPtr);
+                        User32.SetWindowPos(HWndIntPtr, -2, 0, 0, 0, 0, 1 | 2);
+                        break;
+                }
+            }
         }
         /// <summary>
         /// 获取当前窗体句柄
