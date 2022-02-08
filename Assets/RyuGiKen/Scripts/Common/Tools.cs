@@ -1489,6 +1489,83 @@ namespace RyuGiKen
         public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.x - b.x, a.y - b.y, a.z + b.z); }
     }
 #endif
+#if UNITY_EDITOR || UNITY_STANDALONE
+    /// <summary>
+    /// 多维数组
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    [System.Serializable]
+    public class MultiArray<T>
+    {
+        [System.Serializable]
+        public struct SecondArray
+        {
+            public T[] items;
+            public int Length
+            {
+                get
+                {
+                    return items == null ? 0 : items.Length;
+                }
+            }
+        }
+        public SecondArray[] items;
+        public T GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public T GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+        public T[] AllItems
+        {
+            get
+            {
+                List<T> result = new List<T>();
+                for (int i = 0; i < items.Length; i++)
+                {
+                    if (items[i].Length > 0)
+                        result.AddList(items[i].items.ToList());
+                }
+                return result.ToArray();
+            }
+        }
+        public T this[int index]
+        {
+            get
+            {
+                try
+                {
+                    return AllItems[index];
+                }
+                catch
+                {
+                    return default(T);
+                }
+            }
+        }
+        public int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Length; i++)
+                {
+                    result += items[i].Length;
+                }
+                return result;
+            }
+        }
+    }
+#endif
     /// <summary>
     /// 速度类型
     /// </summary>
@@ -2869,6 +2946,27 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 数组转换
+        /// </summary>
+        /// <returns></returns>
+        public static T[][] ConvertArray<T>(this MultiArray<T> multiArray)
+        {
+            if (multiArray == null || multiArray.items == null || multiArray.Length < 1)
+                return null;
+            T[][] result = new T[multiArray.items.Length][];
+            for (int i = 0; i < multiArray.items.Length; i++)
+            {
+                result[i] = new T[multiArray.items[i].Length];
+                for (int j = 0; j < result[i].Length; j++)
+                {
+                    result[i][j] = multiArray.GetItem(i, j);
+                }
+            }
+            return result;
+        }
+#endif
         /// <summary>
         /// 打印数组元素
         /// </summary>
