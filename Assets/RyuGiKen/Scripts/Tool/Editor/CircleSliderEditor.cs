@@ -77,26 +77,19 @@ namespace RyuGiKen.Tools
                 EditorGUILayout.Slider(m_Value, (target as CircleSlider).MinValue, (target as CircleSlider).MaxValue);
                 EditorGUILayout.Space();
 
-                /*EditorGUI.BeginChangeCheck();
-                newMin = EditorGUILayout.FloatField("Min Angle", m_MinAngle.floatValue);
+                EditorGUI.BeginChangeCheck();
+                newMin = EditorGUILayout.Slider("Min Angle", m_MinAngle.floatValue, 0, 360);
                 if (EditorGUI.EndChangeCheck() && newMin <= m_MaxAngle.floatValue)
                 {
-                    m_MinAngle.floatValue = newMin;
+                    m_MinAngle.floatValue = newMin.Clamp(0, 359.999f);
                 }
 
                 EditorGUI.BeginChangeCheck();
-                newMax = EditorGUILayout.FloatField("Max Angle", m_MaxAngle.floatValue);
+                newMax = EditorGUILayout.Slider("Max Angle", m_MaxAngle.floatValue, 0, 360);
                 if (EditorGUI.EndChangeCheck() && newMax >= m_MinAngle.floatValue)
                 {
-                    m_MaxAngle.floatValue = newMax;
-                }*/
-                float temp;
-                temp = EditorGUILayout.Slider("Min Angle", m_MinAngle.floatValue, 0, 360);
-                if (temp <= m_MaxAngle.floatValue)
-                    m_MinAngle.floatValue = temp.Clamp(0, 359.999f);
-                temp = EditorGUILayout.Slider("Max Angle", m_MaxAngle.floatValue, 0, 360);
-                if (temp >= m_MinAngle.floatValue)
-                    m_MaxAngle.floatValue = temp.Clamp(0, 359.999f);
+                    m_MaxAngle.floatValue = newMax.Clamp(0, 359.999f);
+                }
 
                 EditorGUILayout.Slider("Angle", (target as CircleSlider).Angle, (target as CircleSlider).MinAngle, (target as CircleSlider).MaxAngle);
                 EditorGUILayout.Slider(m_FillAngleRange, 0, (target as CircleSlider).MaxAngle - (target as CircleSlider).MinAngle);
@@ -113,7 +106,11 @@ namespace RyuGiKen.Tools
                         slider.HandleFilled = type;
                     }
                 }
-                fillOrigin.intValue = (int)(Image.Origin360)EditorGUILayout.EnumPopup("Fill Origin", (Image.Origin360)fillOrigin.intValue);
+                EditorGUI.BeginChangeCheck();
+                if (EditorGUI.EndChangeCheck())
+                {
+                    fillOrigin.intValue = (int)(Image.Origin360)EditorGUILayout.EnumPopup("Fill Origin", (Image.Origin360)fillOrigin.intValue);
+                }
 
                 EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(m_OnValueChanged);

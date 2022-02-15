@@ -534,8 +534,15 @@ namespace RyuGiKen.Tools
             else //if (!rectTransform.offsetMin.JudgeRange(Vector2.zero, Vector2.one * 0.01f) || !rectTransform.offsetMax.JudgeRange(Vector2.zero, Vector2.one * 0.01f))
             {
                 rectTransform.offsetMin = rectTransform.offsetMax = Vector2.zero;
-                rectTransform.anchorMin = Vector2.zero;
-                rectTransform.anchorMax = Vector2.one;
+                if (Mathf.Approximately(rectTransform.anchorMin.magnitude, 0) && Mathf.Approximately(rectTransform.anchorMax.magnitude, 0))
+                {
+
+                }
+                else if (!Mathf.Approximately(rectTransform.anchorMin.magnitude, 0) && !ValueAdjust.JudgeRange(rectTransform.anchorMax, Vector2.one, Vector2.one * 0.001f))
+                {
+                    rectTransform.anchorMin = Vector2.zero;
+                    rectTransform.anchorMax = Vector2.one;
+                }
             }
         }
         /// <summary>

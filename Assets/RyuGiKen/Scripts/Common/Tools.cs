@@ -1493,14 +1493,13 @@ namespace RyuGiKen
     /// <summary>
     /// 多维数组
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     [System.Serializable]
-    public class MultiArray<T>
+    public class MultiArray
     {
         [System.Serializable]
         public struct SecondArray
         {
-            public T[] items;
+            public Component[] items;
             public int Length
             {
                 get
@@ -1510,11 +1509,11 @@ namespace RyuGiKen
             }
         }
         public SecondArray[] items;
-        public T GetRandomOne(int index1)
+        public Component GetRandomOne(int index1)
         {
             return items[index1].items.GetRandomItem();
         }
-        public T GetItem(int index1, int index2)
+        public Component GetItem(int index1, int index2)
         {
             try
             {
@@ -1522,14 +1521,14 @@ namespace RyuGiKen
             }
             catch
             {
-                return default(T);
+                return default(Component);
             }
         }
-        public T[] AllItems
+        public Component[] AllItems
         {
             get
             {
-                List<T> result = new List<T>();
+                List<Component> result = new List<Component>();
                 for (int i = 0; i < items.Length; i++)
                 {
                     if (items[i].Length > 0)
@@ -1538,7 +1537,7 @@ namespace RyuGiKen
                 return result.ToArray();
             }
         }
-        public T this[int index]
+        public Component this[int index]
         {
             get
             {
@@ -1548,7 +1547,7 @@ namespace RyuGiKen
                 }
                 catch
                 {
-                    return default(T);
+                    return default(Component);
                 }
             }
         }
@@ -2951,14 +2950,14 @@ namespace RyuGiKen
         /// 数组转换
         /// </summary>
         /// <returns></returns>
-        public static T[][] ConvertArray<T>(this MultiArray<T> multiArray)
+        public static Component[][] ConvertArray(this MultiArray multiArray)
         {
             if (multiArray == null || multiArray.items == null || multiArray.Length < 1)
                 return null;
-            T[][] result = new T[multiArray.items.Length][];
+            Component[][] result = new Component[multiArray.items.Length][];
             for (int i = 0; i < multiArray.items.Length; i++)
             {
-                result[i] = new T[multiArray.items[i].Length];
+                result[i] = new Component[multiArray.items[i].Length];
                 for (int j = 0; j < result[i].Length; j++)
                 {
                     result[i][j] = multiArray.GetItem(i, j);
