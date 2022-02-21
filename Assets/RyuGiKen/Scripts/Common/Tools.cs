@@ -2298,6 +2298,86 @@ namespace RyuGiKen
             return result.ToArray();
         }
         /// <summary>
+        /// 计算字符串编辑距离
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="target"></param>
+        /// <param name="isIgnore">忽略大小写</param>
+        /// <returns></returns>
+        public static int CompareStrSimilarity(this string str, string target, bool isIgnore)
+        {
+            int[][] d; // 矩阵
+            int n = str.Length;
+            int m = target.Length;
+            int i; // 遍历str的
+            int j; // 遍历target的
+            char ch1; // str的
+            char ch2; // target的
+            int temp; // 记录相同字符,在某个矩阵位置值的增量,不是0就是1
+            if (n == 0)
+            {
+                return m;
+            }
+            if (m == 0)
+            {
+                return n;
+            }
+            d = ValueAdjust.ConvertArray(new int[n + 1, m + 1]);
+            for (i = 0; i <= n; i++)
+            {
+                // 初始化第一列
+                d[i][0] = i;
+            }
+
+            for (j = 0; j <= m; j++)
+            {
+                // 初始化第一行
+                d[0][j] = j;
+            }
+
+            for (i = 1; i <= n; i++)
+            {
+                // 遍历str
+                ch1 = str[i - 1];
+                // 去匹配target
+                for (j = 1; j <= m; j++)
+                {
+                    ch2 = target[j - 1];
+                    if (isIgnore)
+                    {
+                        temp = ValueAdjust.CompareIgnoreCase(ch1, ch2) ? 0 : 1;
+                    }
+                    else
+                    {
+                        temp = ch1 == ch2 ? 0 : 1;
+                    }
+                    // 左边+1,上边+1, 左上角+temp取最小
+                    d[i][j] = Math.Min(Math.Min(d[i - 1][j] + 1, d[i][j - 1] + 1), d[i - 1][j - 1] + temp);
+                }
+            }
+            return d[n][m];
+        }
+        /// <summary>
+        /// 比较字符串相似度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="target"></param>
+        /// <param name="isIgnore">忽略大小写</param>
+        /// <returns></returns>
+        public static float GetSimilarityRatio(this string str, string target, bool isIgnore)
+        {
+            float result = 0;
+            if (Math.Max(str.Length, target.Length) == 0)
+            {
+                result = 1;
+            }
+            else
+            {
+                result = 1 - CompareStrSimilarity(str, target, isIgnore) * 1f / Math.Max(str.Length, target.Length);
+            }
+            return result;
+        }
+        /// <summary>
         /// 路径分离
         /// </summary>
         /// <param name="path"></param>
@@ -2906,7 +2986,7 @@ namespace RyuGiKen
             if (array == null || array.Length < 1)
                 return null;
             T[][] result = new T[array.GetLength(0)][];
-            for (int i = 0; i < array.Length; i++)
+            for (int i = 0; i < result.Length; i++)
             {
                 result[i] = new T[array.GetLength(1)];
                 for (int j = 0; j < result[i].Length; j++)
