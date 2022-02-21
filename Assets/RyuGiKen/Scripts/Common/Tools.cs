@@ -138,6 +138,203 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 找出文件名相似的文件
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="data">比较结果</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this FileInfo[] files, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        {
+            if (files == null || files.Length < 1)
+            {
+                data = new List<List<Tuple<FileInfo, float>>>();
+                return null;
+            }
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files.ToList(), IgnoreCase, targetSimilarityRatio, out data, types, prefixDelimiter);
+            return result;
+        }
+        /// <summary>
+        /// 找出文件名相似的文件
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this FileInfo[] files, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        {
+            if (files == null || files.Length < 1)
+                return null;
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files.ToList(), IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            return result;
+        }
+        /// <summary>
+        /// 找出文件名相似的文件
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this List<FileInfo> files, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        {
+            if (files == null || files.Count < 1)
+                return null;
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            return result;
+        }
+        /// <summary>
+        /// 找出文件名相似的文件
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="data">比较结果</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this List<FileInfo> files, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        {
+            data = new List<List<Tuple<FileInfo, float>>>();
+            if (files == null || files.Count < 1)
+                return null;
+            List<FileInfo> result = new List<FileInfo>();
+            targetSimilarityRatio = targetSimilarityRatio.Clamp(0, 1);
+            for (int i = 0; i < files.Count; i++)
+            {
+                List<Tuple<FileInfo, float>> temp = new List<Tuple<FileInfo, float>>();
+                temp.Add(new Tuple<FileInfo, float>(files[i], 1));
+                for (int j = 0; j < files.Count; j++)
+                {
+                    if (i == j)
+                        continue;
+                    float radio = GetFile.CompareFileNameSimilarityRatio(files[i], files[j], IgnoreCase, prefixDelimiter);
+                    if (radio > targetSimilarityRatio)
+                    {
+                        temp.Add(new Tuple<FileInfo, float>(files[j], radio));
+                    }
+                }
+                if (temp.Count > 1)
+                {
+                    data.Add(temp);
+                    for (int k = 0; k < temp.Count; k++)
+                    {
+                        result.Add(temp[k].Item1);
+                        files.Remove(temp[k].Item1);
+                    }
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// 找出目录中文件名相似的文件
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="data">比较结果</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                path = Directory.GetCurrentDirectory();
+
+            List<FileInfo> files = GetFile.GetFileInfoAll(path, types);
+            if (files == null || files.Count < 1)
+            {
+                data = new List<List<Tuple<FileInfo, float>>>();
+                return null;
+            }
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, targetSimilarityRatio, out data, types, prefixDelimiter);
+            return result;
+        }
+        /// <summary>
+        /// 找出目录中文件名相似的文件
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        {
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(path, IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            return result;
+        }
+        /// <summary>
+        /// 找出两个目录中文件名相似的文件
+        /// </summary>
+        /// <param name="path1">路径</param>
+        /// <param name="path2">路径</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="data">比较结果</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path1, string path2, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        {
+            data = new List<List<Tuple<FileInfo, float>>>();
+            if (string.IsNullOrWhiteSpace(path1) || string.IsNullOrWhiteSpace(path2))
+                return null;
+
+            List<FileInfo> files = GetFile.GetFileInfoAll(path1, types).AddList(GetFile.GetFileInfoAll(path2, types));
+            if (files == null || files.Count < 1)
+                return null;
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, targetSimilarityRatio, out data, types, prefixDelimiter);
+            return result;
+        }
+        /// <summary>
+        /// 找出两个目录中文件名相似的文件
+        /// </summary>
+        /// <param name="path1">路径</param>
+        /// <param name="path2">路径</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
+        /// <param name="types">文件类型</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns></returns>
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path1, string path2, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        {
+            if (string.IsNullOrWhiteSpace(path1) || string.IsNullOrWhiteSpace(path2))
+                return null;
+
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(path1, path2, IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            return result;
+        }
+        /// <summary>
+        /// 比较文件名相似度
+        /// </summary>
+        /// <param name="file1"></param>
+        /// <param name="file2"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <returns>[0，1]</returns>
+        public static float CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, string prefixDelimiter = null)
+        {
+            string name1 = file1.GetFileNameWithOutType();
+            string name2 = file2.GetFileNameWithOutType();
+            if (!string.IsNullOrWhiteSpace(prefixDelimiter))
+            {
+                if (name1.IndexOf(prefixDelimiter) >= 0)
+                    name1 = name1.Remove(0, name1.IndexOf(prefixDelimiter));
+                if (name2.IndexOf(prefixDelimiter) >= 0)
+                    name2 = name2.Remove(0, name2.IndexOf(prefixDelimiter));
+            }
+            //return ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase);
+            //return ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase);
+            return Math.Min(ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase), ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase));
+        }
+        /// <summary>
         /// 文件名更换前缀
         /// </summary>
         /// <param name="fileName">文件名</param>
@@ -229,7 +426,7 @@ namespace RyuGiKen
         {
             if (string.IsNullOrWhiteSpace(fileName) || oldPostfix == null || newPostfix == null)
                 return null;
-            GetFileNameAndType(fileName, out string newName, out string Type);
+            GetFileNameAndType(fileName, out string newName, out string type);
             bool hasOldPostfix = false;
 
             if (!string.IsNullOrEmpty(oldPostfix))
@@ -249,7 +446,7 @@ namespace RyuGiKen
                     newName = newName.Insert((newName.Length).Clamp(0), newPostfix);
                 }
             }
-            return newName + (Type.Length < 1 ? "" : ("." + Type));
+            return newName + (type.Length < 1 ? "" : ("." + type));
         }
         /// <summary>
         /// 文件名更换后缀
@@ -449,19 +646,19 @@ namespace RyuGiKen
         /// 获得指定路径下所有子目录文件名
         /// </summary>
         /// <param name="path">路径</param>
-        /// <param name="Type">文件类型</param>
+        /// <param name="type">文件类型</param>
         /// <returns></returns>
-        public static List<FileInfo> GetFileInfoAll(string path, string Type = "")
+        public static List<FileInfo> GetFileInfoAll(string path, string type = "")
         {
             if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
 
             List<List<FileInfo>> files = new List<List<FileInfo>>();
-            files.Add(GetFileInfos(path, Type));
+            files.Add(GetFileInfos(path, type));
             DirectoryInfo root = new DirectoryInfo(path);
             foreach (DirectoryInfo d in root.GetDirectories())
             {
-                files.Add(GetFileInfoAll(d.FullName, Type));
+                files.Add(GetFileInfoAll(d.FullName, type));
             }
             List<FileInfo> result = ValueAdjust.ListAddition(files);
             return result;
@@ -470,19 +667,19 @@ namespace RyuGiKen
         /// 获得指定路径下所有子目录文件名
         /// </summary>
         /// <param name="path">路径</param>
-        /// <param name="Type">文件类型</param>
+        /// <param name="types">文件类型</param>
         /// <returns></returns>
-        public static List<FileInfo> GetFileInfoAll(string path, string[] Type)
+        public static List<FileInfo> GetFileInfoAll(string path, string[] types)
         {
             if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
 
             List<List<FileInfo>> files = new List<List<FileInfo>>();
-            files.Add(GetFileInfos(path, Type));
+            files.Add(GetFileInfos(path, types));
             DirectoryInfo root = new DirectoryInfo(path);
             foreach (DirectoryInfo d in root.GetDirectories())
             {
-                files.Add(GetFileInfoAll(d.FullName, Type));
+                files.Add(GetFileInfoAll(d.FullName, types));
             }
             List<FileInfo> result = ValueAdjust.ListAddition(files);
             return result;
@@ -491,19 +688,19 @@ namespace RyuGiKen
         /// 获得指定路径下所有子目录文件名
         /// </summary>
         /// <param name="path">路径</param>
-        /// <param name="Type">文件类型</param>
+        /// <param name="types">文件类型</param>
         /// <returns></returns>
-        public static List<FileInfo> GetFileInfoAllWithOutType(string path, string[] Type)
+        public static List<FileInfo> GetFileInfoAllWithOutType(string path, string[] types)
         {
             if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
 
             List<List<FileInfo>> files = new List<List<FileInfo>>();
-            files.Add(GetFileInfosWithOutType(path, Type));
+            files.Add(GetFileInfosWithOutType(path, types));
             DirectoryInfo root = new DirectoryInfo(path);
             foreach (DirectoryInfo d in root.GetDirectories())
             {
-                files.Add(GetFileInfoAllWithOutType(d.FullName, Type));
+                files.Add(GetFileInfoAllWithOutType(d.FullName, types));
             }
             List<FileInfo> result = ValueAdjust.ListAddition(files);
             return result;
@@ -512,9 +709,9 @@ namespace RyuGiKen
         /// 获得指定路径下所有文件名
         /// </summary>
         /// <param name="path">路径</param>
-        /// <param name="Type">文件类型</param>
+        /// <param name="type">文件类型</param>
         /// <returns></returns>
-        public static List<FileInfo> GetFileInfos(string path, string Type = "")
+        public static List<FileInfo> GetFileInfos(string path, string type = "")
         {
             if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
@@ -522,11 +719,11 @@ namespace RyuGiKen
             List<FileInfo> files = new List<FileInfo>();
             foreach (FileInfo file in root.GetFiles())
             {
-                if (string.IsNullOrWhiteSpace(Type))
+                if (string.IsNullOrWhiteSpace(type))
                 {
                     files.Add(file);
                 }
-                else if (file.JudgeFileType(Type))
+                else if (file.JudgeFileType(type))
                 {
                     files.Add(file);
                 }
@@ -537,17 +734,21 @@ namespace RyuGiKen
         /// 获得指定路径下所有文件名
         /// </summary>
         /// <param name="path">路径</param>
-        /// <param name="Type">文件类型</param>
+        /// <param name="types">文件类型</param>
         /// <returns></returns>
-        public static List<FileInfo> GetFileInfos(string path, string[] Type)
+        public static List<FileInfo> GetFileInfos(string path, string[] types)
         {
             if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
+
+            if (types == null || types.Length < 1)
+                return GetFileInfos(path);
+
             DirectoryInfo root = new DirectoryInfo(path);
             List<FileInfo> files = new List<FileInfo>();
             foreach (FileInfo file in root.GetFiles())
             {
-                foreach (string type in Type)
+                foreach (string type in types)
                 {
                     if (file.JudgeFileType(type))
                     {
@@ -561,18 +762,45 @@ namespace RyuGiKen
         /// 获得指定路径下所有文件名
         /// </summary>
         /// <param name="path">路径</param>
-        /// <param name="Type">文件类型</param>
+        /// <param name="type">文件类型</param>
         /// <returns></returns>
-        public static List<FileInfo> GetFileInfosWithOutType(string path, string[] Type)
+        public static List<FileInfo> GetFileInfosWithOutType(string path, string type)
         {
             if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
+
+            if (string.IsNullOrWhiteSpace(type))
+                return GetFileInfos(path);
+
+            DirectoryInfo root = new DirectoryInfo(path);
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (FileInfo file in root.GetFiles())
+            {
+                if (file.JudgeFileType(type))
+                    files.Add(file);
+            }
+            return files;
+        }
+        /// <summary>
+        /// 获得指定路径下所有文件名
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="types">文件类型</param>
+        /// <returns></returns>
+        public static List<FileInfo> GetFileInfosWithOutType(string path, string[] types)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                path = Directory.GetCurrentDirectory();
+
+            if (types == null || types.Length < 1)
+                return GetFileInfos(path);
+
             DirectoryInfo root = new DirectoryInfo(path);
             List<FileInfo> files = new List<FileInfo>();
             foreach (FileInfo file in root.GetFiles())
             {
                 bool EnabledFileType = true;
-                foreach (string type in Type)
+                foreach (string type in types)
                 {
                     if (string.IsNullOrWhiteSpace(type))
                         continue;
@@ -721,12 +949,12 @@ namespace RyuGiKen
             if (file == null)
                 return null;
             int TypeIndex = file.Name.LastIndexOf('.');
-            string Type = "";
+            string type = "";
             if (TypeIndex >= 0)
             {
-                Type = file.Name.Substring(TypeIndex).Replace(".", "");
+                type = file.Name.Substring(TypeIndex).Replace(".", "");
             }
-            return Type;
+            return type;
         }
         /// <summary>
         /// 获得文件类型
@@ -737,12 +965,12 @@ namespace RyuGiKen
             if (string.IsNullOrWhiteSpace(fileName))
                 return null;
             int TypeIndex = fileName.LastIndexOf('.');
-            string Type = "";
+            string type = "";
             if (TypeIndex >= 0)
             {
-                Type = fileName.Substring(TypeIndex).Replace(".", "");
+                type = fileName.Substring(TypeIndex).Replace(".", "");
             }
-            return Type;
+            return type;
         }
         /// <summary>
         /// 获得文件类型
@@ -775,16 +1003,16 @@ namespace RyuGiKen
         /// 从文件名判断类型
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="Type"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public static bool JudgeFileType(string name, string Type)
+        public static bool JudgeFileType(string name, string type)
         {
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(Type))
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(type))
                 return false;
             try
             {
-                string FileTypeName = name.Substring(name.Length - Type.Length - 1);
-                return FileTypeName.LastIndexOf("." + Type, StringComparison.OrdinalIgnoreCase) >= 0;
+                string FileTypeName = name.Substring(name.Length - type.Length - 1);
+                return FileTypeName.LastIndexOf("." + type, StringComparison.OrdinalIgnoreCase) >= 0;
             }
             catch
             {
@@ -795,13 +1023,13 @@ namespace RyuGiKen
         /// 从文件名判断类型
         /// </summary>
         /// <param name="file"></param>
-        /// <param name="Type"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public static bool JudgeFileType(this FileInfo file, string Type)
+        public static bool JudgeFileType(this FileInfo file, string type)
         {
-            if (file == null || string.IsNullOrWhiteSpace(file.Name) || string.IsNullOrWhiteSpace(Type))
+            if (file == null || string.IsNullOrWhiteSpace(file.Name) || string.IsNullOrWhiteSpace(type))
                 return false;
-            return JudgeFileType(file.Name, Type);
+            return JudgeFileType(file.Name, type);
         }
     }
     /// <summary>
@@ -2302,9 +2530,9 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="str"></param>
         /// <param name="target"></param>
-        /// <param name="isIgnore">忽略大小写</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
         /// <returns></returns>
-        public static int CompareStrSimilarity(this string str, string target, bool isIgnore)
+        public static int CompareStrSimilarity(this string str, string target, bool IgnoreCase)
         {
             int[][] d; // 矩阵
             int n = str.Length;
@@ -2343,7 +2571,7 @@ namespace RyuGiKen
                 for (j = 1; j <= m; j++)
                 {
                     ch2 = target[j - 1];
-                    if (isIgnore)
+                    if (IgnoreCase)
                     {
                         temp = ValueAdjust.CompareIgnoreCase(ch1, ch2) ? 0 : 1;
                     }
@@ -2358,14 +2586,16 @@ namespace RyuGiKen
             return d[n][m];
         }
         /// <summary>
-        /// 比较字符串相似度
+        /// 比较字符串相似度（编辑距离比较）
         /// </summary>
         /// <param name="str"></param>
         /// <param name="target"></param>
-        /// <param name="isIgnore">忽略大小写</param>
-        /// <returns></returns>
-        public static float GetSimilarityRatio(this string str, string target, bool isIgnore)
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <returns>[0，1]</returns>
+        public static float GetSimilarityRatio(this string str, string target, bool IgnoreCase)
         {
+            if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+                return 1;
             float result = 0;
             if (Math.Max(str.Length, target.Length) == 0)
             {
@@ -2373,9 +2603,40 @@ namespace RyuGiKen
             }
             else
             {
-                result = 1 - CompareStrSimilarity(str, target, isIgnore) * 1f / Math.Max(str.Length, target.Length);
+                result = 1 - CompareStrSimilarity(str, target, IgnoreCase) * 1f / Math.Max(str.Length, target.Length);
             }
             return result;
+        }
+        /// <summary>
+        /// 比较字符串相似度（顺序比较）
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="target"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <returns>[0，1]</returns>
+        public static float GetSequenceSimilarityRatio(this string str, string target, bool IgnoreCase)
+        {
+            if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+                return 1;
+            int length = Math.Max(str.Length, target.Length);
+            int result = 0;
+            for (int i = 0; i < length; i++)
+            {
+                if (i < str.Length && i < target.Length)
+                {
+                    if (IgnoreCase)
+                    {
+                        if (str[i].CompareIgnoreCase(target[i]))
+                            result++;
+                    }
+                    else
+                    {
+                        if (str[i] == target[i])
+                            result++;
+                    }
+                }
+            }
+            return result * 1f / length;
         }
         /// <summary>
         /// 路径分离
