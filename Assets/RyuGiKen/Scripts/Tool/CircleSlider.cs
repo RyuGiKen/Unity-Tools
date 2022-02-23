@@ -30,7 +30,7 @@ namespace RyuGiKen.Tools
             set
             {
                 if (m_MinValue != value)
-                    m_MinValue = value > MaxAngle ? MinAngle : ((m_WholeNumbers ? Mathf.CeilToInt(value) : value));
+                    m_MinValue = value > MaxValue ? MinValue : ((m_WholeNumbers ? Mathf.CeilToInt(value) : value));
             }
         }
         [SerializeField] float m_MaxValue = 1;
@@ -44,7 +44,7 @@ namespace RyuGiKen.Tools
             set
             {
                 if (m_MaxValue != value)
-                    m_MaxValue = value < MinAngle ? MaxAngle : ((m_WholeNumbers ? Mathf.FloorToInt(value) : value));
+                    m_MaxValue = value < MinValue ? MaxValue : ((m_WholeNumbers ? Mathf.FloorToInt(value) : value));
             }
         }
         public bool m_WholeNumbers = false;
@@ -536,7 +536,8 @@ namespace RyuGiKen.Tools
                 rectTransform.offsetMin = rectTransform.offsetMax = Vector2.zero;
                 if (Mathf.Approximately(rectTransform.anchorMin.magnitude, 0) && Mathf.Approximately(rectTransform.anchorMax.magnitude, 0))
                 {
-
+                    rectTransform.anchorMin = Vector2.zero;
+                    rectTransform.anchorMax = Vector2.one;
                 }
                 else if (!Mathf.Approximately(rectTransform.anchorMin.magnitude, 0) && !ValueAdjust.JudgeRange(rectTransform.anchorMax, Vector2.one, Vector2.one * 0.001f))
                 {
