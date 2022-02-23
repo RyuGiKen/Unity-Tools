@@ -335,6 +335,57 @@ namespace RyuGiKen
             return Math.Min(ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase), ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase));
         }
         /// <summary>
+        /// 找出两个目录中文件名不同的文件
+        /// </summary>
+        /// <param name="path1">路径</param>
+        /// <param name="path2">路径</param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="types">文件类型</param>
+        /// <returns></returns>
+        public static FileInfo[] CompareFilesName(string path1, string path2, bool IgnoreCase, string[] types = null)
+        {
+            if (string.IsNullOrWhiteSpace(path1) || string.IsNullOrWhiteSpace(path2))
+                return null;
+
+            List<FileInfo> files1 = GetFile.GetFileInfoAll(path1, types);
+            List<FileInfo> files2 = GetFile.GetFileInfoAll(path2, types);
+
+            if (files1 == null || files1.Count < 1 || files2 == null || files2.Count < 1)
+                return null;
+
+            List<FileInfo> result = new List<FileInfo>();
+            for (int k = 0; k < 2; k++)
+            {
+                int count1 = k == 0 ? files1.Count : files2.Count;
+                int count2 = k == 0 ? files2.Count : files1.Count;
+                List<FileInfo> data1 = k == 0 ? files1 : files2;
+                List<FileInfo> data2 = k == 0 ? files2 : files1;
+                for (int i = 0; i < count1; i++)
+                {
+                    string name1 = data1[i].GetFileNameWithOutType();
+                    bool NoSame = true;
+                    for (int j = 0; j < count2; j++)
+                    {
+                        string name2 = data2[j].GetFileNameWithOutType();
+                        //if (ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase) > 0.9f)
+                        if (IgnoreCase && name1.ContainIgnoreCase(name2))
+                        {
+                            NoSame = false;
+                            break;
+                        }
+                        else if (!IgnoreCase && name1.Contain(name2))
+                        {
+                            NoSame = false;
+                            break;
+                        }
+                    }
+                    if (NoSame)
+                        result.Add(files1[i]);
+                }
+            }
+            return result.ToArray().ClearRepeatingItem();
+        }
+        /// <summary>
         /// 文件名更换前缀
         /// </summary>
         /// <param name="fileName">文件名</param>
@@ -2108,6 +2159,17 @@ namespace RyuGiKen
         {
             //return Quaternion.FromToRotation(Vector3.forward, direction);
             return Quaternion.LookRotation(direction);
+        }
+        /// <summary>
+        /// 方向转旋转
+        /// </summary>
+        /// <param name="direction">方向</param>
+        /// <param name="direction">上方向</param>
+        /// <returns></returns>
+        public static Quaternion DirectionToRotation(this Vector3 direction, Vector3 up)
+        {
+            //return Quaternion.FromToRotation(Vector3.forward, direction);
+            return Quaternion.LookRotation(direction, up);
         }
         /// <summary>
         /// 旋转转方向
