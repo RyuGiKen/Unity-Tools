@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -220,6 +221,7 @@ namespace RyuGiKen
                         temp.Add(new Tuple<FileInfo, float>(files[j], radio));
                     }
                 }
+                Thread.Sleep(1);
                 if (temp.Count > 1)
                 {
                     data.Add(temp);
@@ -321,6 +323,20 @@ namespace RyuGiKen
         /// <returns>[0，1]</returns>
         public static float CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, string prefixDelimiter = null)
         {
+            GetFile.CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out float Ratio, out float SeqRatio, prefixDelimiter);
+            return Math.Min(Ratio, SeqRatio);
+        }
+        /// <summary>
+        /// 比较文件名相似度
+        /// </summary>
+        /// <param name="file1"></param>
+        /// <param name="file2"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude">过滤</param>
+        /// <returns>[0，1]</returns>
+        public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out float Ratio, out float SeqRatio, string prefixDelimiter = null, string[] exclude = null)
+        {
             string name1 = file1.GetFileNameWithOutType();
             string name2 = file2.GetFileNameWithOutType();
             if (!string.IsNullOrWhiteSpace(prefixDelimiter))
@@ -329,10 +345,25 @@ namespace RyuGiKen
                     name1 = name1.Remove(0, name1.IndexOf(prefixDelimiter));
                 if (name2.IndexOf(prefixDelimiter) >= 0)
                     name2 = name2.Remove(0, name2.IndexOf(prefixDelimiter));
+                if (exclude != null)
+                {
+                    foreach (string str in exclude)
+                    {
+                        if (IgnoreCase)
+                        {
+                            name1 = name1.ToLower().Replace(str.ToLower(), "");
+                            name2 = name2.ToLower().Replace(str.ToLower(), "");
+                        }
+                        else
+                        {
+                            name1 = name1.Replace(str, "");
+                            name2 = name2.Replace(str, "");
+                        }
+                    }
+                }
             }
-            //return ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase);
-            //return ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase);
-            return Math.Min(ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase), ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase));
+            Ratio = ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase);
+            SeqRatio = ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase);
         }
         /// <summary>
         /// 找出两个目录中文件名不同的文件
@@ -368,19 +399,20 @@ namespace RyuGiKen
                     {
                         string name2 = data2[j].GetFileNameWithOutType();
                         //if (ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase) > 0.9f)
-                        if (IgnoreCase && name1.ContainIgnoreCase(name2))
+                        if (IgnoreCase && name1.ToLower() == name2.ToLower())
                         {
                             NoSame = false;
                             break;
                         }
-                        else if (!IgnoreCase && name1.Contain(name2))
+                        else if (!IgnoreCase && name1 == name2)
                         {
                             NoSame = false;
                             break;
                         }
                     }
                     if (NoSame)
-                        result.Add(files1[i]);
+                        result.Add(data1[i]);
+                    Thread.Sleep(0);
                 }
             }
             return result.ToArray().ClearRepeatingItem();
