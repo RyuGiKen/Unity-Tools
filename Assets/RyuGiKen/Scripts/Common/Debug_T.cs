@@ -68,16 +68,9 @@ namespace RyuGiKen.Tools
                         int i = 0;
                         //for (int i = 0; i < ((LogList.Count < 10) ? LogList.Count : 10); i++)
                         {
-                            if (LogList[i] != "" && LogList[i] != null)
+                            if (!string.IsNullOrEmpty(LogList[i]))
                             {
-                                string fileTitle = "[" + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff") + "]";
-                                sw.WriteLine(fileTitle);
-                                //开始写入
-                                sw.WriteLine(LogList[i] + "\r\n");
-                                //清空缓冲区
-                                sw.Flush();
-                                //关闭流
-                                //sw.Close();
+                                Print(sw, LogList[i], true);
                             }
                             LogList.RemoveAt(i);
                         }
@@ -87,21 +80,61 @@ namespace RyuGiKen.Tools
                 Thread.Sleep(1);
             }
         }
+        static void Print(StreamWriter sw, string str, bool printTime)
+        {
+            if (sw != null)
+            {
+                string fileTitle = printTime ? ("[" + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff") + "]") : "";
+                sw.WriteLine(fileTitle);
+                //开始写入
+                sw.WriteLine(str + "\r\n");
+                //清空缓冲区
+                sw.Flush();
+                //关闭流
+                //sw.Close();
+            }
+        }
         /// <summary>
         /// 打印日志
         /// </summary>
         /// <param name="Content"></param>
         public static void Log(string Content)
         {
-            if (CanAdd && LogList != null)
-                LogList.Add(Content);
             Debug.Log(Content);
+            if (instance)
+            {
+                if (CanAdd && LogList != null)
+                    LogList.Add(Content);
+            }
+            else
+            {
+                CheckStreamWriter();
+                Print(sw, Content, true);
+                if (sw != null)
+                {
+                    sw.Close();
+                    sw = null;
+                }
+            }
         }
         public static void LogError(string Content)
         {
-            if (CanAdd && LogList != null)
-                LogList.Add(Content);
             Debug.LogError(Content);
+            if (instance)
+            {
+                if (CanAdd && LogList != null)
+                    LogList.Add(Content);
+            }
+            else
+            {
+                CheckStreamWriter();
+                Print(sw, Content, true);
+                if (sw != null)
+                {
+                    sw.Close();
+                    sw = null;
+                }
+            }
         }
         /// <summary>
         /// 清空日志
