@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -220,6 +221,7 @@ namespace RyuGiKen
                         temp.Add(new Tuple<FileInfo, float>(files[j], radio));
                     }
                 }
+                Thread.Sleep(1);
                 if (temp.Count > 1)
                 {
                     data.Add(temp);
@@ -321,8 +323,7 @@ namespace RyuGiKen
         /// <returns>[0，1]</returns>
         public static float CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, string prefixDelimiter = null)
         {
-
-            CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out float Ratio, out float SeqRatio, prefixDelimiter);
+            GetFile.CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out float Ratio, out float SeqRatio, prefixDelimiter);
             return Math.Min(Ratio, SeqRatio);
         }
         /// <summary>
@@ -333,7 +334,7 @@ namespace RyuGiKen
         /// <param name="IgnoreCase">忽略大小写</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
         /// <param name="exclude">过滤</param>
-        /// <returns>[0，1]</returns>
+        /// <returns></returns>
         public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out float Ratio, out float SeqRatio, string prefixDelimiter = null, string[] exclude = null)
         {
             string name1 = file1.GetFileNameWithOutType();
@@ -400,19 +401,20 @@ namespace RyuGiKen
                     {
                         string name2 = data2[j].GetFileNameWithOutType();
                         //if (ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase) > 0.9f)
-                        if (IgnoreCase && name1.ContainIgnoreCase(name2))
+                        if (IgnoreCase && name1.ToLower() == name2.ToLower())
                         {
                             NoSame = false;
                             break;
                         }
-                        else if (!IgnoreCase && name1.Contain(name2))
+                        else if (!IgnoreCase && name1 == name2)
                         {
                             NoSame = false;
                             break;
                         }
                     }
                     if (NoSame)
-                        result.Add(files1[i]);
+						result.Add(data1[i]);
+                    Thread.Sleep(0);
                 }
             }
             return result.ToArray().ClearRepeatingItem();
