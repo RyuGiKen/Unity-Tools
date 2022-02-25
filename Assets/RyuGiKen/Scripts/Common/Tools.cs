@@ -321,6 +321,21 @@ namespace RyuGiKen
         /// <returns>[0，1]</returns>
         public static float CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, string prefixDelimiter = null)
         {
+
+            CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out float Ratio, out float SeqRatio, prefixDelimiter);
+            return Math.Min(Ratio, SeqRatio);
+        }
+        /// <summary>
+        /// 比较文件名相似度
+        /// </summary>
+        /// <param name="file1"></param>
+        /// <param name="file2"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude">过滤</param>
+        /// <returns>[0，1]</returns>
+        public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out float Ratio, out float SeqRatio, string prefixDelimiter = null, string[] exclude = null)
+        {
             string name1 = file1.GetFileNameWithOutType();
             string name2 = file2.GetFileNameWithOutType();
             if (!string.IsNullOrWhiteSpace(prefixDelimiter))
@@ -329,10 +344,27 @@ namespace RyuGiKen
                     name1 = name1.Remove(0, name1.IndexOf(prefixDelimiter));
                 if (name2.IndexOf(prefixDelimiter) >= 0)
                     name2 = name2.Remove(0, name2.IndexOf(prefixDelimiter));
+                if (exclude != null)
+                {
+                    for (int i = 0; i < exclude.Length; i++)
+                    {
+                        if (string.IsNullOrEmpty(exclude[i]))
+                            continue;
+                        if (IgnoreCase)
+                        {
+                            name1 = name1.ToLower().Replace(exclude[i].ToLower(), "");
+                            name2 = name2.ToLower().Replace(exclude[i].ToLower(), "");
+                        }
+                        else
+                        {
+                            name1 = name1.Replace(exclude[i], "");
+                            name2 = name2.Replace(exclude[i], "");
+                        }
+                    }
+                }
             }
-            //return ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase);
-            //return ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase);
-            return Math.Min(ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase), ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase));
+            Ratio = ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase);
+            SeqRatio = ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase);
         }
         /// <summary>
         /// 找出两个目录中文件名不同的文件
