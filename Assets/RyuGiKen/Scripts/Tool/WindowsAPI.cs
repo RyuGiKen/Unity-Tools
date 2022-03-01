@@ -360,4 +360,43 @@ namespace WindowsAPI
         [DllImport("user32.dll")] public static extern int ToAscii(int uVirtKey, int uScanCode, byte[] lpbKeyState, byte[] lpwTransKey, int fuState);
         #endregion
     }
+    /// <summary>
+    /// 简繁体转换
+    /// </summary>
+    public static class ChineseConverter
+    {
+        internal const int LOCALE_SYSTEM_DEFAULT = 0x0800;
+        internal const int LCMAP_SIMPLIFIED_CHINESE = 0x02000000;
+        internal const int LCMAP_TRADITIONAL_CHINESE = 0x04000000;
+
+        /// <summary> 
+        /// 使用kernel.dll的简繁体转换工具，只要有裝OS就可以使用，不需要导入dll，但只能做逐字转换。
+        /// </summary> 
+        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern int LCMapString(int Locale, int dwMapFlags, string lpSrcStr, int cchSrc, [Out] string lpDestStr, int cchDest);
+
+        /// <summary> 
+        /// 繁体转简体
+        /// </summary> 
+        /// <param name="str">繁体</param> 
+        /// <returns>简体</returns> 
+        public static string ToSimplified(string str)
+        {
+            string result = new string(' ', str.Length);
+            LCMapString(LOCALE_SYSTEM_DEFAULT, LCMAP_SIMPLIFIED_CHINESE, str, str.Length, result, str.Length);
+            return result;
+        }
+
+        /// <summary> 
+        /// 简体转繁体
+        /// </summary> 
+        /// <param name="str">简体</param> 
+        /// <returns>繁体</returns> 
+        public static string ToTraditional(string str)
+        {
+            string result = new string(' ', str.Length);
+            LCMapString(LOCALE_SYSTEM_DEFAULT, LCMAP_TRADITIONAL_CHINESE, str, str.Length, result, str.Length);
+            return result;
+        }
+    }
 }

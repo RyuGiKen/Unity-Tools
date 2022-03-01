@@ -336,6 +336,7 @@ namespace RyuGiKen
         /// <param name="prefixDelimiter">前缀分割符</param>
         /// <param name="exclude1">前置过滤字符串</param>
         /// <param name="exclude2">后置过滤字符</param>
+        /// <returns>[0，1]</returns>
         public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out Vector4 Ratio, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null)
         {
             string name1 = file1.GetFileNameWithOutType();
@@ -2834,7 +2835,8 @@ namespace RyuGiKen
         /// 字符串批量替换
         /// </summary>
         /// <param name="str"></param>
-        /// <param name="chars"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
         /// <returns></returns>
         public static string ReplaceAny(this string str, string from, string to)
         {
@@ -2851,7 +2853,8 @@ namespace RyuGiKen
         /// 字符串批量替换
         /// </summary>
         /// <param name="str"></param>
-        /// <param name="chars"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
         /// <returns></returns>
         public static string ReplaceAny(this string str, char[] from, string to)
         {
@@ -3982,65 +3985,6 @@ namespace RyuGiKen
                 if (excludeSpace)
                 {
                     temp = builder.ToString().Replace(" ", "");
-                    if (!string.IsNullOrWhiteSpace(temp))
-                        result.Add(temp);
-                }
-                else
-                {
-                    temp = builder.ToString();
-                    result.Add(temp);
-
-                }
-            }
-            return result.ToArray();
-        }
-        /// <summary>
-        /// 分离混合的字符串和数字和字母
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="exclude">过滤</param>
-        /// <returns></returns>
-        public static string[] SplitNumAndAlphabet(this string str, string[] exclude = null)
-        {
-            if (string.IsNullOrWhiteSpace(str))
-                return null;
-            char[] chars = str.ToCharArray();
-            bool?[] maybeNum = new bool?[chars.Length];
-            for (int i = 0; i < chars.Length; i++)
-            {
-                //if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
-                //    maybeNum[i] = true;
-                if (char.IsNumber(chars[i]))
-                    maybeNum[i] = true;
-                else if (char.IsLetter(chars[i]))
-                    maybeNum[i] = false;
-            }
-            List<string> result = new List<string>();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                builder.Clear();
-                for (int j = i; j <= chars.Length; j++)
-                {
-                    if (j < chars.Length && (i == j || maybeNum[i] == maybeNum[j]))
-                    {
-                        builder.Append(chars[j]);
-                    }
-                    else
-                    {
-                        i = j - 1;
-                        break;
-                    }
-                }
-                string temp = null;
-                if (exclude != null && exclude.Length > 0)
-                {
-                    temp = builder.ToString();
-                    foreach (string ex in exclude)
-                    {
-                        if (!string.IsNullOrEmpty(ex))
-                            temp = temp.Replace(ex, "");
-                    }
                     if (!string.IsNullOrWhiteSpace(temp))
                         result.Add(temp);
                 }
@@ -6591,8 +6535,37 @@ namespace RyuGiKen
         /// <param name="max">最大值</param>
         /// <param name="period">循环周期</param>
         /// <returns></returns>
+        public static double SetRange(double num, double min, double max, double period)
+        {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || num.IsNaN())
+                return double.NaN;
+            double numAdjusted = num;
+            while (numAdjusted >= max)
+            {
+                numAdjusted -= period;
+            }
+            while (numAdjusted < min)
+            {
+                numAdjusted += period;
+            }
+            return numAdjusted;
+        }
+        /// <summary>
+        /// 调整循环范围(当前值，最小值，最大值，循环周期)
+        /// </summary>
+        /// <param name="num">当前值</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="period">循环周期</param>
+        /// <returns></returns>
         public static float SetRange(float num, float min, float max, float period)
         {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || num.IsNaN())
+                return float.NaN;
             float numAdjusted = num;
             while (numAdjusted >= max)
             {
@@ -6603,6 +6576,79 @@ namespace RyuGiKen
                 numAdjusted += period;
             }
             return numAdjusted;
+        }
+        /// <summary>
+        /// 调整循环范围(当前值，最小值，最大值，循环周期)
+        /// </summary>
+        /// <param name="num">当前值</param>
+        /// <param name="range">循环周期</param>
+        /// <returns></returns>
+        public static float SetRange(float num, Vector2 range)
+        {
+            if (range == null)
+                return num;
+            else
+            {
+                FindMinAndMax(range.x, range.y, out float min, out float max);
+                return SetRange(num, min, max, max - min);
+            }
+        }
+        /// <summary>
+        /// 反循环
+        /// </summary>
+        /// <param name="curValue">当前值</param>
+        /// <param name="lastValue">上一帧值</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns></returns>
+        public static double UnLoop(double curValue, double lastValue, double min, double max)
+        {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || curValue.IsNaN())
+                return double.NaN;
+            FindMinAndMax(min, max, out min, out max);
+            double result = curValue;
+            while (result < lastValue)
+            {
+                result += (max - min);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 反循环
+        /// </summary>
+        /// <param name="curValue">当前值</param>
+        /// <param name="lastValue">上一帧值</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns></returns>
+        public static float UnLoop(float curValue, float lastValue, float min, float max)
+        {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || curValue.IsNaN())
+                return float.NaN;
+            FindMinAndMax(min, max, out min, out max);
+            float result = curValue;
+            while (result < lastValue)
+            {
+                result += (max - min);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 反循环
+        /// </summary>
+        /// <param name="curValue">当前值</param>
+        /// <param name="lastValue">上一帧值</param>
+        /// <param name="Range">循环周期</param>
+        /// <returns></returns>
+        public static float UnLoop(float curValue, float lastValue, Vector2 Range)
+        {
+            if (Range == null)
+                return curValue;
+            return UnLoop(curValue, lastValue, Range.x, Range.y);
         }
         /// <summary>
         /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
