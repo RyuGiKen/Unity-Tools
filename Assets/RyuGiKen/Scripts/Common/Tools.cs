@@ -143,19 +143,20 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="files"></param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
         /// <param name="data">比较结果</param>
-        /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(this FileInfo[] files, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this FileInfo[] files, bool IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
             if (files == null || files.Length < 1)
             {
-                data = new List<List<Tuple<FileInfo, float>>>();
+                data = new List<List<Tuple<FileInfo, Vector4>>>();
                 return null;
             }
-            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files.ToList(), IgnoreCase, targetSimilarityRatio, out data, types, prefixDelimiter);
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files.ToList(), IgnoreCase, out data, prefixDelimiter, exclude1, exclude2, delimiter);
             return result;
         }
         /// <summary>
@@ -163,15 +164,16 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="files"></param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
-        /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(this FileInfo[] files, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this FileInfo[] files, bool IgnoreCase, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
             if (files == null || files.Length < 1)
                 return null;
-            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files.ToList(), IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files.ToList(), IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, prefixDelimiter, exclude1, exclude2, delimiter);
             return result;
         }
         /// <summary>
@@ -179,15 +181,16 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="files"></param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
-        /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(this List<FileInfo> files, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this List<FileInfo> files, bool IgnoreCase, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
             if (files == null || files.Count < 1)
                 return null;
-            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, prefixDelimiter, exclude1, exclude2, delimiter);
             return result;
         }
         /// <summary>
@@ -195,30 +198,33 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="files"></param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
         /// <param name="data">比较结果</param>
-        /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(this List<FileInfo> files, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(this List<FileInfo> files, bool IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
-            data = new List<List<Tuple<FileInfo, float>>>();
+            data = new List<List<Tuple<FileInfo, Vector4>>>();
             if (files == null || files.Count < 1)
                 return null;
             List<FileInfo> result = new List<FileInfo>();
-            targetSimilarityRatio = targetSimilarityRatio.Clamp(0, 1);
             for (int i = 0; i < files.Count; i++)
             {
-                List<Tuple<FileInfo, float>> temp = new List<Tuple<FileInfo, float>>();
-                temp.Add(new Tuple<FileInfo, float>(files[i], 1));
+                List<Tuple<FileInfo, Vector4>> temp = new List<Tuple<FileInfo, Vector4>>();
+                temp.Add(new Tuple<FileInfo, Vector4>(files[i], Vector4.one));
                 for (int j = 0; j < files.Count; j++)
                 {
                     if (i == j)
                         continue;
-                    float radio = GetFile.CompareFileNameSimilarityRatio(files[i], files[j], IgnoreCase, prefixDelimiter);
-                    if (radio > targetSimilarityRatio)
+                    GetFile.CompareFileNameSimilarityRatio(files[i], files[j], IgnoreCase, out Vector4 radio, prefixDelimiter, exclude1, exclude2, delimiter);
+                    if ((radio.x > 0.5f && radio.y > 0.5f && radio.z > 0.5f && radio.w > 0.5f) ||
+                        ((radio.x >= 0.7f || radio.y >= 0.7f || radio.z >= 0.7f || radio.w >= 0.7f) && radio.w > 0) ||
+                        (radio.z > 0.8f))
                     {
-                        temp.Add(new Tuple<FileInfo, float>(files[j], radio));
+                        temp.Add(new Tuple<FileInfo, Vector4>(files[j], radio));
+                        //Count++;
                     }
                 }
                 Thread.Sleep(0);
@@ -239,12 +245,14 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="path">路径</param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
         /// <param name="data">比较结果</param>
         /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path, bool IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, string[] types = null, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
             if (string.IsNullOrWhiteSpace(path))
                 path = Directory.GetCurrentDirectory();
@@ -252,10 +260,10 @@ namespace RyuGiKen
             List<FileInfo> files = GetFile.GetFileInfoAll(path, types);
             if (files == null || files.Count < 1)
             {
-                data = new List<List<Tuple<FileInfo, float>>>();
+                data = new List<List<Tuple<FileInfo, Vector4>>>();
                 return null;
             }
-            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, targetSimilarityRatio, out data, types, prefixDelimiter);
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, out data, prefixDelimiter, exclude1, exclude2, delimiter);
             return result;
         }
         /// <summary>
@@ -263,13 +271,15 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="path">路径</param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
         /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path, bool IgnoreCase, string[] types = null, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
-            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(path, IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(path, IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, types, prefixDelimiter, exclude1, exclude2, delimiter);
             return result;
         }
         /// <summary>
@@ -278,21 +288,23 @@ namespace RyuGiKen
         /// <param name="path1">路径</param>
         /// <param name="path2">路径</param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
         /// <param name="data">比较结果</param>
         /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path1, string path2, bool IgnoreCase, float targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path1, string path2, bool IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, string[] types = null, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
-            data = new List<List<Tuple<FileInfo, float>>>();
+            data = new List<List<Tuple<FileInfo, Vector4>>>();
             if (string.IsNullOrWhiteSpace(path1) || string.IsNullOrWhiteSpace(path2))
                 return null;
 
             List<FileInfo> files = GetFile.GetFileInfoAll(path1, types).AddList(GetFile.GetFileInfoAll(path2, types));
             if (files == null || files.Count < 1)
                 return null;
-            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, targetSimilarityRatio, out data, types, prefixDelimiter);
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(files, IgnoreCase, out data, prefixDelimiter, exclude1, exclude2, delimiter);
             return result;
         }
         /// <summary>
@@ -301,16 +313,18 @@ namespace RyuGiKen
         /// <param name="path1">路径</param>
         /// <param name="path2">路径</param>
         /// <param name="IgnoreCase">忽略大小写</param>
-        /// <param name="targetSimilarityRatio">比较阈值[0，1]</param>
         /// <param name="types">文件类型</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns></returns>
-        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path1, string path2, bool IgnoreCase, float targetSimilarityRatio, string[] types = null, string prefixDelimiter = null)
+        public static List<FileInfo> CompareFilesNameSimilarityRatio(string path1, string path2, bool IgnoreCase, string[] types = null, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
             if (string.IsNullOrWhiteSpace(path1) || string.IsNullOrWhiteSpace(path2))
                 return null;
 
-            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(path1, path2, IgnoreCase, targetSimilarityRatio, out List<List<Tuple<FileInfo, float>>> data, types, prefixDelimiter);
+            List<FileInfo> result = GetFile.CompareFilesNameSimilarityRatio(path1, path2, IgnoreCase, out List<List<Tuple<FileInfo, Vector4>>> data, types, prefixDelimiter, exclude1, exclude2, delimiter);
             return result;
         }
         /// <summary>
@@ -320,11 +334,15 @@ namespace RyuGiKen
         /// <param name="file2"></param>
         /// <param name="IgnoreCase">忽略大小写</param>
         /// <param name="prefixDelimiter">前缀分割符</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns>[0，1]</returns>
-        public static float CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, string prefixDelimiter = null)
+        public static float CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
-            GetFile.CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out Vector4 Ratio, prefixDelimiter);
-            return Math.Min(Math.Min(Ratio.x, Ratio.y), Math.Min(Ratio.z, Ratio.w));
+            GetFile.CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out Vector4 Ratio, prefixDelimiter, exclude1, exclude2, delimiter);
+            ValueAdjust.FindMinAndMax(new float[] { Ratio.x, Ratio.y, Ratio.z, Ratio.w }, out float min, out float max);
+            return max;
         }
         /// <summary>
         /// 比较文件名相似度
@@ -336,8 +354,9 @@ namespace RyuGiKen
         /// <param name="prefixDelimiter">前缀分割符</param>
         /// <param name="exclude1">前置过滤字符串</param>
         /// <param name="exclude2">后置过滤字符</param>
+        /// <param name="delimiter">组合分割符</param>
         /// <returns>[0，1]</returns>
-        public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out Vector4 Ratio, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null)
+        public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out Vector4 Ratio, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null, string delimiter = null)
         {
             string name1 = file1.GetFileNameWithOutType();
             string name2 = file2.GetFileNameWithOutType();
@@ -368,8 +387,10 @@ namespace RyuGiKen
                 }
             }
             //移除括号内容
-            string temp1 = name1.Split("~~～〜-_—\"“”()（）[]【】「」『』<>《》".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0].ReplaceAny(exclude2, "");
-            string temp2 = name2.Split("~~～〜-_—\"“”()（）[]【】「」『』<>《》".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0].ReplaceAny(exclude2, "");
+            if (string.IsNullOrWhiteSpace(delimiter))
+                delimiter = "~~～〜\"“”()（）[]【】「」『』<>《》";
+            string temp1 = name1.Split(delimiter.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0].ReplaceAny(exclude2, "");
+            string temp2 = name2.Split(delimiter.ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0].ReplaceAny(exclude2, "");
             Ratio.y = ValueAdjust.GetSequenceSimilarityRatio(temp1, temp2, IgnoreCase);
             //后置过滤
             name1 = name1.ReplaceAny(exclude2, "");
@@ -385,7 +406,7 @@ namespace RyuGiKen
         /// <param name="IgnoreCase">忽略大小写</param>
         /// <param name="types">文件类型</param>
         /// <returns></returns>
-        public static FileInfo[] CompareFilesName(string path1, string path2, bool IgnoreCase, string[] types = null)
+        public static FileInfo[] FindDifferenceCompareFilesName(string path1, string path2, bool IgnoreCase, string[] types = null)
         {
             if (string.IsNullOrWhiteSpace(path1) || string.IsNullOrWhiteSpace(path2))
                 return null;
