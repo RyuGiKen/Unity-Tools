@@ -2756,7 +2756,7 @@ namespace RyuGiKen
                 return 1;
             else if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
                 return 0;
- 
+
             string[] temp1 = str.SplitNumOrAlphabet(exclude);
             string[] temp2 = target.SplitNumOrAlphabet(exclude);
             //Debug.Log(ValueAdjust.PrintArray(temp1, true) + "\n" + ValueAdjust.PrintArray(temp2, true));
@@ -6447,8 +6447,37 @@ namespace RyuGiKen
         /// <param name="max">最大值</param>
         /// <param name="period">循环周期</param>
         /// <returns></returns>
+        public static double SetRange(double num, double min, double max, double period)
+        {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || num.IsNaN())
+                return double.NaN;
+            double numAdjusted = num;
+            while (numAdjusted >= max)
+            {
+                numAdjusted -= period;
+            }
+            while (numAdjusted < min)
+            {
+                numAdjusted += period;
+            }
+            return numAdjusted;
+        }
+        /// <summary>
+        /// 调整循环范围(当前值，最小值，最大值，循环周期)
+        /// </summary>
+        /// <param name="num">当前值</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="period">循环周期</param>
+        /// <returns></returns>
         public static float SetRange(float num, float min, float max, float period)
         {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || num.IsNaN())
+                return float.NaN;
             float numAdjusted = num;
             while (numAdjusted >= max)
             {
@@ -6459,6 +6488,79 @@ namespace RyuGiKen
                 numAdjusted += period;
             }
             return numAdjusted;
+        }
+        /// <summary>
+        /// 调整循环范围(当前值，最小值，最大值，循环周期)
+        /// </summary>
+        /// <param name="num">当前值</param>
+        /// <param name="range">循环周期</param>
+        /// <returns></returns>
+        public static float SetRange(float num, Vector2 range)
+        {
+            if (range == null)
+                return num;
+            else
+            {
+                FindMinAndMax(range.x, range.y, out float min, out float max);
+                return SetRange(num, min, max, max - min);
+            }
+        }
+        /// <summary>
+        /// 反循环
+        /// </summary>
+        /// <param name="curValue">当前值</param>
+        /// <param name="lastValue">上一帧值</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns></returns>
+        public static double UnLoop(double curValue, double lastValue, double min, double max)
+        {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || curValue.IsNaN())
+                return double.NaN;
+            FindMinAndMax(min, max, out min, out max);
+            double result = curValue;
+            while (result < lastValue)
+            {
+                result += (max - min);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 反循环
+        /// </summary>
+        /// <param name="curValue">当前值</param>
+        /// <param name="lastValue">上一帧值</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <returns></returns>
+        public static float UnLoop(float curValue, float lastValue, float min, float max)
+        {
+            if (min == max)
+                return min;
+            if (min.IsNaN() || max.IsNaN() || curValue.IsNaN())
+                return float.NaN;
+            FindMinAndMax(min, max, out min, out max);
+            float result = curValue;
+            while (result < lastValue)
+            {
+                result += (max - min);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 反循环
+        /// </summary>
+        /// <param name="curValue">当前值</param>
+        /// <param name="lastValue">上一帧值</param>
+        /// <param name="Range">循环周期</param>
+        /// <returns></returns>
+        public static float UnLoop(float curValue, float lastValue, Vector2 Range)
+        {
+            if (Range == null)
+                return curValue;
+            return UnLoop(curValue, lastValue, Range.x, Range.y);
         }
         /// <summary>
         /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
