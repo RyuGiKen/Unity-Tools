@@ -2726,6 +2726,11 @@ namespace RyuGiKen
             else if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
                 return 0;
             float result = 0;
+            if (IgnoreCase)
+            {
+                str = WindowsAPI.ChineseConverter.ToSimplified(str);
+                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+            }
             if (Math.Max(str.Length, target.Length) == 0)
             {
                 result = 1;
@@ -2751,6 +2756,11 @@ namespace RyuGiKen
                 return 0;
             int length = Math.Max(str.Length, target.Length);
             int result = 0;
+            if (IgnoreCase)
+            {
+                str = WindowsAPI.ChineseConverter.ToSimplified(str);
+                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+            }
             for (int i = 0; i < length; i++)
             {
                 if (i < str.Length && i < target.Length)
@@ -2778,6 +2788,11 @@ namespace RyuGiKen
                 return 0;
             int length = Math.Max(str.Length, target.Length);
             int result = 0;
+            if (IgnoreCase)
+            {
+                str = WindowsAPI.ChineseConverter.ToSimplified(str);
+                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+            }
             for (int i = 0; i < length; i++)
             {
                 if (i < str.Length && i < target.Length)
@@ -2807,7 +2822,11 @@ namespace RyuGiKen
                 return 1;
             else if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
                 return 0;
-
+            if (IgnoreCase)
+            {
+                str = WindowsAPI.ChineseConverter.ToSimplified(str);
+                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+            }
             if (exclude1 != null && exclude1.Length > 0)
             {
                 for (int i = 0; i < exclude1.Length; i++)
