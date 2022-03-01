@@ -221,7 +221,7 @@ namespace RyuGiKen
                         temp.Add(new Tuple<FileInfo, float>(files[j], radio));
                     }
                 }
-                Thread.Sleep(1);
+                Thread.Sleep(0);
                 if (temp.Count > 1)
                 {
                     data.Add(temp);
@@ -323,8 +323,8 @@ namespace RyuGiKen
         /// <returns>[0，1]</returns>
         public static float CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, string prefixDelimiter = null)
         {
-            GetFile.CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out float Ratio, out float SeqRatio, prefixDelimiter);
-            return Math.Min(Ratio, SeqRatio);
+            GetFile.CompareFileNameSimilarityRatio(file1, file2, IgnoreCase, out Vector4 Ratio, prefixDelimiter);
+            return Math.Min(Math.Min(Ratio.x, Ratio.y), Math.Min(Ratio.z, Ratio.w));
         }
         /// <summary>
         /// 比较文件名相似度
@@ -332,40 +332,49 @@ namespace RyuGiKen
         /// <param name="file1"></param>
         /// <param name="file2"></param>
         /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="Ratio"></param>
         /// <param name="prefixDelimiter">前缀分割符</param>
-        /// <param name="exclude">过滤</param>
-        /// <returns></returns>
-        public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out float Ratio, out float SeqRatio, string prefixDelimiter = null, string[] exclude = null)
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        public static void CompareFileNameSimilarityRatio(this FileInfo file1, FileInfo file2, bool IgnoreCase, out Vector4 Ratio, string prefixDelimiter = null, string[] exclude1 = null, string exclude2 = null)
         {
             string name1 = file1.GetFileNameWithOutType();
             string name2 = file2.GetFileNameWithOutType();
-            if (!string.IsNullOrWhiteSpace(prefixDelimiter))
+            if (!string.IsNullOrWhiteSpace(prefixDelimiter))//移除前缀
             {
                 if (name1.IndexOf(prefixDelimiter) >= 0)
-                    name1 = name1.Remove(0, name1.IndexOf(prefixDelimiter));
+                    name1 = name1.Remove(0, name1.IndexOf(prefixDelimiter) + prefixDelimiter.Length);
                 if (name2.IndexOf(prefixDelimiter) >= 0)
-                    name2 = name2.Remove(0, name2.IndexOf(prefixDelimiter));
-                if (exclude != null)
+                    name2 = name2.Remove(0, name2.IndexOf(prefixDelimiter) + prefixDelimiter.Length);
+            }
+            Ratio.x = ValueAdjust.GetCompoundSimilarityRatio(name1, name2, IgnoreCase, exclude1, exclude2);//按组合比较相似度
+            if (exclude1 != null)//前置过滤
+            {
+                for (int i = 0; i < exclude1.Length; i++)
                 {
-                    for (int i = 0; i < exclude.Length; i++)
+                    if (string.IsNullOrEmpty(exclude1[i]))
+                        continue;
+                    if (IgnoreCase)
                     {
-                        if (string.IsNullOrEmpty(exclude[i]))
-                            continue;
-                        if (IgnoreCase)
-                        {
-                            name1 = name1.ToLower().Replace(exclude[i].ToLower(), "");
-                            name2 = name2.ToLower().Replace(exclude[i].ToLower(), "");
-                        }
-                        else
-                        {
-                            name1 = name1.Replace(exclude[i], "");
-                            name2 = name2.Replace(exclude[i], "");
-                        }
+                        name1 = name1.ToLower().Replace(exclude1[i].ToLower(), "");
+                        name2 = name2.ToLower().Replace(exclude1[i].ToLower(), "");
+                    }
+                    else
+                    {
+                        name1 = name1.Replace(exclude1[i], "");
+                        name2 = name2.Replace(exclude1[i], "");
                     }
                 }
             }
-            Ratio = ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase);
-            SeqRatio = ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase);
+            //移除括号内容
+            string temp1 = name1.Split("~~～〜-_—\"“”()（）[]【】「」『』<>《》".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0].ReplaceAny(exclude2, "");
+            string temp2 = name2.Split("~~～〜-_—\"“”()（）[]【】「」『』<>《》".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0].ReplaceAny(exclude2, "");
+            Ratio.y = ValueAdjust.GetSequenceSimilarityRatio(temp1, temp2, IgnoreCase);
+            //后置过滤
+            name1 = name1.ReplaceAny(exclude2, "");
+            name2 = name2.ReplaceAny(exclude2, "");
+            Ratio.z = ValueAdjust.GetSimilarityRatio(name1, name2, IgnoreCase);
+            Ratio.w = ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase);
         }
         /// <summary>
         /// 找出两个目录中文件名不同的文件
@@ -413,7 +422,7 @@ namespace RyuGiKen
                         }
                     }
                     if (NoSame)
-						result.Add(data1[i]);
+                        result.Add(data1[i]);
                     Thread.Sleep(0);
                 }
             }
@@ -2690,8 +2699,10 @@ namespace RyuGiKen
         /// <returns>[0，1]</returns>
         public static float GetSimilarityRatio(this string str, string target, bool IgnoreCase)
         {
-            if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+            if (string.IsNullOrEmpty(str) && string.IsNullOrEmpty(target))
                 return 1;
+            else if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+                return 0;
             float result = 0;
             if (Math.Max(str.Length, target.Length) == 0)
             {
@@ -2704,6 +2715,33 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 比较字符串相似度（构成比较）
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="target"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <returns>[0，1]</returns>
+        public static float GetFormSimilarityRatio(this string str, string target, bool IgnoreCase)
+        {
+            if (string.IsNullOrEmpty(str) && string.IsNullOrEmpty(target))
+                return 1;
+            else if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+                return 0;
+            int length = Math.Max(str.Length, target.Length);
+            int result = 0;
+            for (int i = 0; i < length; i++)
+            {
+                if (i < str.Length && i < target.Length)
+                {
+                    if (IgnoreCase && str[i].CompareIgnoreCase(target[i]))
+                        result++;
+                    else if (!IgnoreCase && str[i] == target[i])
+                        result++;
+                }
+            }
+            return result * 1f / length;
+        }
+        /// <summary>
         /// 比较字符串相似度（顺序比较）
         /// </summary>
         /// <param name="str"></param>
@@ -2712,27 +2750,119 @@ namespace RyuGiKen
         /// <returns>[0，1]</returns>
         public static float GetSequenceSimilarityRatio(this string str, string target, bool IgnoreCase)
         {
-            if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+            if (string.IsNullOrEmpty(str) && string.IsNullOrEmpty(target))
                 return 1;
+            else if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+                return 0;
             int length = Math.Max(str.Length, target.Length);
             int result = 0;
             for (int i = 0; i < length; i++)
             {
                 if (i < str.Length && i < target.Length)
                 {
-                    if (IgnoreCase)
-                    {
-                        if (str[i].CompareIgnoreCase(target[i]))
-                            result++;
-                    }
+                    if (IgnoreCase && str[i].CompareIgnoreCase(target[i]))
+                        result++;
+                    else if (!IgnoreCase && str[i] == target[i])
+                        result++;
                     else
-                    {
-                        if (str[i] == target[i])
-                            result++;
-                    }
+                        break;
                 }
             }
             return result * 1f / length;
+        }
+        /// <summary>
+        /// 比较字符串相似度（组合比较）
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="target"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <param name="exclude1">前置过滤字符串</param>
+        /// <param name="exclude2">后置过滤字符</param>
+        /// <returns>[0，1]</returns>
+        public static float GetCompoundSimilarityRatio(this string str, string target, bool IgnoreCase, string[] exclude1 = null, string exclude2 = null)
+        {
+            if (string.IsNullOrEmpty(str) && string.IsNullOrEmpty(target))
+                return 1;
+            else if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(target))
+                return 0;
+
+            if (exclude1 != null && exclude1.Length > 0)
+            {
+                for (int i = 0; i < exclude1.Length; i++)
+                {
+                    if (string.IsNullOrEmpty(exclude1[i]))
+                        continue;
+                    if (IgnoreCase)
+                    {
+                        str = str.ToLower().Replace(exclude1[i].ToLower(), "");
+                        target = target.ToLower().Replace(exclude1[i].ToLower(), "");
+                    }
+                    else
+                    {
+                        str = str.Replace(exclude1[i], "");
+                        target = target.Replace(exclude1[i], "");
+                    }
+                }
+            }
+
+            string[] temp1 = str.SplitNumOrAlphabet(exclude2);
+            string[] temp2 = target.SplitNumOrAlphabet(exclude2);
+            //Debug.Log(ValueAdjust.PrintArray(temp1, true) + "\n" + ValueAdjust.PrintArray(temp2, true));
+            int length = Math.Max(temp1.Length, temp2.Length);
+            float result = 0;
+            if (temp1.Length == 1 && temp2.Length == 1)
+            {
+                result = temp1[0].GetSequenceSimilarityRatio(temp2[0], IgnoreCase);
+            }
+            else
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    if (i < temp1.Length && i < temp2.Length)
+                    {
+                        result += temp1[i].GetSequenceSimilarityRatio(temp2[i], IgnoreCase);
+                        //if (IgnoreCase && temp1[i].ToLower() == temp2[i].ToLower())
+                        //    result++;
+                        //else if (!IgnoreCase && temp1[i] == temp2[i])
+                        //    result++;
+                    }
+                }
+            }
+            return result / length;
+        }
+        /// <summary>
+        /// 字符串批量替换
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="chars"></param>
+        /// <returns></returns>
+        public static string ReplaceAny(this string str, string from, string to)
+        {
+            if (string.IsNullOrEmpty(str) || string.IsNullOrEmpty(from))
+                return str;
+            string result = str;
+            foreach (char c in from)
+            {
+                result = result.Replace(c.ToString(), to);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 字符串批量替换
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="chars"></param>
+        /// <returns></returns>
+        public static string ReplaceAny(this string str, char[] from, string to)
+        {
+            if (string.IsNullOrEmpty(str) || from == null || from.Length < 1)
+                return str;
+            string result = str;
+            foreach (char c in from)
+            {
+                result = result.Replace(c.ToString(), to);
+            }
+            return result;
         }
         /// <summary>
         /// 路径分离
@@ -3740,7 +3870,9 @@ namespace RyuGiKen
             bool[] maybeNum = new bool[chars.Length];
             for (int i = 0; i < chars.Length; i++)
             {
-                if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                //if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                //    maybeNum[i] = true;
+                if (char.IsNumber(chars[i]))
                     maybeNum[i] = true;
             }
             List<string> result = new List<string>();
@@ -3807,6 +3939,227 @@ namespace RyuGiKen
                 }
             }
             return result.ClearNullItem();
+        }
+        /// <summary>
+        /// 分离混合的字符串和数字和字母
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="excludeSpace">排除空格</param>
+        /// <returns></returns>
+        public static string[] SplitNumAndAlphabet(this string str, bool excludeSpace)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return null;
+            char[] chars = str.ToCharArray();
+            bool?[] maybeNum = new bool?[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+            {
+                //if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                //    maybeNum[i] = true;
+                if (char.IsNumber(chars[i]))
+                    maybeNum[i] = true;
+                else if (char.IsLetter(chars[i]))
+                    maybeNum[i] = false;
+            }
+            List<string> result = new List<string>();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                builder.Clear();
+                for (int j = i; j <= chars.Length; j++)
+                {
+                    if (j < chars.Length && (i == j || maybeNum[i] == maybeNum[j]))
+                    {
+                        builder.Append(chars[j]);
+                    }
+                    else
+                    {
+                        i = j - 1;
+                        break;
+                    }
+                }
+                string temp = null;
+                if (excludeSpace)
+                {
+                    temp = builder.ToString().Replace(" ", "");
+                    if (!string.IsNullOrWhiteSpace(temp))
+                        result.Add(temp);
+                }
+                else
+                {
+                    temp = builder.ToString();
+                    result.Add(temp);
+
+                }
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 分离混合的字符串和数字和字母
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="exclude">过滤</param>
+        /// <returns></returns>
+        public static string[] SplitNumAndAlphabet(this string str, string[] exclude = null)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return null;
+            char[] chars = str.ToCharArray();
+            bool?[] maybeNum = new bool?[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+            {
+                //if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                //    maybeNum[i] = true;
+                if (char.IsNumber(chars[i]))
+                    maybeNum[i] = true;
+                else if (char.IsLetter(chars[i]))
+                    maybeNum[i] = false;
+            }
+            List<string> result = new List<string>();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                builder.Clear();
+                for (int j = i; j <= chars.Length; j++)
+                {
+                    if (j < chars.Length && (i == j || maybeNum[i] == maybeNum[j]))
+                    {
+                        builder.Append(chars[j]);
+                    }
+                    else
+                    {
+                        i = j - 1;
+                        break;
+                    }
+                }
+                string temp = null;
+                if (exclude != null && exclude.Length > 0)
+                {
+                    temp = builder.ToString();
+                    foreach (string ex in exclude)
+                    {
+                        if (!string.IsNullOrEmpty(ex))
+                            temp = temp.Replace(ex, "");
+                    }
+                    if (!string.IsNullOrWhiteSpace(temp))
+                        result.Add(temp);
+                }
+                else
+                {
+                    temp = builder.ToString();
+                    result.Add(temp);
+
+                }
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 分离混合的字符串和数字或字母
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="exclude">过滤</param>
+        /// <returns></returns>
+        public static string[] SplitNumOrAlphabet(this string str, string exclude = null)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return null;
+            char[] chars = str.ToCharArray();
+            bool[] maybeNum = new bool[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+            {
+                //if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                //    maybeNum[i] = true;
+                if (char.IsLetterOrDigit(chars[i]))
+                    maybeNum[i] = true;
+            }
+            List<string> result = new List<string>();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                builder.Clear();
+                for (int j = i; j <= chars.Length; j++)
+                {
+                    if (j < chars.Length && (i == j || maybeNum[i] == maybeNum[j]))
+                    {
+                        builder.Append(chars[j]);
+                    }
+                    else
+                    {
+                        i = j - 1;
+                        break;
+                    }
+                }
+                string temp = null;
+                if (!string.IsNullOrEmpty(exclude))
+                {
+                    temp = builder.ToString();
+                    temp = temp.ReplaceAny(exclude, "");
+                    if (!string.IsNullOrWhiteSpace(temp))
+                        result.Add(temp);
+                }
+                else
+                {
+                    temp = builder.ToString();
+                    result.Add(temp);
+                }
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 分离混合的字符串和数字或字母
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="exclude">过滤</param>
+        /// <returns></returns>
+        public static string[] SplitNumOrAlphabet(this string str, string[] exclude = null)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return null;
+            char[] chars = str.ToCharArray();
+            bool[] maybeNum = new bool[chars.Length];
+            for (int i = 0; i < chars.Length; i++)
+            {
+                //if (chars[i].ToString().IndexOfAny("0123456789".ToCharArray()) >= 0)
+                //    maybeNum[i] = true;
+                if (char.IsLetterOrDigit(chars[i]))
+                    maybeNum[i] = true;
+            }
+            List<string> result = new List<string>();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                builder.Clear();
+                for (int j = i; j <= chars.Length; j++)
+                {
+                    if (j < chars.Length && (i == j || maybeNum[i] == maybeNum[j]))
+                    {
+                        builder.Append(chars[j]);
+                    }
+                    else
+                    {
+                        i = j - 1;
+                        break;
+                    }
+                }
+                string temp = null;
+                if (exclude != null && exclude.Length > 0)
+                {
+                    temp = builder.ToString();
+                    foreach (string ex in exclude)
+                    {
+                        if (!string.IsNullOrEmpty(ex))
+                            temp = temp.Replace(ex, "");
+                    }
+                    if (!string.IsNullOrWhiteSpace(temp))
+                        result.Add(temp);
+                }
+                else
+                {
+                    temp = builder.ToString();
+                    result.Add(temp);
+                }
+            }
+            return result.ToArray();
         }
         /// <summary>
         /// 统计字符串中特定字符个数
