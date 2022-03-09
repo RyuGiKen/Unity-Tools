@@ -67,34 +67,7 @@ namespace RyuGiKen
         /// <returns></returns>
         public static string LoadXmlData(string NodeName, string filePath, string RootNodeName, bool IgnoreCase = false)
         {
-            if (string.IsNullOrWhiteSpace(NodeName) || string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(RootNodeName))
-                return null;
-            string result = null;
-            XmlReader reader = null;
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    XmlReaderSettings settings = new XmlReaderSettings();
-                    settings.IgnoreComments = true;//忽略注释
-                    reader = XmlReader.Create(filePath, settings);
-                    xmlDoc.Load(reader);
-                    XmlNodeList node = xmlDoc.SelectSingleNode(RootNodeName).ChildNodes;
-                    foreach (XmlElement x1 in node)
-                    {
-                        if (x1.Name == NodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(NodeName)))
-                        {
-                            result = x1.InnerText;
-                            break;
-                        }
-                    }
-                }
-            }
-            catch { }
-            if (reader != null)
-                reader.Close();
-            return result;
+            return LoadXmlData(new string[] { NodeName }, filePath, RootNodeName, IgnoreCase);
         }
         /// <summary>
         /// 读取配置参数
@@ -137,6 +110,64 @@ namespace RyuGiKen
             if (reader != null)
                 reader.Close();
             return result;
+        }
+        /// <summary>
+        /// 读取配置参数
+        /// </summary>
+        /// <param name="NodeName"></param>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="RootNodeName">根节点</param>
+        /// <param name="data"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        public static void LoadXmlData(string NodeName, string filePath, string RootNodeName, out string[] data, bool IgnoreCase = false)
+        {
+            LoadXmlData(new string[] { NodeName }, filePath, RootNodeName, out data, IgnoreCase);
+        }
+        /// <summary>
+        /// 读取配置参数
+        /// </summary>
+        /// <param name="NodeName"></param>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="RootNodeName">根节点</param>
+        /// <param name="data"></param>
+        /// <param name="IgnoreCase">忽略大小写</param>
+        /// <returns></returns>
+        public static void LoadXmlData(string[] NodeName, string filePath, string RootNodeName, out string[] data, bool IgnoreCase = false)
+        {
+            if (NodeName == null || NodeName.Length < 1 || string.IsNullOrWhiteSpace(filePath) || string.IsNullOrWhiteSpace(RootNodeName))
+            {
+                data = null;
+                return;
+            }
+            List<string> result = new List<string>();
+            XmlReader reader = null;
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    XmlReaderSettings settings = new XmlReaderSettings();
+                    settings.IgnoreComments = true;//忽略注释
+                    reader = XmlReader.Create(filePath, settings);
+                    xmlDoc.Load(reader);
+                    XmlNodeList node = xmlDoc.SelectSingleNode(RootNodeName).ChildNodes;
+                    foreach (XmlElement x1 in node)
+                    {
+                        foreach (string nodeName in NodeName)
+                        {
+                            if (!string.IsNullOrWhiteSpace(nodeName) && (x1.Name == nodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(nodeName))))
+                            {
+                                result.Add(x1.InnerText);
+                                //break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            if (reader != null)
+                reader.Close();
+            data = result.ToArray();
         }
         /// <summary>
         /// 找出文件名相似的文件
