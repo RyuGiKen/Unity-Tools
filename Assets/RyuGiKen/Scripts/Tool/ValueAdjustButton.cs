@@ -23,7 +23,14 @@ namespace RyuGiKen.Tools
             }
             get
             {
-                return value;
+                return LimitValue ? value.Clamp(ValueRange.x, ValueRange.y) : value;
+            }
+        }
+        public string OutPut
+        {
+            get
+            {
+                return (Prefix + m_Value.ToString("F" + digit) + Postfix);
             }
         }
         [Tooltip("精度")] public int digit;
@@ -70,14 +77,15 @@ namespace RyuGiKen.Tools
         public void UpdateText()
         {
             if (m_Text)
-                m_Text.text = Prefix + value.ToString("F" + digit) + Postfix;
+                m_Text.text = OutPut;
         }
         /// <summary>
         /// 输入框改变数值后
         /// </summary>
         public void ChangeValue()
         {
-            m_Value = (m_InputField ? m_InputField.text.ToFloat() : m_Value).Clamp(ValueRange.x, ValueRange.y);
+            float temp = (m_InputField ? m_InputField.text.ToFloat() : m_Value);
+            m_Value = LimitValue ? temp.Clamp(ValueRange.x, ValueRange.y) : temp;
         }
         /// <summary>
         /// 值减少

@@ -1205,11 +1205,11 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="transform"></param>
         /// <returns></returns>
-        public static Transform[] GetChildren(this Transform transform)
+        public static Transform[] GetChildren(this Component transform)
         {
             List<Transform> result = new List<Transform>();
-            if (transform.childCount > 0)
-                foreach (Transform child in transform)
+            if (transform.transform.childCount > 0)
+                foreach (Transform child in transform.transform)
                 {
                     result.Add(child);
                 }
@@ -1235,11 +1235,11 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="transform"></param>
         /// <returns></returns>
-        public static Transform[] GetDescendants(this Transform transform)
+        public static Transform[] GetDescendants(this Component transform)
         {
             List<Transform> result = new List<Transform>();
             result.AddList(transform.GetChildren().ToList());
-            foreach (Transform child in transform)
+            foreach (Transform child in transform.transform)
             {
                 result.AddList(child.GetDescendants().ToList());
             }
@@ -1382,12 +1382,17 @@ namespace RyuGiKen
         /// <param name="GO"></param>
         public static void Destroy<T>(this T[] GO) where T : Object
         {
+            if (GO == null || GO.Length < 1)
+                return;
             foreach (var item in GO)
             {
-                if (Application.isPlaying)
-                    Object.Destroy(item);
-                else
-                    Object.DestroyImmediate(item);
+                if (item)
+                {
+                    if (Application.isPlaying)
+                        Object.Destroy(item);
+                    else
+                        Object.DestroyImmediate(item);
+                }
             }
         }
         /// <summary>
@@ -1397,12 +1402,17 @@ namespace RyuGiKen
         /// <param name="GO"></param>
         public static void Destroy<T>(this List<T> GO) where T : Object
         {
+            if (GO == null || GO.Count < 1)
+                return;
             foreach (var item in GO)
             {
-                if (Application.isPlaying)
-                    Object.Destroy(item);
-                else
-                    Object.DestroyImmediate(item);
+                if (item)
+                {
+                    if (Application.isPlaying)
+                        Object.Destroy(item);
+                    else
+                        Object.DestroyImmediate(item);
+                }
             }
         }
         /// <summary>
@@ -1425,6 +1435,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetActive(this GameObject[] GO, bool active)
         {
+            if (GO == null || GO.Length < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1438,6 +1450,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetActive<T>(this T[] GO, bool active) where T : Component
         {
+            if (GO == null || GO.Length < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1451,6 +1465,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetActive(this List<GameObject> GO, bool active)
         {
+            if (GO == null || GO.Count < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1464,6 +1480,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetActive<T>(this List<T> GO, bool active) where T : Component
         {
+            if (GO == null || GO.Count < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1477,6 +1495,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetEnable(this Collider[] GO, bool active)
         {
+            if (GO == null || GO.Length < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1490,6 +1510,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetEnable(this List<Collider> GO, bool active)
         {
+            if (GO == null || GO.Count < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1503,6 +1525,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetEnable(this Renderer[] GO, bool active)
         {
+            if (GO == null || GO.Length < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1516,6 +1540,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetEnable(this List<Renderer> GO, bool active)
         {
+            if (GO == null || GO.Count < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1529,6 +1555,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetEnable<T>(this T[] GO, bool active) where T : Behaviour
         {
+            if (GO == null || GO.Length < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1542,6 +1570,8 @@ namespace RyuGiKen
         /// <param name="active">活动状态</param>
         public static void SetEnable<T>(this List<T> GO, bool active) where T : Behaviour
         {
+            if (GO == null || GO.Count < 1)
+                return;
             foreach (var item in GO)
             {
                 if (item)
@@ -1552,15 +1582,16 @@ namespace RyuGiKen
         /// 数组转列表，转组件
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="array"></param>
-        /// <param name="type"></param>
+        /// <param name="m_Array"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(this GameObject[] array) where T : Component
+        public static List<T> ToList<T>(this GameObject[] m_Array) where T : Component
         {
+            if (m_Array == null || m_Array.Length < 1)
+                return null;
             List<T> list = new List<T>();
-            for (int i = 0; i < array.Length; i++)
-                if (array[i] && array[i].GetComponent<T>())
-                    list.Add(array[i].GetComponent<T>());
+            for (int i = 0; i < m_Array.Length; i++)
+                if (m_Array[i] && m_Array[i].GetComponent<T>())
+                    list.Add(m_Array[i].GetComponent<T>());
                 else
                     list.Add(null);
             return list;
@@ -1569,14 +1600,16 @@ namespace RyuGiKen
         /// 列表转数组，转组件
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
+        /// <param name="m_List"></param>
         /// <returns></returns>
-        public static T[] ToArray<T>(this List<GameObject> list) where T : Component
+        public static T[] ToArray<T>(this List<GameObject> m_List) where T : Component
         {
-            T[] array = new T[list.Count];
+            if (m_List == null || m_List.Count < 1)
+                return null;
+            T[] array = new T[m_List.Count];
             for (int i = 0; i < array.Length; i++)
-                if (list[i] && list[i].GetComponent<T>())
-                    array[i] = list[i].GetComponent<T>();
+                if (m_List[i] && m_List[i].GetComponent<T>())
+                    array[i] = m_List[i].GetComponent<T>();
             return array;
         }
         /// <summary>
@@ -1586,6 +1619,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<T> ToComponent<T>(this List<Component> m_List) where T : Component
         {
+            if (m_List == null || m_List.Count < 1)
+                return null;
             List<T> list = new List<T>();
             for (int i = 0; i < m_List.Count; i++)
                 if (m_List[i] && m_List[i].GetComponent<T>())
@@ -1601,6 +1636,40 @@ namespace RyuGiKen
         /// <returns></returns>
         public static T[] ToComponent<T>(this Component[] m_Array) where T : Component
         {
+            if (m_Array == null || m_Array.Length < 1)
+                return null;
+            T[] array = new T[m_Array.Length];
+            for (int i = 0; i < array.Length; i++)
+                if (m_Array[i] && m_Array[i].GetComponent<T>())
+                    array[i] = m_Array[i].GetComponent<T>();
+            return array;
+        }
+        /// <summary>
+        /// 转组件
+        /// </summary>
+        /// <param name="m_List"></param>
+        /// <returns></returns>
+        public static List<T> ToComponent<T>(this List<GameObject> m_List) where T : Component
+        {
+            if (m_List == null || m_List.Count < 1)
+                return null;
+            List<T> list = new List<T>();
+            for (int i = 0; i < m_List.Count; i++)
+                if (m_List[i] && m_List[i].GetComponent<T>())
+                    list.Add(m_List[i].GetComponent<T>());
+                else
+                    list.Add(null);
+            return list;
+        }
+        /// <summary>
+        /// 转组件
+        /// </summary>
+        /// <param name="m_Array"></param>
+        /// <returns></returns>
+        public static T[] ToComponent<T>(this GameObject[] m_Array) where T : Component
+        {
+            if (m_Array == null || m_Array.Length < 1)
+                return null;
             T[] array = new T[m_Array.Length];
             for (int i = 0; i < array.Length; i++)
                 if (m_Array[i] && m_Array[i].GetComponent<T>())
@@ -1614,6 +1683,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<GameObject> ToGameObject<T>(this List<T> m_List) where T : Component
         {
+            if (m_List == null || m_List.Count < 1)
+                return null;
             List<GameObject> list = new List<GameObject>();
             for (int i = 0; i < m_List.Count; i++)
                 if (m_List[i] && m_List[i].gameObject)
@@ -1629,6 +1700,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static GameObject[] ToGameObject<T>(this T[] m_Array) where T : Component
         {
+            if (m_Array == null || m_Array.Length < 1)
+                return null;
             GameObject[] array = new GameObject[m_Array.Length];
             for (int i = 0; i < array.Length; i++)
                 if (m_Array[i] && m_Array[i].gameObject)
