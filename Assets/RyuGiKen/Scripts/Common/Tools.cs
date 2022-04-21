@@ -3269,13 +3269,22 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<T> AddList<T>(this List<T> list01, List<T> list02)
         {
-            if (list01 == null || list02 == null)
-                return null;
-            for (int i = 0; i < list02.Count; i++)
+            List<T> result = new List<T>();
+            if (list01 != null)
             {
-                list01.Add(list02[i]);
+                for (int i = 0; i < list01.Count; i++)
+                {
+                    result.Add(list01[i]);
+                }
             }
-            return list01;
+            if (list02 != null)
+            {
+                for (int i = 0; i < list02.Count; i++)
+                {
+                    result.Add(list02[i]);
+                }
+            }
+            return result;
         }
         /// <summary>
         /// 数组转列表

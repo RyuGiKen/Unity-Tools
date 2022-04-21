@@ -9,6 +9,8 @@ namespace RyuGiKen.Tools
     public class ValueAdjustButtonEditor : Editor
     {
         bool ShowInspector = false;
+        SerializedProperty PressSpeed;
+        SerializedProperty PressTime;
         SerializedProperty value;
         SerializedProperty digit;
         SerializedProperty LimitValue;
@@ -17,6 +19,8 @@ namespace RyuGiKen.Tools
         SerializedProperty Postfix;
         void OnEnable()
         {
+            PressSpeed = serializedObject.FindProperty("PressSpeed");
+            PressTime = serializedObject.FindProperty("PressTime");
             value = serializedObject.FindProperty("value");
             digit = serializedObject.FindProperty("digit");
             LimitValue = serializedObject.FindProperty("LimitValue");
@@ -26,7 +30,7 @@ namespace RyuGiKen.Tools
         }
         public override void OnInspectorGUI()
         {
-            string[] Name = new string[8];
+            string[] Name = new string[10];
             switch (Application.systemLanguage)
             {
                 case SystemLanguage.Chinese:
@@ -40,6 +44,8 @@ namespace RyuGiKen.Tools
                     Name[5] = "精度";
                     Name[6] = "前缀";
                     Name[7] = "后缀";
+                    Name[8] = "长按累加";
+                    Name[9] = "长按间隔";
                     break;
                 default:
                     Name[0] = "Show Inspector";
@@ -50,6 +56,8 @@ namespace RyuGiKen.Tools
                     Name[5] = "Digit";
                     Name[6] = "Prefix";
                     Name[7] = "Postfix";
+                    Name[8] = "Hold Press";
+                    Name[9] = "Time";
                     break;
             }
             ShowInspector = EditorGUILayout.Foldout(ShowInspector, Name[0]);
@@ -79,6 +87,12 @@ namespace RyuGiKen.Tools
                 EditorGUILayout.Space();
                 Prefix.stringValue = EditorGUILayout.TextField(Name[6], Prefix.stringValue);
                 Postfix.stringValue = EditorGUILayout.TextField(Name[7], Postfix.stringValue);
+
+                PressSpeed.floatValue = EditorGUILayout.FloatField(Name[8], PressSpeed.floatValue);
+                if (button.PressSpeed > 0)
+                {
+                    PressTime.floatValue = EditorGUILayout.FloatField(Name[9], PressTime.floatValue.Clamp(0));
+                }
 
                 if (button.m_Text && button.m_Text.text != temp)
                     button.UpdateText();

@@ -32,7 +32,7 @@ namespace RyuGiKen.Tools
         {
             meshRenderer = meshRenderer.ClearRepeatingItem();
         }
-        void Update()
+        void LateUpdate()
         {
             if (shadowList != null)
             {
