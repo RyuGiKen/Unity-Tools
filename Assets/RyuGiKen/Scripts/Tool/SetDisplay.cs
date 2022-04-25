@@ -101,12 +101,17 @@ namespace RyuGiKen.Tools
             OverrideMouse = Override;
             OverrideMousePos = new Vector2(X, Y);
         }
+        Vector2 GetMousePosition()
+        {
+            User32.GetCursorPos(out User32.POINT point);
+            return new Vector2(point.x, point.y);
+        }
         /// <summary>
         /// 测试副屏是否在主屏右方
         /// </summary>
         void TestRight()
         {
-            Vector2 mousePosition = Input.mousePosition;
+            Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[0].x, ErrorRange);
             string info = "Target：" + TestMousePos[0] + " Mouse：" + mousePosition + " 副屏在主屏右方：" + result + " \r\n";
             Debug_T.Log(info);
@@ -121,7 +126,7 @@ namespace RyuGiKen.Tools
         /// </summary>
         void TestLeft()
         {
-            Vector2 mousePosition = Input.mousePosition;
+            Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[1].x, ErrorRange);
             string info = "Target：" + TestMousePos[1] + " Mouse：" + mousePosition + " 副屏在主屏左方：" + result + " \r\n";
             Debug_T.Log(info);
@@ -136,8 +141,8 @@ namespace RyuGiKen.Tools
         /// </summary>
         void TestUp()
         {
-            Vector2 mousePosition = Input.mousePosition;
-            bool result = ValueAdjust.JudgeRange(Display.displays[0].systemHeight - mousePosition.y, TestMousePos[2].y, ErrorRange);
+            Vector2 mousePosition = GetMousePosition();
+            bool result = ValueAdjust.JudgeRange(mousePosition.y, TestMousePos[2].y, ErrorRange);
             string info = "Target：" + TestMousePos[2] + " Mouse：" + mousePosition + " 副屏在主屏上方：" + result + " \r\n";
             Debug_T.Log(info);
             SetOverrideMousePos(TestMousePos[3].x, TestMousePos[3].y, true);
@@ -151,8 +156,8 @@ namespace RyuGiKen.Tools
         /// </summary>
         void TestDown()
         {
-            Vector2 mousePosition = Input.mousePosition;
-            bool result = ValueAdjust.JudgeRange(Display.displays[0].systemHeight - mousePosition.y, TestMousePos[3].y, ErrorRange);
+            Vector2 mousePosition = GetMousePosition();
+            bool result = ValueAdjust.JudgeRange(mousePosition.y, TestMousePos[3].y, ErrorRange);
             string info = "Target：" + TestMousePos[3] + " Mouse：" + mousePosition + " 副屏在主屏下方：" + result + " \r\n";
             Debug_T.Log(info);
             if (result)

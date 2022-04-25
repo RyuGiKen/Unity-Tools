@@ -24,6 +24,11 @@ namespace WindowsAPI
             public int right;
             public int bottom;
         }
+        public struct POINT
+        {
+            public int x;
+            public int y;
+        }
         #region User32.dll 函数
         //[DllImport("user32.dll", EntryPoint = "GetScrollInfo", CallingConvention = CallingConvention.StdCall)]
         //public static extern bool GetScrollInfo(IntPtr hwnd, int fnBar, ref SCROLLINFO lpsi);
@@ -67,6 +72,12 @@ namespace WindowsAPI
         /// <param name="y"></param>
         /// <returns></returns>
         [DllImport("user32.dll")] public static extern int SetCursorPos(int x, int y);
+        /// <summary>
+        /// 获取鼠标位置
+        /// </summary>
+        /// <param name="lpPoint"></param>
+        /// <returns></returns>
+        [DllImport("user32.dll")] public extern static bool GetCursorPos(out POINT lpPoint);
         /// <summary>
         /// 找出窗口句柄
         /// </summary>
@@ -170,7 +181,7 @@ namespace WindowsAPI
         [DllImport("user32.dll")] public static extern void SendMessage(IntPtr hWnd, int msg, int wParam, ref RECT lParam);
         [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SendMessage", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-        //[DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int msg, int wParam, ref POINT lParam);
+        [DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int msg, int wParam, ref POINT lParam);
         //[DllImport("user32.dll")] public static extern void SendMessage(IntPtr hWnd, int msg, int wParam, ref TBBUTTON lParam);
         //[DllImport("user32.dll")] public static extern void SendMessage(IntPtr hWnd, int msg, int wParam, ref TBBUTTONINFO lParam);
         //[DllImport("user32.dll")] public static extern int SendMessage(IntPtr hWnd, int msg, int wParam, ref REBARBANDINFO lParam);
@@ -269,11 +280,11 @@ namespace WindowsAPI
         /// <summary>
         /// 该函数返回指定窗口的边框矩形的尺寸。该尺寸以相对于屏幕坐标左上角的屏幕坐标给出。
         /// </summary>
-        //[DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, ref RECT rect);
+        [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, ref RECT rect);
         /// <summary>
         /// 该函数将指定点的用户坐标转换成屏幕坐标。
         /// </summary>
-        //[DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr hWnd, ref POINT pt);
+        [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr hWnd, ref POINT pt);
         /// <summary>
         /// 当在指定时间内鼠标指针离开或盘旋在一个窗口上时，此函数寄送消息。
         /// </summary>
