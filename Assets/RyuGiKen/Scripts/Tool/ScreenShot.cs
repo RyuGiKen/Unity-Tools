@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -13,7 +16,7 @@ namespace RyuGiKen.Tools
     [AddComponentMenu("RyuGiKen/截图")]
     public class ScreenShot : MonoBehaviour
     {
-        [Tooltip("截图按键")] [SerializeField] KeyCode ScreenShotKey = KeyCode.F12;
+        [Tooltip("截图按键")][SerializeField] KeyCode ScreenShotKey = KeyCode.F12;
         [Tooltip("输出路径（为空时默认在工程文件夹根目录，游戏_Data文件夹内）")] public string fileName;
         void Update()
         {
@@ -83,7 +86,7 @@ namespace RyuGiKen.Tools
                 Texture2D t = new Texture2D(width, height);
                 t.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
                 t.Apply();
-                System.IO.File.WriteAllBytes(fileName, t.EncodeToPNG());
+                File.WriteAllBytes(fileName, t.EncodeToPNG());
 #endif
             }
             switch (Application.systemLanguage)
@@ -99,4 +102,36 @@ namespace RyuGiKen.Tools
             }
         }
     }
+#if UNITY_EDITOR
+    [CustomEditor(typeof(ScreenShot))]
+    public class ScreenShotEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            string[] ButtonName = new string[2];
+            switch (Application.systemLanguage)
+            {
+                case SystemLanguage.Chinese:
+                case SystemLanguage.ChineseSimplified:
+                case SystemLanguage.ChineseTraditional:
+                    ButtonName[0] = "截图(场景视图)";
+                    ButtonName[1] = "截图(游戏视图)";
+                    break;
+                default:
+                    ButtonName[0] = "ScreenShot (Scene View)";
+                    ButtonName[1] = "ScreenShot (Game View)";
+                    break;
+            }
+            if (GUILayout.Button(ButtonName[0]))
+            {
+                ScreenShot.PrintScreen((target as ScreenShot).fileName, false);
+            }
+            if (GUILayout.Button(ButtonName[1]))
+            {
+                ScreenShot.PrintScreen((target as ScreenShot).fileName, true);
+            }
+        }
+    }
+#endif
 }

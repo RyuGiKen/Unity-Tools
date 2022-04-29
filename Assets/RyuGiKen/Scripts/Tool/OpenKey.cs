@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 namespace WindowsAPI
 {
     /// <summary>
@@ -121,4 +124,36 @@ namespace WindowsAPI
 #endif
         }
     }
+#if UNITY_EDITOR
+    [CustomEditor(typeof(OpenKey))]
+    public class OpenKeyEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            string[] ButtonName = new string[2];
+            switch (Application.systemLanguage)
+            {
+                case SystemLanguage.Chinese:
+                case SystemLanguage.ChineseSimplified:
+                case SystemLanguage.ChineseTraditional:
+                    ButtonName[0] = "调出屏幕键盘";
+                    ButtonName[1] = "隐藏屏幕键盘";
+                    break;
+                default:
+                    ButtonName[0] = "Open Keyboard";
+                    ButtonName[1] = "Hide Keyboard";
+                    break;
+            }
+            if (GUILayout.Button(ButtonName[0]))
+            {
+                (target as OpenKey).OpenKeyClick();
+            }
+            if (GUILayout.Button(ButtonName[1]))
+            {
+                (target as OpenKey).HideKey();
+            }
+        }
+    }
+#endif
 }
