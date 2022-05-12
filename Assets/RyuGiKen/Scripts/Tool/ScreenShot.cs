@@ -48,14 +48,14 @@ namespace RyuGiKen.Tools
         public static void PrintScreen(bool GameView)
         {
             ScreenShot screenShootor = FindObjectOfType<ScreenShot>();
-            PrintScreen(screenShootor?.fileName, GameView);
+            PrintScreen(screenShootor ? screenShootor.fileName : null, GameView);
         }
         /// <summary>
         /// 截图
         /// </summary>
         /// <param name="fileName">路径</param>
         /// <param name="GameView">false时为场景视图</param>
-        public static void PrintScreen(string fileName, bool GameView = true)
+        public static string PrintScreen(string fileName, bool GameView = true)
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 fileName = Application.productName + "_" + DateTime.Now.ToString().Replace(":", "_").Replace("/", "_").Replace("\\", "_");
@@ -100,6 +100,7 @@ namespace RyuGiKen.Tools
                     Debug.Log("Screenshot Saved：" + fileName);
                     break;
             }
+            return fileName;
         }
     }
 #if UNITY_EDITOR

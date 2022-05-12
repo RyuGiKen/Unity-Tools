@@ -35,7 +35,7 @@ namespace RyuGiKen.Tools
             }
             get
             {
-                return LimitValue ? value.Clamp(ValueRange.x, ValueRange.y) : value;
+                return LimitValue ? value.Clamp(ValueRange) : value;
             }
         }
         public string OutPut
@@ -97,7 +97,7 @@ namespace RyuGiKen.Tools
         public void ChangeValue()
         {
             float temp = (m_InputField ? m_InputField.text.ToFloat() : m_Value);
-            m_Value = LimitValue ? temp.Clamp(ValueRange.x, ValueRange.y) : temp;
+            m_Value = LimitValue ? temp.Clamp(ValueRange) : temp;
         }
         /// <summary>
         /// 值减少
@@ -152,7 +152,7 @@ namespace RyuGiKen.Tools
             if (!adjust.IsNaN())
                 if (LimitValue)
                 {
-                    value = (value + adjust).Clamp(ValueRange.x, ValueRange.y);
+                    value = (value + adjust).Clamp(ValueRange);
                 }
                 else
                 {

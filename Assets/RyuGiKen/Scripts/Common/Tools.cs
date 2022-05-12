@@ -16,6 +16,9 @@ using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 using Debug = UnityEngine.Debug;
 #endif
+#if UNITY_EDITOR 
+using UnityEditor;
+#endif
 /// <summary>
 /// RyuGiKen's Tools
 /// <para>
@@ -2057,6 +2060,115 @@ namespace RyuGiKen
         /// </summary>
         CentreAndEdge = 4
     }
+    /// <summary>
+    /// 限位值
+    /// </summary>
+    [Serializable]
+    public class ValueInRange
+    {
+        [SerializeField] private float value;
+        public float Value
+        {
+            set { this.value = value.Clamp(range); }
+            get { return value.Clamp(range); }
+        }
+        public float Length
+        {
+            get { return Range.y - Range.x; }
+        }
+        [SerializeField] private Vector2 range;
+        public Vector2 Range
+        {
+            set { SetRange(value); }
+            get { return range; }
+        }
+        public float MinValue
+        {
+            set { SetRange(value, Range.y); }
+            get { return Range.x; }
+        }
+        public float MaxValue
+        {
+            set { SetRange(Range.x, value); }
+            get { return Range.y; }
+        }
+        public ValueInRange()
+        {
+            value = 0;
+            range = new Vector2(float.NaN, float.NaN);
+        }
+        public ValueInRange(float value)
+        {
+            this.value = value;
+            range = new Vector2(float.NaN, float.NaN);
+        }
+        public ValueInRange(float value, float min, float max)
+        {
+            this.value = value;
+            range = new Vector2();
+            SetRange(min, max);
+        }
+        public ValueInRange(float value, Vector2 range)
+        {
+            this.value = value;
+            this.range = new Vector2();
+            SetRange(range);
+        }
+        public void SetRange(Vector2 range)
+        {
+            ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
+        }
+        public void SetRange(float min, float max)
+        {
+            ValueAdjust.FindMinAndMax(min, max, out range.x, out range.y);
+        }
+        public override string ToString()
+        {
+            return Value + "：" + Range;
+        }
+        public static implicit operator ValueInRange(float value) { return new ValueInRange(value); }
+        //public static implicit operator ValueInRange(double value) { return new ValueInRange(value.ToFloat()); }
+        //public static implicit operator ValueInRange(decimal value) { return new ValueInRange(value.ToFloat()); }
+        public static implicit operator ValueInRange(int value) { return new ValueInRange(value); }
+        public static implicit operator ValueInRange(uint value) { return new ValueInRange(value); }
+        public static implicit operator ValueInRange(short value) { return new ValueInRange(value); }
+        public static implicit operator ValueInRange(long value) { return new ValueInRange(value); }
+
+        public static implicit operator float(ValueInRange value) { return value.Value; }
+        //public static implicit operator double(ValueInRange value) { return value.Value; }
+        //public static implicit operator decimal(ValueInRange value) { return value.Value.ToDecimal(); }
+        public static implicit operator int(ValueInRange value) { return value.Value.ToInteger(); }
+        public static implicit operator uint(ValueInRange value) { return value.Value.ToUInteger(); }
+        public static implicit operator short(ValueInRange value) { return (short)value.Value; }
+        public static implicit operator long(ValueInRange value) { return value.Value.ToInteger64(); }
+    }
+#if UNITY_EDITOR
+    [CustomPropertyDrawer(typeof(ValueInRange))]
+    public class ValueInRangePropertyDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            float width = (position.width - 50f) / 3f;
+            Rect valueRect = new Rect(position.x, position.y, width, position.height);
+            Rect rangeRect = new Rect(valueRect.x + valueRect.width + 40, position.y, width * 2, position.height);
+            EditorGUI.PropertyField(valueRect, property.FindPropertyRelative("value"), GUIContent.none);
+            EditorGUI.PropertyField(rangeRect, property.FindPropertyRelative("range"), GUIContent.none);
+
+            EditorGUI.indentLevel = indent;
+        }
+    }
+#endif
     /// <summary>
     /// 数值调整
     /// </summary>
@@ -5958,6 +6070,8 @@ namespace RyuGiKen
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         /// <returns></returns>
         public static float Clamp(this float value, float min, float max)
         {
@@ -5972,10 +6086,66 @@ namespace RyuGiKen
                 result = value;
             return result;
         }
+#if UNITY_STANDALONE || UNITY_EDITOR
+        /// <summary>
+        /// 限位。
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public static float Clamp(this float value, Vector2 range)
+        {
+            return Clamp(value, range.x, range.y);
+        }
+        /// <summary>
+        /// 限位。
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public static int Clamp(this int value, Vector2Int range)
+        {
+            return Clamp(value, range.x, range.y);
+        }
         /// <summary>
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static Vector2 Clamp(this Vector2 value, Vector2 min, Vector2 max)
+        {
+            Vector2 result = new Vector2();
+            FindMinAndMax(min.x, max.x, out min.x, out max.x);
+            FindMinAndMax(min.y, max.y, out min.y, out max.y);
+
+            result = new Vector2(value.x.Clamp(min.x, max.x), value.y.Clamp(min.y, max.y));
+            return result;
+        }
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        public static Vector3 Clamp(this Vector3 value, Vector3 min, Vector3 max)
+        {
+            Vector3 result = new Vector3();
+            FindMinAndMax(min.x, max.x, out min.x, out max.x);
+            FindMinAndMax(min.y, max.y, out min.y, out max.y);
+            FindMinAndMax(min.z, max.z, out min.z, out max.z);
+            result = new Vector3(value.x.Clamp(min.x, max.x), value.y.Clamp(min.y, max.y), value.z.Clamp(min.z, max.z));
+            return result;
+        }
+#endif
+        /// <summary>
+        /// 限位。返回不小于min且不大于max的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         /// <returns></returns>
         public static double Clamp(this double value, double min, double max)
         {
@@ -5994,6 +6164,8 @@ namespace RyuGiKen
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         /// <returns></returns>
         public static decimal Clamp(this decimal value, decimal min, decimal max)
         {
@@ -6012,6 +6184,8 @@ namespace RyuGiKen
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         /// <returns></returns>
         public static int Clamp(this int value, int min, int max)
         {
@@ -6030,6 +6204,8 @@ namespace RyuGiKen
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         /// <returns></returns>
         public static uint Clamp(this uint value, uint min, uint max)
         {
@@ -6048,6 +6224,8 @@ namespace RyuGiKen
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         /// <returns></returns>
         public static long Clamp(this long value, long min, long max)
         {
@@ -6066,6 +6244,8 @@ namespace RyuGiKen
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         /// <returns></returns>
         public static int Clamp(this int value, float min, float max)
         {
@@ -6136,8 +6316,16 @@ namespace RyuGiKen
         /// <param name="max"></param>
         public static void FindMinAndMax(float A, float B, out float min, out float max)
         {
-            min = Math.Min(A, B);
-            max = Math.Max(A, B);
+            if (float.IsNaN(A) || float.IsNaN(B))
+            {
+                min = A;
+                max = B;
+            }
+            else
+            {
+                min = Math.Min(A, B);
+                max = Math.Max(A, B);
+            }
         }
         /// <summary>
         /// 找出最大最小值
@@ -6148,8 +6336,16 @@ namespace RyuGiKen
         /// <param name="max"></param>
         public static void FindMinAndMax(double A, double B, out double min, out double max)
         {
-            min = Math.Min(A, B);
-            max = Math.Max(A, B);
+            if (double.IsNaN(A) || double.IsNaN(B))
+            {
+                min = A;
+                max = B;
+            }
+            else
+            {
+                min = Math.Min(A, B);
+                max = Math.Max(A, B);
+            }
         }
         /// <summary>
         /// 找出最大最小值
