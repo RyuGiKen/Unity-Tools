@@ -65,6 +65,21 @@ namespace RyuGiKen.Tools
                 }
             }
         }
+        void OnDrawGizmos()
+        {
+#if UNITY_EDITOR
+            Gizmos.color = Color.cyan;
+            for (int i = 1; i < bones.Length; i++)
+            {
+                Gizmos.DrawLine(bones[i].transform.position, bones[i - 1].transform.position);
+            }
+            Gizmos.color = Color.green;
+            for (int i = 0; i < bones.Length; i++)
+            {
+                Gizmos.DrawWireSphere(bones[i].transform.position, 0.02f);
+            }
+#endif
+        }
         [System.Serializable]
         public struct Bone
         {

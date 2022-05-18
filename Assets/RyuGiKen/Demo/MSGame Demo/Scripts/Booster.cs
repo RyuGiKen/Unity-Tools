@@ -66,7 +66,7 @@ namespace RyuGiKen.MSGame
             LocalEulerAngles = Vector3.zero;
             if (LocalDirection.z > 0)
             {
-                LocalEulerAngles.x = Mathf.Atan2(LocalDirection.y, LocalDirection.z) / Mathf.PI * 180;
+                LocalEulerAngles.x = -Mathf.Atan2(LocalDirection.y, LocalDirection.z) / Mathf.PI * 180;
                 LocalEulerAngles.y = Mathf.Atan2(LocalDirection.x, LocalDirection.z) / Mathf.PI * 180;
 
                 if ((int)Math.Abs(LocalEulerAngles.x) <= MovableRange.x && (int)Math.Abs(LocalEulerAngles.y) <= MovableRange.y)

@@ -2169,6 +2169,12 @@ namespace RyuGiKen
         }
     }
 #endif
+    public enum RotationAxis
+    {
+        XYZ,
+        YXZ,
+        ZXY,
+    }
     /// <summary>
     /// 数值调整
     /// </summary>
@@ -2427,9 +2433,64 @@ namespace RyuGiKen
         {
             Vector3 LocalDirection = transform.InverseTransformDirection(direction);//局部方向
             Vector3 LocalEulerAngles = Vector3.zero;
-            LocalEulerAngles.x = Mathf.Atan2(LocalDirection.y, LocalDirection.z) / Mathf.PI * 180;
+            LocalEulerAngles.x = -Mathf.Atan2(LocalDirection.y, LocalDirection.z) / Mathf.PI * 180;
             LocalEulerAngles.y = Mathf.Atan2(LocalDirection.x, LocalDirection.z) / Mathf.PI * 180;
             return LocalEulerAngles;
+        }
+        /// <summary>
+        /// 欧拉角自定义顺序转四元数
+        /// </summary>
+        /// <param name="Angle"></param>
+        /// <param name="LocalAxis"></param>
+        /// <param name="axis"></param>
+        /// <returns></returns>
+        public static Quaternion LocalEulerAnglesToLocalRotation(Vector3 Angle, Transform LocalAxis, RotationAxis axis)
+        {
+            Quaternion result = Quaternion.identity;
+            switch (axis)
+            {
+                case RotationAxis.YXZ:
+                    result = Quaternion.AngleAxis(Angle.y, LocalAxis.InverseTransformDirection(LocalAxis.up))
+                        * Quaternion.AngleAxis(Angle.x, LocalAxis.InverseTransformDirection(LocalAxis.forward))
+                        * Quaternion.AngleAxis(Angle.z, LocalAxis.InverseTransformDirection(LocalAxis.right));
+                    break;
+                case RotationAxis.XYZ:
+                    result = Quaternion.AngleAxis(Angle.x, LocalAxis.InverseTransformDirection(LocalAxis.forward))
+                        * Quaternion.AngleAxis(Angle.y, LocalAxis.InverseTransformDirection(LocalAxis.up))
+                        * Quaternion.AngleAxis(Angle.z, LocalAxis.InverseTransformDirection(LocalAxis.right));
+                    break;
+                case RotationAxis.ZXY:
+                    result = Quaternion.AngleAxis(Angle.z, LocalAxis.InverseTransformDirection(LocalAxis.right))
+                        * Quaternion.AngleAxis(Angle.x, LocalAxis.InverseTransformDirection(LocalAxis.forward))
+                        * Quaternion.AngleAxis(Angle.y, LocalAxis.InverseTransformDirection(LocalAxis.up));
+                    break;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 全局方向转局部旋转
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="direction">全局方向</param>
+        /// <returns></returns>
+        public static Quaternion DirectionToLocalRotation(this Transform transform, Vector3 direction)
+        {
+            Vector3 LocalDirection = transform.InverseTransformDirection(direction);//局部方向
+            Quaternion LocalRotation = LocalDirection.DirectionToRotation();
+            return LocalRotation;
+        }
+        /// <summary>
+        /// 全局方向转局部旋转
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="direction">全局方向</param>
+        /// <param name="up">上方向</param>
+        /// <returns></returns>
+        public static Quaternion DirectionToLocalRotation(this Transform transform, Vector3 direction, Vector3 up)
+        {
+            Vector3 LocalDirection = transform.InverseTransformDirection(direction);//局部方向
+            Quaternion LocalRotation = LocalDirection.DirectionToRotation(up);
+            return LocalRotation;
         }
         /// <summary>
         /// 方向转旋转
@@ -2445,7 +2506,7 @@ namespace RyuGiKen
         /// 方向转旋转
         /// </summary>
         /// <param name="direction">方向</param>
-        /// <param name="direction">上方向</param>
+        /// <param name="up">上方向</param>
         /// <returns></returns>
         public static Quaternion DirectionToRotation(this Vector3 direction, Vector3 up)
         {
