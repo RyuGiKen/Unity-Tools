@@ -47,7 +47,7 @@ namespace RyuGiKen.Tools
         }
         void Start()
         {
-            Debug_T.Log(" displays(显示器数)： " + Display.displays.Length + " \r\n");
+            DebugL.Log(" displays(显示器数)： " + Display.displays.Length + " \r\n");
 
             string xmlData = GetFile.LoadXmlData(new string[] { "UseSecondScreen", "SecondScreen" }, Application.streamingAssetsPath + "/Setting.xml", "Data", true);
             if (!string.IsNullOrWhiteSpace(xmlData))
@@ -114,7 +114,7 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[0].x, ErrorRange);
             string info = "Target：" + TestMousePos[0] + " Mouse：" + mousePosition + " 副屏在主屏右方：" + result + " \r\n";
-            Debug_T.Log(info);
+            DebugL.Log(info);
             SetOverrideMousePos(TestMousePos[1].x, TestMousePos[1].y, true);
             if (result)
                 SetPosition(1, 0);//右
@@ -129,7 +129,7 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[1].x, ErrorRange);
             string info = "Target：" + TestMousePos[1] + " Mouse：" + mousePosition + " 副屏在主屏左方：" + result + " \r\n";
-            Debug_T.Log(info);
+            DebugL.Log(info);
             SetOverrideMousePos(TestMousePos[2].x, TestMousePos[2].y, true);
             if (result)
                 SetPosition(-1, 0);//左
@@ -144,7 +144,7 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.y, TestMousePos[2].y, ErrorRange);
             string info = "Target：" + TestMousePos[2] + " Mouse：" + mousePosition + " 副屏在主屏上方：" + result + " \r\n";
-            Debug_T.Log(info);
+            DebugL.Log(info);
             SetOverrideMousePos(TestMousePos[3].x, TestMousePos[3].y, true);
             if (result)
                 SetPosition(0, -1);//上
@@ -159,7 +159,7 @@ namespace RyuGiKen.Tools
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.y, TestMousePos[3].y, ErrorRange);
             string info = "Target：" + TestMousePos[3] + " Mouse：" + mousePosition + " 副屏在主屏下方：" + result + " \r\n";
-            Debug_T.Log(info);
+            DebugL.Log(info);
             if (result)
                 SetPosition(0, 1);//下
             else
@@ -206,7 +206,7 @@ namespace RyuGiKen.Tools
                     break;
             }
             bool result = User32.SetWindowPos(HWndIntPtr, 1, WindowPosX, WindowPosY, WindowWidth, WindowHeight, SWP_SHOWWINDOW);//设置屏幕大小和位置
-            Debug_T.Log("副屏设置" + result);
+            DebugL.Log("副屏设置" + result);
         }
         /// <summary>
         /// 窗口置顶

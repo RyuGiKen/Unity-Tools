@@ -10,17 +10,17 @@ namespace RyuGiKen.Tools
     /// 打印日志。
     /// </summary>
     [DisallowMultipleComponent]
-    public class Debug_T : MonoBehaviour
+    public class DebugL : MonoBehaviour
     {
-        public static Debug_T instance;
+        public static DebugL instance;
         [Tooltip("允许收录")] public static bool CanAdd = true;
         [Tooltip("允许打印")] public static bool CanPrint = false;
         public static string Path = Application.streamingAssetsPath;
         [Tooltip("打印队列长度")] public int ListCount = 0;
         [Tooltip("打印队列")] public static List<string> LogList = new List<string>();
-        Thread th;
-        static StreamWriter sw;
-        private void Awake()
+        protected Thread th;
+        protected static StreamWriter sw;
+        protected virtual void Awake()
         {
             if (!instance)
                 instance = this;
@@ -31,19 +31,19 @@ namespace RyuGiKen.Tools
             th = new Thread(new ThreadStart(Print));
             th.Start();
         }
-        void Start()
+        protected virtual void Start()
         {
             CanPrint = true;
 #if UNITY_EDITOR
             CanPrint = false;//编辑器状态打印可能导致循环导入
-            //CanAdd = false;
+            CanAdd = false;
 #endif
         }
-        void Update()
+        protected virtual void Update()
         {
             ListCount = LogList.Count;
         }
-        private void LateUpdate()
+        protected virtual void LateUpdate()
         {
             if (Input.GetKeyDown(KeyCode.F5))//切换是否打印日志
             {
@@ -54,7 +54,7 @@ namespace RyuGiKen.Tools
                 Clear();
             }
         }
-        void Print()
+        protected void Print()
         {
             while (true)
             {
@@ -80,7 +80,7 @@ namespace RyuGiKen.Tools
                 Thread.Sleep(1);
             }
         }
-        static void Print(StreamWriter sw, string str, bool printTime)
+        protected static void Print(StreamWriter sw, string str, bool printTime)
         {
             if (sw != null)
             {
@@ -98,7 +98,7 @@ namespace RyuGiKen.Tools
         /// 打印日志
         /// </summary>
         /// <param name="Content"></param>
-        public static void Log(string Content)
+        public static void Log(string Content, bool Force = false)
         {
             Debug.Log(Content);
             if (instance)
@@ -106,7 +106,7 @@ namespace RyuGiKen.Tools
                 if (CanAdd && LogList != null)
                     LogList.Add(Content);
             }
-            else
+            else if (Force)
             {
                 CheckStreamWriter();
                 Print(sw, Content, true);
@@ -117,7 +117,7 @@ namespace RyuGiKen.Tools
                 }
             }
         }
-        public static void LogError(string Content)
+        public static void LogError(string Content, bool Force = false)
         {
             Debug.LogError(Content);
             if (instance)
@@ -125,7 +125,7 @@ namespace RyuGiKen.Tools
                 if (CanAdd && LogList != null)
                     LogList.Add(Content);
             }
-            else
+            else if (Force)
             {
                 CheckStreamWriter();
                 Print(sw, Content, true);
@@ -143,6 +143,7 @@ namespace RyuGiKen.Tools
         {
             bool originEnable = CanPrint;
             CanPrint = false;//清空前需暂停打印
+            SetPath();
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
             File.WriteAllText(Path + "/Log.txt", string.Empty, Encoding.UTF8);
@@ -154,15 +155,19 @@ namespace RyuGiKen.Tools
             }
             CheckStreamWriter();
         }
-        private static void CheckStreamWriter()
+        protected static void SetPath()
+        {
+            Path = Application.streamingAssetsPath;
+        }
+        protected static void CheckStreamWriter()
         {
             if (sw == null)
             {
-                Path = Application.streamingAssetsPath;
+                SetPath();
                 sw = new StreamWriter(Path + "/Log.txt", true, Encoding.UTF8);
             }
         }
-        private void OnApplicationQuit()
+        protected virtual void OnApplicationQuit()
         {
             try
             {
@@ -176,7 +181,7 @@ namespace RyuGiKen.Tools
             }
             catch (System.Exception e)
             {
-                Debug_T.LogError("失败 " + e);
+                LogError("失败 " + e);
             }
         }
     }
