@@ -127,7 +127,7 @@ public class Test : MonoBehaviour
 
         PrintData.Add(systemInfo);
         UpdateResolutionInput();
-        Debug_T.Log(systemInfo);
+        DebugL.Log(systemInfo);
         ShowScreenInfo();
     }
     void ShowScreenInfo()
@@ -138,7 +138,7 @@ public class Test : MonoBehaviour
             + " currentResolution(屏幕绘制分辨率)： " + Screen.currentResolution + " \r\n";
         PrintData.Add(Info);
         UpdateResolutionInput();
-        Debug_T.Log(Info);
+        DebugL.Log(Info);
     }
     void SwitchDisplay(int index)
     {
