@@ -27,7 +27,7 @@ namespace RyuGiKen
         public MultiArray(T[][] array)
         {
             this.items = new List<ReorderableList<T>>();
-            for(int i = 0; i < array.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
                 items.Add(new ReorderableList<T>(array[i]));
             }
@@ -228,7 +228,7 @@ namespace RyuGiKen
     [Serializable] public class MultiArrayValueInRange : MultiArray<ValueInRange> { public new List<ReorderableListValueInRange> items; }
 
 #if UNITY_EDITOR
-    [CustomPropertyDrawer(typeof(MultiArrayBase))] 
+    [CustomPropertyDrawer(typeof(MultiArrayBase))]
     public class MultiArrayPropertyDrawer : PropertyDrawer
     {
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

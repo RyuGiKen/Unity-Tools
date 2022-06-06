@@ -111,7 +111,6 @@ namespace RyuGiKen
     public class ReorderableListPropertyDrawer : PropertyDrawer
     {
         protected const int minSpacing = 2;
-        //protected ReorderableList list;
         protected virtual ReorderableList CreateReorderableList(SerializedProperty property, SerializedProperty listProperty)
         {
             bool Draggable = property.FindPropertyRelative("Draggable").boolValue;
@@ -119,8 +118,6 @@ namespace RyuGiKen
         }
         protected ReorderableList GetReorderableList(SerializedProperty property)
         {
-            //if (list == null)
-            //{
             var listProperty = property.FindPropertyRelative("items");
 
             ReorderableList list = CreateReorderableList(property, listProperty);
@@ -133,7 +130,6 @@ namespace RyuGiKen
             {
                 DrawListItems(rect, listProperty.GetArrayElementAtIndex(index));
             };
-            //}
             return list;
         }
         protected virtual float GetPropertyHeight(SerializedProperty property)
