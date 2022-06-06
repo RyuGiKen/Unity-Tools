@@ -31,7 +31,7 @@ namespace RyuGiKen
     /// <summary>
     /// 获取文件
     /// </summary>
-    public static class GetFile
+    public static partial class GetFile
     {
         /// <summary>
         /// 读取配置参数
@@ -1185,7 +1185,7 @@ namespace RyuGiKen
     /// <summary>
     /// 对象调整
     /// </summary>
-    public static class ObjectAdjust
+    public static partial class ObjectAdjust
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
@@ -1940,82 +1940,6 @@ namespace RyuGiKen
         public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.x - b.x, a.y - b.y, a.z + b.z); }
     }
 #endif
-#if UNITY_EDITOR || UNITY_STANDALONE
-    /// <summary>
-    /// 多维数组
-    /// </summary>
-    [System.Serializable]
-    public class MultiArray
-    {
-        [System.Serializable]
-        public struct SecondArray
-        {
-            public Component[] items;
-            public int Length
-            {
-                get
-                {
-                    return items == null ? 0 : items.Length;
-                }
-            }
-        }
-        public SecondArray[] items;
-        public Component GetRandomOne(int index1)
-        {
-            return items[index1].items.GetRandomItem();
-        }
-        public Component GetItem(int index1, int index2)
-        {
-            try
-            {
-                return items[index1].items[index2];
-            }
-            catch
-            {
-                return default(Component);
-            }
-        }
-        public Component[] AllItems
-        {
-            get
-            {
-                List<Component> result = new List<Component>();
-                for (int i = 0; i < items.Length; i++)
-                {
-                    if (items[i].Length > 0)
-                        result.AddList(items[i].items.ToList());
-                }
-                return result.ToArray();
-            }
-        }
-        public Component this[int index]
-        {
-            get
-            {
-                try
-                {
-                    return AllItems[index];
-                }
-                catch
-                {
-                    return default(Component);
-                }
-            }
-        }
-        public int Length
-        {
-            get
-            {
-                int result = 0;
-                for (int i = 0; i < items.Length; i++)
-                {
-                    result += items[i].Length;
-                }
-                return result;
-            }
-        }
-    }
-#endif
     /// <summary>
     /// 速度类型
     /// </summary>
@@ -2178,7 +2102,7 @@ namespace RyuGiKen
     /// <summary>
     /// 数值调整
     /// </summary>
-    public static class ValueAdjust
+    public static partial class ValueAdjust
     {
         /// <summary>
         /// 转速转角速度
@@ -2260,6 +2184,24 @@ namespace RyuGiKen
                     break;
             }
             return result;
+        }
+        /// <summary>
+        /// 获取枚举元素
+        /// </summary>
+        /// <param name="enumType"></param>
+        /// <returns></returns>
+        public static string[] GetEnumNames(Type enumType)
+        {
+            return System.Enum.GetNames(enumType);
+        }
+        /// <summary>
+        /// 获取枚举元素数量
+        /// </summary>
+        /// <param name="enumType"></param>
+        /// <returns></returns>
+        public static int GetEnumLength(Type enumType)
+        {
+            return System.Enum.GetNames(enumType).Length;
         }
 #if UNITY_STANDALONE || UNITY_EDITOR
         /// <summary>
@@ -3841,27 +3783,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
-        /// <summary>
-        /// 数组转换
-        /// </summary>
-        /// <returns></returns>
-        public static Component[][] ConvertArray(this MultiArray multiArray)
-        {
-            if (multiArray == null || multiArray.items == null || multiArray.Length < 1)
-                return null;
-            Component[][] result = new Component[multiArray.items.Length][];
-            for (int i = 0; i < multiArray.items.Length; i++)
-            {
-                result[i] = new Component[multiArray.items[i].Length];
-                for (int j = 0; j < result[i].Length; j++)
-                {
-                    result[i][j] = multiArray.GetItem(i, j);
-                }
-            }
-            return result;
-        }
-#endif
         /// <summary>
         /// 打印数组元素
         /// </summary>
@@ -3881,30 +3802,6 @@ namespace RyuGiKen
                     str += array[i].ToString();
                 if (newline)
                     str += "\n";
-            }
-            return str;
-        }
-        /// <summary>
-        /// 打印数组元素
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="array"></param>
-        /// <returns></returns>
-        public static string PrintArray<T>(this T[][] array)
-        {
-            if (array == null || array.Length < 1)
-                return "";
-            string str = "";
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (array[i] != null)
-                    for (int j = 0; j < array[i].Length; j++)
-                    {
-                        str += "  [" + i + "][" + j + "] ";
-                        if (array[i][j] != null)
-                            str += array[i][j].ToString();
-                    }
-                str += "\n";
             }
             return str;
         }
@@ -3950,30 +3847,6 @@ namespace RyuGiKen
                     str += list[i].ToString();
                 if (newline)
                     str += "\n";
-            }
-            return str;
-        }
-        /// <summary>
-        /// 打印列表元素
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public static string PrintArray<T>(this List<List<T>> list)
-        {
-            if (list == null || list.Count < 1)
-                return "";
-            string str = "";
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (list[i] != null)
-                    for (int j = 0; j < list[i].Count; j++)
-                    {
-                        str += "  [" + i + "][" + j + "] ";
-                        if (list[i][j] != null)
-                            str += list[i][j].ToString();
-                    }
-                str += "\n";
             }
             return str;
         }
@@ -7979,6 +7852,18 @@ namespace RyuGiKen
         /// <summary>
         /// 映射
         /// </summary>
+        /// <param name="value">参数，范围</param>
+        /// <param name="OutputRange">输出范围</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float MappingRange(ValueInRange value, ValueInRange OutputRange, int n = 1, bool limit = true)
+        {
+            return MappingRange(value, value.Range, OutputRange.Range, n, limit);
+        }
+        /// <summary>
+        /// 映射
+        /// </summary>
         /// <param name="value">参数</param>
         /// <param name="range">参数范围节点</param>
         /// <param name="OutputMin">输出最小值</param>
@@ -8848,7 +8733,7 @@ namespace RyuGiKen
     /// <summary>
     /// 颜色调整
     /// </summary>
-    public static class ColorAdjust
+    public static partial class ColorAdjust
     {
         /// <summary>
         /// 颜色调整模式
@@ -9198,7 +9083,7 @@ namespace RyuGiKen
     /// <summary>
     /// IP地址相关
     /// </summary>
-    public static class IPInformation
+    public static partial class IPInformation
     {
         /// <summary>
         /// IP地址类型
