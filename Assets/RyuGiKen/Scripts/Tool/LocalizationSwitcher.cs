@@ -1,0 +1,147 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditorInternal;
+#endif
+namespace RyuGiKen.Localization
+{
+    /// <summary>
+    /// 多语言切换
+    /// </summary>
+    public class LocalizationSwitcher : MonoBehaviour
+    {
+        public GamesLanguage language;
+        public bool StartSet = true;
+        public bool Seted = false;
+        public LocalizationConfigurationBase configuration;
+        public Component[] components;
+        protected void Awake()
+        {
+            Seted = false;
+        }
+        protected void Start()
+        {
+            if (StartSet)
+                UpdateLanguage();
+        }
+        protected void LateUpdate()
+        {
+            if (!Seted)
+                UpdateLanguage();
+        }
+        /// <summary>
+        /// 系统语言转游戏语言
+        /// </summary>
+        /// <param name="systemLanguage"></param>
+        /// <returns></returns>
+        public static GamesLanguage SystemLanguageToGamesLanguage(SystemLanguage systemLanguage)
+        {
+            GamesLanguage result;
+            switch (systemLanguage)
+            {
+                default:
+                case SystemLanguage.English:
+                    result = GamesLanguage.English;
+                    break;
+                case SystemLanguage.Chinese:
+                case SystemLanguage.ChineseSimplified:
+                case SystemLanguage.ChineseTraditional:
+                    result = GamesLanguage.Chinese;
+                    break;
+            }
+            return result;
+        }
+        public virtual void UpdateLanguage()
+        {
+            if (language == GamesLanguage.Auto)
+            {
+                language = SystemLanguageToGamesLanguage(Application.systemLanguage);
+            }
+            UpdateLanguage(configuration, language);
+        }
+        public void UpdateLanguage(GamesLanguage language)
+        {
+            this.language = language;
+            UpdateLanguage(configuration, language);
+        }
+        public void UpdateLanguage(LocalizationConfigurationBase configuration, GamesLanguage language)
+        {
+            if (configuration == null)
+            {
+                Debug.Log("无配置文件");
+                return;
+            }
+            for (int i = 0; i < components.Length; i++)
+            {
+                if (i < components.Length && components[i])
+                {
+                    if (configuration is LocalizationConfiguration)
+                    {
+                        if (i < (configuration as LocalizationConfiguration).configurations.items.Count)
+                        {
+                            Localization objects = (configuration as LocalizationConfiguration).configurations.items[i];
+
+                            if (components[i].TryGetComponent(out Text text))
+                                text.text = objects.Find(language);
+                            else if (components[i].TryGetComponent(out InputField input))
+                                input.text = objects.Find(language);
+                            else if (components[i].TryGetComponent(out AudioSource audio))
+                                audio.clip = objects.Find(language);
+                            else if (components[i].TryGetComponent(out Image image))
+                                image.sprite = objects.Find(language);
+                            else if (components[i].TryGetComponent(out RawImage rawImage))
+                                rawImage.texture = objects.Find(language);
+                            else if (components[i].TryGetComponent(out SpriteRenderer spriteRenderer))
+                                spriteRenderer.sprite = objects.Find(language);
+                            else if (components[i].TryGetComponent(out MeshRenderer meshRenderer))
+                                meshRenderer.material.mainTexture = objects.Find(language);
+                            else if (components[i].TryGetComponent(out SkinnedMeshRenderer skinnedMeshRenderer))
+                                skinnedMeshRenderer.material.mainTexture = objects.Find(language);
+                        }
+                    }
+                    else if (configuration is LocalizationStringConfiguration)
+                    {
+                        if (i < (configuration as LocalizationStringConfiguration).configurations.items.Count)
+                        {
+                            LocalizationString objects2 = (configuration as LocalizationStringConfiguration).configurations.items[i];
+
+                            if (components[i].TryGetComponent(out Text text))
+                                text.text = objects2.Find(language);
+                            else if (components[i].TryGetComponent(out InputField input))
+                                input.text = objects2.Find(language);
+                        }
+                    }
+                }
+            }
+            Seted = true;
+        }
+        public LocalizationItem TryGetLocalization(int index)
+        {
+            if (!configuration || language == GamesLanguage.Auto || index < 0)
+                return null;
+            if (configuration is LocalizationConfiguration)
+            {
+                return (configuration as LocalizationConfiguration).GetLocalization(language, index);
+            }
+            return null;
+        }
+        public string TryGetLocalizationString(int index, string exception)
+        {
+            if (!configuration || language == GamesLanguage.Auto || index < 0)
+                return exception;
+            return configuration.TryGetLocalizationString(language, index, exception);
+        }
+    }
+    public static partial class Extension
+    {
+        public static string TryGetLocalizationString(this LocalizationSwitcher switcher, GamesLanguage language, int index, string exception)
+        {
+            if (!switcher || switcher.configuration == null || language == GamesLanguage.Auto || index < 0)
+                return exception;
+            return switcher.configuration.TryGetLocalizationString(language, index, exception);
+        }
+    }
+}
