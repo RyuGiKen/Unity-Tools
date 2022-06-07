@@ -2185,6 +2185,88 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR
+        /// <summary>
+        /// 获取字典指定项
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static T GetValueInDictionary<T>(this Dictionary<SerializedProperty, T> dictionary, SerializedProperty key)
+        {
+            foreach (KeyValuePair<SerializedProperty, T> pair in dictionary)
+            {
+                if (pair.Key.GetHashCode().Equals(key.GetHashCode()))
+                {
+                    return pair.Value;
+                }
+            }
+            return default;
+        }
+#endif
+        /// <summary>
+        /// 获取字典指定项
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static TKey GetKeyInDictionary<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TValue value)
+        {
+            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+            {
+                if (pair.Value.Equals(value))
+                {
+                    return pair.Key;
+                }
+            }
+            return default;
+        }
+        /// <summary>
+        /// 获取字典指定项
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static TValue GetValueInDictionary<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+        {
+            //foreach (KeyValuePair<TKey, TValue> pair in dictionary)
+            //{
+            //    if (pair.Key.Equals(key))
+            //    {
+            //        return pair.Value;
+            //    }
+            //}
+            //return default;
+            dictionary.TryGetValue(key, out TValue value);
+            return value;
+        }
+        /// <summary>
+        /// 获取字典指定项
+        /// </summary>
+        /// <typeparam name="TKey1"></typeparam>
+        /// <typeparam name="TKey2"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static TValue GetValueInDictionary<TKey1, TKey2, TValue>(this Dictionary<Tuple<TKey1, TKey2>, TValue> dictionary, Tuple<TKey1, TKey2> key)
+        {
+            if (key == null)
+                return default;
+            foreach (KeyValuePair<Tuple<TKey1, TKey2>, TValue> pair in dictionary)
+            {
+                if (pair.Key.Item1.Equals(key.Item1) && pair.Key.Item2.Equals(key.Item2))
+                {
+                    return pair.Value;
+                }
+            }
+            return default;
+        }
         /// <summary>
         /// 获取枚举元素
         /// </summary>

@@ -27,8 +27,75 @@ namespace RyuGiKen.Localization
     {
         public MultiArrayLocalizationString configurations;
     }
-    [System.Serializable] public class MultiArrayLocalizationString : MultiArray<LocalizationStringItem> { public new List<LocalizationString> items; }
-    [System.Serializable] public class LocalizationString : ReorderableList<LocalizationStringItem> { }
+    [System.Serializable]
+    public class MultiArrayLocalizationString : MultiArrayExtension<LocalizationStringItem>
+    {
+        public new List<LocalizationString> items;
+        public MultiArrayLocalizationString(LocalizationStringItem[][] array)
+        {
+            this.items = new List<LocalizationString>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new LocalizationString(array[i]));
+        }
+        public MultiArrayLocalizationString(ReorderableList<LocalizationStringItem>[] array)
+        {
+            this.items = new List<LocalizationString>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new LocalizationString(array[i].ToArray()));
+        }
+        public MultiArrayLocalizationString(LocalizationString[] array)
+        {
+            this.items = new List<LocalizationString>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayLocalizationString(List<ReorderableList<LocalizationStringItem>> list)
+        {
+            this.items = new List<LocalizationString>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new LocalizationString(list[i].ToArray()));
+        }
+        public MultiArrayLocalizationString(List<LocalizationString> list) { this.items = list; }
+        public override LocalizationStringItem GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override LocalizationStringItem GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [System.Serializable]
+    public class LocalizationString : ReorderableList<LocalizationStringItem>
+    {
+        public LocalizationString() { this.items = new List<LocalizationStringItem>(); }
+        public LocalizationString(LocalizationStringItem[] array) { this.items = array != null ? array.ToList() : new List<LocalizationStringItem>(); }
+        public LocalizationString(List<LocalizationStringItem> list) { this.items = list; }
+    }
     [System.Serializable]
     public class LocalizationStringItem
     {
@@ -230,8 +297,7 @@ namespace RyuGiKen.Localization
     {
         protected override ReorderableList CreateReorderableList(SerializedProperty property, SerializedProperty listProperty)
         {
-            bool Draggable = property.FindPropertyRelative("Draggable").boolValue;
-            return new ReorderableList(property.serializedObject, listProperty, Draggable, true, false, false);
+            return CreateReorderableList(property, listProperty, false);
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
