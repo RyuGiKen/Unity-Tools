@@ -19,6 +19,7 @@ using Debug = UnityEngine.Debug;
 #if UNITY_EDITOR 
 using UnityEditor;
 #endif
+using RyuGiKen;
 /// <summary>
 /// RyuGiKen's Tools
 /// <para>
@@ -1985,22 +1986,16 @@ namespace RyuGiKen
         CentreAndEdge = 4
     }
     /// <summary>
-    /// 限位值
+    /// 范围
     /// </summary>
     [Serializable]
-    public class ValueInRange
+    public class ValueRange
     {
-        [SerializeField] private float value;
-        public float Value
-        {
-            set { this.value = value.Clamp(range); }
-            get { return value.Clamp(range); }
-        }
         public float Length
         {
-            get { return Range.y - Range.x; }
+            get { return (Range.y - Range.x).Abs(); }
         }
-        [SerializeField] private Vector2 range;
+        [SerializeField] protected Vector2 range;
         public Vector2 Range
         {
             set { SetRange(value); }
@@ -2015,6 +2010,51 @@ namespace RyuGiKen
         {
             set { SetRange(Range.x, value); }
             get { return Range.y; }
+        }
+        public ValueRange()
+        {
+            range = new Vector2(float.NaN, float.NaN);
+        }
+        public ValueRange(float min, float max)
+        {
+            range = new Vector2();
+            SetRange(min, max);
+        }
+        public ValueRange(Vector2 range)
+        {
+            this.range = new Vector2();
+            SetRange(range);
+        }
+        public void SetRange(Vector2 range)
+        {
+            ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
+        }
+        public void SetRange(float min, float max)
+        {
+            ValueAdjust.FindMinAndMax(min, max, out range.x, out range.y);
+        }
+        public override string ToString()
+        {
+            return Range.ToString();
+        }
+        //public static implicit operator ValueRange(ValueInRange value) { return new ValueRange(value.Range); }
+        public static implicit operator ValueRange(Vector2 value) { return new ValueRange(value); }
+        public static implicit operator Vector2(ValueRange value) { return value.range; }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        public static implicit operator ValueRange(Vector2Int value) { return new ValueRange(value); }
+#endif
+    }
+    /// <summary>
+    /// 限位值
+    /// </summary>
+    [Serializable]
+    public class ValueInRange: ValueRange
+    {
+        [SerializeField] private float value;
+        public float Value
+        {
+            set { this.value = value.Clamp(range); }
+            get { return value.Clamp(range); }
         }
         public ValueInRange()
         {
@@ -2038,14 +2078,6 @@ namespace RyuGiKen
             this.range = new Vector2();
             SetRange(range);
         }
-        public void SetRange(Vector2 range)
-        {
-            ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
-        }
-        public void SetRange(float min, float max)
-        {
-            ValueAdjust.FindMinAndMax(min, max, out range.x, out range.y);
-        }
         public override string ToString()
         {
             return Value + "：" + Range;
@@ -2066,33 +2098,6 @@ namespace RyuGiKen
         public static implicit operator short(ValueInRange value) { return (short)value.Value; }
         public static implicit operator long(ValueInRange value) { return value.Value.ToInteger64(); }
     }
-#if UNITY_EDITOR
-    [CustomPropertyDrawer(typeof(ValueInRange))]
-    public class ValueInRangePropertyDrawer : PropertyDrawer
-    {
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            return base.GetPropertyHeight(property, label);
-        }
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            //base.OnGUI(position, property, label);
-
-            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
-
-            int indent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
-
-            float width = (position.width - 50f) / 3f;
-            Rect valueRect = new Rect(position.x, position.y, width, position.height);
-            Rect rangeRect = new Rect(valueRect.x + valueRect.width + 40, position.y, width * 2, position.height);
-            EditorGUI.PropertyField(valueRect, property.FindPropertyRelative("value"), GUIContent.none);
-            EditorGUI.PropertyField(rangeRect, property.FindPropertyRelative("range"), GUIContent.none);
-
-            EditorGUI.indentLevel = indent;
-        }
-    }
-#endif
     public enum RotationAxis
     {
         XYZ,
@@ -3421,26 +3426,6 @@ namespace RyuGiKen
             return resultList;
         }
         /// <summary>
-        /// 列表相加。补充在后。
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list01"></param>
-        /// <param name="list02"></param>
-        /// <returns></returns>
-        public static List<T> ListAddition<T>(List<T> list01, List<T> list02)
-        {
-            List<T> resultList = new List<T>();
-            for (int i = 0; i < list01.Count; i++)
-            {
-                resultList.Add(list01[i]);
-            }
-            for (int i = 0; i < list02.Count; i++)
-            {
-                resultList.Add(list02[i]);
-            }
-            return resultList;
-        }
-        /// <summary>
         /// 数组增加项
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -3463,22 +3448,37 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="list01"></param>
         /// <param name="list02"></param>
+        /// <param name="changeSelf">改变自身</param>
         /// <returns></returns>
-        public static List<T> AddList<T>(this List<T> list01, List<T> list02)
+        public static List<T> AddList<T>(this List<T> list01, List<T> list02, bool changeSelf = true)
         {
             List<T> result = new List<T>();
-            if (list01 != null)
+            if (changeSelf)
             {
-                for (int i = 0; i < list01.Count; i++)
+                if (list01 != null)
                 {
-                    result.Add(list01[i]);
+                    for (int i = 0; i < list02.Count; i++)
+                    {
+                        list01.Add(list02[i]);
+                    }
                 }
+                result = list01;
             }
-            if (list02 != null)
+            else
             {
-                for (int i = 0; i < list02.Count; i++)
+                if (list01 != null)
                 {
-                    result.Add(list02[i]);
+                    for (int i = 0; i < list01.Count; i++)
+                    {
+                        result.Add(list01[i]);
+                    }
+                }
+                if (list02 != null)
+                {
+                    for (int i = 0; i < list02.Count; i++)
+                    {
+                        result.Add(list02[i]);
+                    }
                 }
             }
             return result;
@@ -6506,7 +6506,7 @@ namespace RyuGiKen
         /// 找出最大最小值
         /// </summary>
         /// <param name="array"></param>
-        public static Vector2Int FindMinAndMax(int[] array)
+        public static Vector2Int FindMinAndMax(params int[] array)
         {
             if (array == null || array.Length < 1)
                 return Vector2Int.zero;
@@ -6544,7 +6544,7 @@ namespace RyuGiKen
         /// 找出最大最小值
         /// </summary>
         /// <param name="array"></param>
-        public static Vector2 FindMinAndMax(float[] array)
+        public static Vector2 FindMinAndMax(params float[] array)
         {
             if (array == null || array.Length < 1)
                 return new Vector2(float.NaN, float.NaN);
@@ -6941,6 +6941,21 @@ namespace RyuGiKen
                 numAdjusted += period;
             }
             return numAdjusted;
+        }
+        /// <summary>
+        /// 调整循环范围(当前值，最小值，最大值，循环周期)
+        /// </summary>
+        /// <param name="num">当前值</param>
+        /// <param name="range">循环周期</param>
+        /// <returns></returns>
+        public static float SetRange(float num, ValueRange range)
+        {
+            if (range == null)
+                return num;
+            else
+            {
+                return SetRange(num, range.MinValue, range.MaxValue, range.Length);
+            }
         }
         /// <summary>
         /// 调整循环范围(当前值，最小值，最大值，循环周期)
@@ -9274,4 +9289,60 @@ namespace RyuGiKen
             return ipEndPoint.Address;
         }
     }
+}
+namespace RyuGiKenEditor
+{
+#if UNITY_EDITOR
+    [CustomPropertyDrawer(typeof(ValueRange))]
+    public class ValueRangePropertyDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            Vector2 range = EditorGUI.Vector2Field(position, GUIContent.none, property.FindPropertyRelative("range").vector2Value);
+            property.FindPropertyRelative("range").vector2Value = ValueAdjust.FindMinAndMax(range.x, range.y);
+
+            EditorGUI.indentLevel = indent;
+        }
+    }
+    [CustomPropertyDrawer(typeof(ValueInRange))]
+    public class ValueInRangePropertyDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            float width = (position.width - 50f) / 3f;
+            Rect valueRect = new Rect(position.x, position.y, width, position.height);
+            Rect rangeRect = new Rect(valueRect.x + valueRect.width + 40, position.y, width * 2, position.height);
+
+            float value = EditorGUI.DelayedFloatField(valueRect, property.FindPropertyRelative("value").floatValue);
+
+            Vector2 range = EditorGUI.Vector2Field(rangeRect, GUIContent.none, property.FindPropertyRelative("range").vector2Value);
+            property.FindPropertyRelative("range").vector2Value = ValueAdjust.FindMinAndMax(range.x, range.y);
+
+            property.FindPropertyRelative("value").floatValue = value.Clamp(property.FindPropertyRelative("range").vector2Value);
+            EditorGUI.indentLevel = indent;
+        }
+    }
+#endif
 }

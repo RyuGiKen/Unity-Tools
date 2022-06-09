@@ -10,6 +10,8 @@ using SliderEvent = UnityEngine.UI.Slider.SliderEvent;
 using UnityEditor;
 using UnityEditor.UI;
 #endif
+using RyuGiKen;
+using RyuGiKen.Tools;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -625,6 +627,9 @@ namespace RyuGiKen.Tools
             eventData.useDragThreshold = false;
         }
     }
+}
+namespace RyuGiKenEditor.Tools
+{
 #if UNITY_EDITOR
     [CustomEditor(typeof(CircleSlider), true)]
     [CanEditMultipleObjects]

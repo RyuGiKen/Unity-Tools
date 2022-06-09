@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using RyuGiKen;
 using UnityEngine.EventSystems;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using RyuGiKen;
+using RyuGiKen.Tools;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -183,6 +184,9 @@ namespace RyuGiKen.Tools
             EventSystem.current.SetSelectedGameObject(null);
         }
     }
+}
+namespace RyuGiKenEditor.Tools
+{
 #if UNITY_EDITOR
     [CanEditMultipleObjects]
     [CustomEditor(typeof(ValueAdjustButton))]

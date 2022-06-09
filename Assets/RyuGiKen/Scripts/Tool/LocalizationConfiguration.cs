@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using RyuGiKen;
 using RyuGiKen.Tools;
+using RyuGiKen.Localization;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditorInternal;
@@ -238,6 +239,9 @@ namespace RyuGiKen.Localization
             return localization.items.Find(language);
         }
     }
+}
+namespace RyuGiKenEditor.Localization
+{
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(LocalizationItem))]
     public class LocalizationItemPropertyDrawer : LocalizationStringItemPropertyDrawer
@@ -289,7 +293,7 @@ namespace RyuGiKen.Localization
             }
         }
     }
-    [CustomPropertyDrawer(typeof(Localization), true)]
+    [CustomPropertyDrawer(typeof(RyuGiKen.Localization.Localization), true)]
     public class LocalizationPropertyDrawer : LocalizationStringPropertyDrawer
     {
         //protected override ReorderableList CreateReorderableList(SerializedProperty property, SerializedProperty listProperty)

@@ -4,6 +4,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using RyuGiKen.Tools;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -41,6 +42,9 @@ namespace RyuGiKen.Tools
             }
         }
     }
+}
+namespace RyuGiKenEditor.Tools
+{
 #if UNITY_EDITOR
     [CustomEditor(typeof(SetHideFlags))]
     public class SetHideFlagsEditor : Editor

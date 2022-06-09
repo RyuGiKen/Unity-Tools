@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using RyuGiKen;
 using RyuGiKen.Tools;
+using RyuGiKen.Localization;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditorInternal;
@@ -247,6 +248,9 @@ namespace RyuGiKen.Localization
             return localization.items.Find(language);
         }
     }
+}
+namespace RyuGiKenEditor.Localization
+{
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(LocalizationStringItem))]
     public class LocalizationStringItemPropertyDrawer : PropertyDrawer

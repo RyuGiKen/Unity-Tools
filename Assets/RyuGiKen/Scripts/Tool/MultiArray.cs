@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 using UnityEditor;
 using UnityEditorInternal;
 #endif
-
+using RyuGiKen;
 namespace RyuGiKen
 {
     public abstract class MultiArrayBase
@@ -2112,6 +2112,68 @@ namespace RyuGiKen
     }
 #endif
     [Serializable]
+    public class MultiArrayValueRange : MultiArrayExtension<ValueRange>
+    {
+        public new List<ReorderableListValueRange> items;
+        public MultiArrayValueRange(ValueRange[][] array)
+        {
+            this.items = new List<ReorderableListValueRange>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListValueRange(array[i]));
+        }
+        public MultiArrayValueRange(ReorderableList<ValueRange>[] array)
+        {
+            this.items = new List<ReorderableListValueRange>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListValueRange(array[i].ToArray()));
+        }
+        public MultiArrayValueRange(ReorderableListValueRange[] array)
+        {
+            this.items = new List<ReorderableListValueRange>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayValueRange(List<ReorderableList<ValueRange>> list)
+        {
+            this.items = new List<ReorderableListValueRange>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListValueRange(list[i].ToArray()));
+        }
+        public MultiArrayValueRange(List<ReorderableListValueRange> list) { this.items = list; }
+        public override ValueRange GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override ValueRange GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
     public class MultiArrayValueInRange : MultiArrayExtension<ValueInRange>
     {
         public new List<ReorderableListValueInRange> items;
@@ -2173,7 +2235,9 @@ namespace RyuGiKen
             }
         }
     }
-
+}
+namespace RyuGiKenEditor
+{
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(MultiArrayBase))]
     public class MultiArrayPropertyDrawer : PropertyDrawer

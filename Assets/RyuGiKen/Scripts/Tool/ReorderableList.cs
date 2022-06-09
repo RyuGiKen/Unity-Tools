@@ -10,6 +10,7 @@ using Object = UnityEngine.Object;
 using UnityEditor;
 using UnityEditorInternal;
 #endif
+using RyuGiKen;
 namespace RyuGiKen
 {
     [System.Serializable]
@@ -364,13 +365,22 @@ namespace RyuGiKen
     }
 #endif
     [System.Serializable]
+    public class ReorderableListValueRange : ReorderableList<ValueRange>
+    {
+        public ReorderableListValueRange() { this.items = new List<ValueRange>(); }
+        public ReorderableListValueRange(ValueRange[] array) { this.items = array != null ? array.ToList() : new List<ValueRange>(); }
+        public ReorderableListValueRange(List<ValueRange> list) { this.items = list; }
+    }
+    [System.Serializable]
     public class ReorderableListValueInRange : ReorderableList<ValueInRange>
     {
         public ReorderableListValueInRange() { this.items = new List<ValueInRange>(); }
         public ReorderableListValueInRange(ValueInRange[] array) { this.items = array != null ? array.ToList() : new List<ValueInRange>(); }
         public ReorderableListValueInRange(List<ValueInRange> list) { this.items = list; }
     }
-
+}
+namespace RyuGiKenEditor
+{
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(ReorderableListBase), true)]
     public class ReorderableListPropertyDrawer : PropertyDrawer

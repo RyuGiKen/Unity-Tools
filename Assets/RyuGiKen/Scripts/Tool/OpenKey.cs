@@ -7,6 +7,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using WindowsAPI;
 namespace WindowsAPI
 {
     /// <summary>
@@ -124,7 +125,10 @@ namespace WindowsAPI
 #endif
         }
     }
+}
 #if UNITY_EDITOR
+namespace UnityEditor
+{
     [CustomEditor(typeof(OpenKey))]
     public class OpenKeyEditor : Editor
     {
@@ -155,5 +159,5 @@ namespace WindowsAPI
             }
         }
     }
-#endif
 }
+#endif

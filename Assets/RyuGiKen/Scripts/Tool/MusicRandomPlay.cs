@@ -4,6 +4,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using RyuGiKen.Tools;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -107,6 +108,9 @@ namespace RyuGiKen.Tools
             audioSource?.Stop();
         }
     }
+}
+namespace RyuGiKenEditor.Tools
+{
 #if UNITY_EDITOR
     [CustomEditor(typeof(MusicRandomPlay))]
     [CanEditMultipleObjects]
