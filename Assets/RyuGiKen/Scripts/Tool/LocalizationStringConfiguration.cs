@@ -211,6 +211,57 @@ namespace RyuGiKen.Localization
             else
                 return item;
         }
+        public static string TryGetLocalizationStringFormat(this LocalizationConfigurationBase configuration, GamesLanguage language, int index, string exception, params object[] args)
+        {
+            if (configuration == null || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+            if (configuration is LocalizationConfiguration)
+            {
+                try
+                {
+                    return (configuration as LocalizationConfiguration).TryGetLocalizationStringFormat(language, index, exception, args);
+                }
+                catch
+                {
+                    return exception;
+                }
+            }
+            else if (configuration is LocalizationStringConfiguration)
+            {
+                try
+                {
+                    return (configuration as LocalizationStringConfiguration).TryGetLocalizationStringFormat(language, index, exception, args);
+                }
+                catch
+                {
+                    return exception;
+                }
+            }
+            else
+            {
+                return exception;
+            }
+        }
+        public static string TryGetLocalizationStringFormat(this LocalizationStringConfiguration configuration, GamesLanguage language, int index, string exception, params object[] args)
+        {
+            if (configuration == null || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+            try
+            {
+                return configuration.configurations.TryGetLocalizationStringFormat(language, index, exception, args);
+            }
+            catch
+            {
+                return exception;
+            }
+        }
+        public static string TryGetLocalizationStringFormat(this MultiArrayLocalizationString array, GamesLanguage language, int index, string exception, params object[] args)
+        {
+            if (array == null || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+
+            return array.TryGetLocalizationString(language, index, exception).StringFormat(args);
+        }
         public static LocalizationStringItem Find(this LocalizationStringItem[] array, GamesLanguage language)
         {
             if (array == null || array.Length < 1)

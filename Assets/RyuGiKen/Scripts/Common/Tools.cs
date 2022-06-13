@@ -3409,6 +3409,43 @@ namespace RyuGiKen
         }
 #endif
         /// <summary>
+        /// 字符串格式化
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public static string StringFormat(this string str, params object[] args)
+        {
+            if (string.IsNullOrWhiteSpace(str) || args == null || args.Length < 1)
+                return null;
+            int count = 0;
+            List<object> list = new List<object>();
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str.Contain("{" + i + "}"))
+                {
+                    count++;
+                    if (i < args.Length)
+                        list.Add(args[i]);
+                }
+                else
+                    break;
+            }
+            if (list.Count < 1)
+                return str;
+            else if (count == args.Length)
+                return string.Format(str, list.ToArray());
+            else
+            {
+                string result = str;
+                for (int i = 0; i < Math.Min(count, list.Count); i++)
+                {
+                    result = result.Replace(("{" + i + "}"), list[i].ToString());
+                }
+                return result;
+            }
+        }
+        /// <summary>
         /// 列表相加。
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -8763,6 +8800,7 @@ namespace RyuGiKen
     /// <summary>
     /// 颜色（HSV模式）
     /// </summary>
+    [Serializable]
     public struct HSVColor
     {
         /// <summary>
@@ -9341,6 +9379,38 @@ namespace RyuGiKenEditor
             property.FindPropertyRelative("range").vector2Value = ValueAdjust.FindMinAndMax(range.x, range.y);
 
             property.FindPropertyRelative("value").floatValue = value.Clamp(property.FindPropertyRelative("range").vector2Value);
+            EditorGUI.indentLevel = indent;
+        }
+    }
+    [CustomPropertyDrawer(typeof(HSVColor))]
+    public class HSVColorPropertyDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            SerializedProperty Hue = property.FindPropertyRelative("Hue");
+            SerializedProperty Saturation = property.FindPropertyRelative("Saturation");
+            SerializedProperty Value = property.FindPropertyRelative("Value");
+            SerializedProperty alpha = property.FindPropertyRelative("alpha");
+
+            HSVColor color = new HSVColor(Hue.floatValue, Saturation.floatValue, Value.floatValue, alpha.floatValue);
+            Color result = EditorGUI.ColorField(position, color);
+            color = ColorAdjust.ConvertRgbToHsv(result);
+            Hue.floatValue = color.Hue;
+            Saturation.floatValue = color.Saturation;
+            Value.floatValue = color.Value;
+            alpha.floatValue = color.alpha;
+
             EditorGUI.indentLevel = indent;
         }
     }

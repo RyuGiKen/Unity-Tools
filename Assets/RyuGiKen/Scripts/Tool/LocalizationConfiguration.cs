@@ -202,6 +202,28 @@ namespace RyuGiKen.Localization
             else
                 return item;
         }
+        public static string TryGetLocalizationStringFormat(this LocalizationConfiguration configuration, GamesLanguage language, int index, string exception, params object[] args)
+        {
+            if (configuration == null || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+            try
+            {
+                return configuration.configurations.TryGetLocalizationStringFormat(language, index, exception, args);
+            }
+            catch
+            {
+                return exception;
+            }
+        }
+        public static string TryGetLocalizationStringFormat(this MultiArrayLocalization array, GamesLanguage language, int index, string exception, params object[] args)
+        {
+            if (array == null || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+            string temp = array.TryGetLocalizationString(language, index, exception);
+            return temp.StringFormat(args);
+            //LocalizationItem item = array.GetLocalization(language, index);
+            //return ((item == null || item.type != ObjectType.String) ? exception : item.str).StringFormat(args);
+        }
         public static LocalizationItem Find(this LocalizationItem[] array, GamesLanguage language)
         {
             if (array == null || array.Length < 1)

@@ -134,6 +134,12 @@ namespace RyuGiKen.Localization
                 return exception;
             return configuration.TryGetLocalizationString(language, index, exception);
         }
+        public string TryGetLocalizationStringFormat(int index, string exception, params object[] args)
+        {
+            if (!configuration || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+            return configuration.TryGetLocalizationStringFormat(language, index, exception, args);
+        }
     }
     public static partial class Extension
     {
