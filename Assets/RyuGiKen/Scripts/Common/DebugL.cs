@@ -27,7 +27,10 @@ namespace RyuGiKen.Tools
             if (instance != this)
                 Destroy(this);
             Clear();
-            LogList.Clear();
+            LogList = new List<string>();
+        }
+        protected virtual void OnEnable()
+        {
             th = new Thread(new ThreadStart(Print));
             th.Start();
         }
@@ -167,7 +170,7 @@ namespace RyuGiKen.Tools
                 sw = new StreamWriter(Path + "/Log.txt", true, Encoding.UTF8);
             }
         }
-        protected virtual void OnApplicationQuit()
+        protected virtual void OnDisable()
         {
             try
             {
@@ -178,10 +181,11 @@ namespace RyuGiKen.Tools
                     sw.Flush();
                     sw.Close();
                 }
+                Debug.Log("停止打印");
             }
             catch (System.Exception e)
             {
-                LogError("失败 " + e);
+                Debug.LogError("失败 " + e);
             }
         }
     }

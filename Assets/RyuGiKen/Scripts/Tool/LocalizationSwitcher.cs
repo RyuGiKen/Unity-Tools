@@ -120,34 +120,74 @@ namespace RyuGiKen.Localization
         }
         public LocalizationItem TryGetLocalization(int index)
         {
-            if (!configuration || language == GamesLanguage.Auto || index < 0)
-                return null;
-            if (configuration is LocalizationConfiguration)
-            {
-                return (configuration as LocalizationConfiguration).GetLocalization(language, index);
-            }
-            return null;
+            return Extension.TryGetLocalization(this, index);
+        }
+        public LocalizationItem TryGetLocalization(GamesLanguage language, int index)
+        {
+            return Extension.TryGetLocalization(this, language, index);
         }
         public string TryGetLocalizationString(int index, string exception)
         {
-            if (!configuration || language == GamesLanguage.Auto || index < 0)
-                return exception;
-            return configuration.TryGetLocalizationString(language, index, exception);
+            return Extension.TryGetLocalizationString(this, index, exception);
+        }
+        public string TryGetLocalizationString(GamesLanguage language, int index, string exception)
+        {
+            return Extension.TryGetLocalizationString(this, language, index, exception);
         }
         public string TryGetLocalizationStringFormat(int index, string exception, params object[] args)
         {
-            if (!configuration || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
-                return exception;
-            return configuration.TryGetLocalizationStringFormat(language, index, exception, args);
+            return Extension.TryGetLocalizationStringFormat(this, index, exception, args);
+        }
+        public string TryGetLocalizationStringFormat(GamesLanguage language, int index, string exception, params object[] args)
+        {
+            return Extension.TryGetLocalizationStringFormat(this, language, index, exception, args);
         }
     }
     public static partial class Extension
     {
+        public static LocalizationItem TryGetLocalization(this LocalizationSwitcher switcher, int index)
+        {
+            if (!switcher || switcher.configuration == null || switcher.language == GamesLanguage.Auto || index < 0)
+                return null;
+            if (switcher.configuration is LocalizationConfiguration)
+            {
+                return (switcher.configuration as LocalizationConfiguration).GetLocalization(switcher.language, index);
+            }
+            return null;
+        }
+        public static LocalizationItem TryGetLocalization(this LocalizationSwitcher switcher, GamesLanguage language, int index)
+        {
+            if (!switcher || switcher.configuration == null || language == GamesLanguage.Auto || index < 0)
+                return null;
+            if (switcher.configuration is LocalizationConfiguration)
+            {
+                return (switcher.configuration as LocalizationConfiguration).GetLocalization(language, index);
+            }
+            return null;
+        }
+        public static string TryGetLocalizationString(this LocalizationSwitcher switcher, int index, string exception)
+        {
+            if (!switcher || switcher.configuration == null || switcher.language == GamesLanguage.Auto || index < 0)
+                return exception;
+            return switcher.configuration.TryGetLocalizationString(switcher.language, index, exception);
+        }
         public static string TryGetLocalizationString(this LocalizationSwitcher switcher, GamesLanguage language, int index, string exception)
         {
             if (!switcher || switcher.configuration == null || language == GamesLanguage.Auto || index < 0)
                 return exception;
             return switcher.configuration.TryGetLocalizationString(language, index, exception);
+        }
+        public static string TryGetLocalizationStringFormat(this LocalizationSwitcher switcher, int index, string exception, params object[] args)
+        {
+            if (!switcher || switcher.configuration == null || switcher.language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+            return switcher.configuration.TryGetLocalizationStringFormat(switcher.language, index, exception, args);
+        }
+        public static string TryGetLocalizationStringFormat(this LocalizationSwitcher switcher, GamesLanguage language, int index, string exception, params object[] args)
+        {
+            if (!switcher || switcher.configuration == null || language == GamesLanguage.Auto || index < 0 || args == null || args.Length < 1)
+                return exception;
+            return switcher.configuration.TryGetLocalizationStringFormat(language, index, exception, args);
         }
     }
 }
