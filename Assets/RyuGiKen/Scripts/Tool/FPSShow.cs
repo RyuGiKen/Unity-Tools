@@ -27,10 +27,10 @@ namespace RyuGiKen.Tools
         [Tooltip("不受时间缩放影响")] public bool UnscaledDeltaTime = true;
         [Tooltip("打印平均帧率日志")] public bool FPSLog = false;
         [Header("根据帧数自动切换画质(连续10s)")]
-        [Tooltip("根据帧数自动切换画质")] public bool autoAdjustQualityLevel = false;
+        [Tooltip("根据帧数自动切换画质")] public bool autoAdjustQualityLevel = true;
+        [Tooltip("切换时间")] public int autoAdjustQualityLevelTime = 10;
         [Tooltip("帧率超范围计时")] static float deltaTime = 0;
-        [Tooltip("最小帧率")] public int adjustMinFPS = 20;
-        [Tooltip("最大帧率")] public int adjustMaxFPS = 50;
+        [Tooltip("帧率范围")] public ValueRange adjustFPSRange = new Vector2(20, 55);
         [Tooltip("限制帧率")] public int LockFrameRate = 60;
         private void Awake()
         {
@@ -99,30 +99,32 @@ namespace RyuGiKen.Tools
                 FPSText.enabled = !hide;
                 ShowFPS();
             }
-            if (autoAdjustQualityLevel && m_FPS < adjustMinFPS && Time.timeScale > 0)//自动降低画质
+            if (autoAdjustQualityLevel && m_FPS < adjustFPSRange.MinValue)//自动降低画质
             {
                 if (deltaTime <= 0)
                     deltaTime -= Time.unscaledDeltaTime;
                 else
                     deltaTime = 0;
-                if (deltaTime <= -10)
+                if (deltaTime <= -autoAdjustQualityLevelTime.Clamp(0))
                 {
                     deltaTime = 0;
                     AdjustQualityLevel(-1);
                 }
             }
-            else if (autoAdjustQualityLevel && m_FPS > adjustMaxFPS && Time.timeScale > 0)//自动提高画质
+            else if (autoAdjustQualityLevel && m_FPS > adjustFPSRange.MaxValue)//自动提高画质
             {
                 if (deltaTime >= 0)
                     deltaTime += Time.unscaledDeltaTime;
                 else
                     deltaTime = 0;
-                if (deltaTime >= 10)
+                if (deltaTime >= autoAdjustQualityLevelTime.Clamp(0))
                 {
                     deltaTime = 0;
                     AdjustQualityLevel(1);
                 }
             }
+            else if (deltaTime.Abs() > 1)
+                deltaTime = 0;
         }
         /// <summary>
         /// FPS计数
@@ -207,8 +209,8 @@ namespace RyuGiKen.Tools
         SerializedProperty FPSLog;
         SerializedProperty LockFrameRate;
         SerializedProperty autoAdjustQualityLevel;
-        SerializedProperty adjustMinFPS;
-        SerializedProperty adjustMaxFPS;
+        SerializedProperty autoAdjustQualityLevelTime;
+        SerializedProperty adjustFPSRange;
         void OnEnable()
         {
             hide = serializedObject.FindProperty("hide");
@@ -216,8 +218,8 @@ namespace RyuGiKen.Tools
             FPSLog = serializedObject.FindProperty("FPSLog");
             LockFrameRate = serializedObject.FindProperty("LockFrameRate");
             autoAdjustQualityLevel = serializedObject.FindProperty("autoAdjustQualityLevel");
-            adjustMinFPS = serializedObject.FindProperty("adjustMinFPS");
-            adjustMaxFPS = serializedObject.FindProperty("adjustMaxFPS");
+            autoAdjustQualityLevelTime = serializedObject.FindProperty("autoAdjustQualityLevelTime");
+            adjustFPSRange = serializedObject.FindProperty("adjustFPSRange");
         }
         public override void OnInspectorGUI()
         {
@@ -234,8 +236,8 @@ namespace RyuGiKen.Tools
                     Name[4] = "打印平均帧率日志";
                     Name[5] = "限制帧率";
                     Name[6] = "根据帧数自动切换画质(连续10s)";
-                    Name[7] = "最小帧率";
-                    Name[8] = "最大帧率";
+                    Name[7] = "切换时间";
+                    Name[8] = "最大帧率范围";
                     break;
                 default:
                     Name[0] = "Show Inspector";
@@ -245,8 +247,8 @@ namespace RyuGiKen.Tools
                     Name[4] = "Log";
                     Name[5] = "Limit FrameRate";
                     Name[6] = "Auto Adjust QualityLevel";
-                    Name[7] = "Min FrameRate";
-                    Name[8] = "Max FrameRate";
+                    Name[7] = "Switch Time";
+                    Name[8] = "FrameRate Range";
                     break;
             }
             ShowInspector = EditorGUILayout.Foldout(ShowInspector, Name[0]);
@@ -266,8 +268,10 @@ namespace RyuGiKen.Tools
                 autoAdjustQualityLevel.boolValue = EditorGUILayout.ToggleLeft(Name[6], autoAdjustQualityLevel.boolValue);
                 if (fps.autoAdjustQualityLevel)
                 {
-                    adjustMinFPS.intValue = EditorGUILayout.DelayedIntField(Name[7], adjustMinFPS.intValue.Clamp(0));
-                    adjustMaxFPS.intValue = EditorGUILayout.DelayedIntField(Name[7], adjustMaxFPS.intValue.Clamp(adjustMinFPS.intValue + 1));
+                    autoAdjustQualityLevelTime.intValue = EditorGUILayout.DelayedIntField(Name[7], autoAdjustQualityLevelTime.intValue.Clamp(0));
+                    SerializedProperty range = adjustFPSRange.FindPropertyRelative("range");
+                    Vector2 temp = EditorGUILayout.Vector2Field(Name[8], range.vector2Value).Clamp(Vector2.one, Vector2.one * 600);
+                    range.vector2Value = new Vector2Int(temp.x.ToInteger(), temp.y.ToInteger());
                 }
             }
             serializedObject.ApplyModifiedProperties();
