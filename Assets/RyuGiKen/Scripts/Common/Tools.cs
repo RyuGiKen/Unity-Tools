@@ -1940,6 +1940,24 @@ namespace RyuGiKen
         public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z); }
         public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.x - b.x, a.y - b.y, a.z + b.z); }
     }
+    public struct Vector4
+    {
+        public float x;
+        public float y;
+        public float z;
+        public float w;
+        public static Vector4 zero = new Vector4(0, 0, 0, 0);
+        public static Vector4 one = new Vector4(1, 1, 1, 1);
+        public Vector4(float X = 0, float Y = 0, float Z = 0, float W = 0)
+        {
+            this.x = X;
+            this.y = Y;
+            this.z = Z;
+            this.w = W;
+        }
+        public static Vector4 operator +(Vector4 a, Vector4 b) { return new Vector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
+        public static Vector4 operator -(Vector4 a, Vector4 b) { return new Vector4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
+    }
 #endif
     /// <summary>
     /// 速度类型
@@ -1991,21 +2009,45 @@ namespace RyuGiKen
     [Serializable]
     public class ValueRange
     {
+        /// <summary>
+        /// 范围长度
+        /// </summary>
         public float Length
         {
-            get { return (Range.y - Range.x).Abs(); }
+            get
+            {
+                if (float.IsNaN(Range.x) || float.IsNaN(Range.y))
+                    return float.NaN;
+                else
+                    return (Range.y - Range.x).Abs();
+            }
         }
-        [SerializeField] protected Vector2 range;
+        /// <summary>
+        /// 范围
+        /// </summary>
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [SerializeField]
+#endif
+        protected Vector2 range;
+        /// <summary>
+        /// 范围
+        /// </summary>
         public Vector2 Range
         {
             set { SetRange(value); }
             get { return range; }
         }
+        /// <summary>
+        /// 最小值
+        /// </summary>
         public float MinValue
         {
             set { SetRange(value, Range.y); }
             get { return Range.x; }
         }
+        /// <summary>
+        /// 最大值
+        /// </summary>
         public float MaxValue
         {
             set { SetRange(Range.x, value); }
@@ -2025,10 +2067,19 @@ namespace RyuGiKen
             this.range = new Vector2();
             SetRange(range);
         }
+        /// <summary>
+        /// 设置范围
+        /// </summary>
+        /// <param name="range"></param>
         public void SetRange(Vector2 range)
         {
             ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
         }
+        /// <summary>
+        /// 设置范围
+        /// </summary>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
         public void SetRange(float min, float max)
         {
             ValueAdjust.FindMinAndMax(min, max, out range.x, out range.y);
@@ -2048,9 +2099,12 @@ namespace RyuGiKen
     /// 限位值
     /// </summary>
     [Serializable]
-    public class ValueInRange: ValueRange
+    public class ValueInRange : ValueRange
     {
-        [SerializeField] private float value;
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [SerializeField]
+#endif
+        private float value;
         public float Value
         {
             set { this.value = value.Clamp(range); }
@@ -2073,6 +2127,12 @@ namespace RyuGiKen
             SetRange(min, max);
         }
         public ValueInRange(float value, Vector2 range)
+        {
+            this.value = value;
+            this.range = new Vector2();
+            SetRange(range);
+        }
+        public ValueInRange(float value, ValueRange range)
         {
             this.value = value;
             this.range = new Vector2();
@@ -2708,6 +2768,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float[] GetVectorValue(this Vector2[] value, string type)
         {
+            if (value == null)
+                return null;
             float[] result = new float[value.Length];
             for (int i = 0; i < result.Length; i++)
             {
@@ -2729,10 +2791,32 @@ namespace RyuGiKen
         /// 三维坐标数组转单轴值数组
         /// </summary>
         /// <param name="value"></param>
+        /// <returns></returns>
+        public static void GetVectorValue(this Vector2[] value, out float[] x, out float[] y)
+        {
+            if (value == null)
+            {
+                x = y = null;
+                return;
+            }
+            x = new float[value.Length];
+            y = new float[value.Length];
+            for (int i = 0; i < value.Length; i++)
+            {
+                x[i] = value[i].x;
+                y[i] = value[i].y;
+            }
+        }
+        /// <summary>
+        /// 三维坐标数组转单轴值数组
+        /// </summary>
+        /// <param name="value"></param>
         /// <param name="type">XYZ</param>
         /// <returns></returns>
         public static float[] GetVectorValue(this Vector3[] value, string type)
         {
+            if (value == null)
+                return null;
             float[] result = new float[value.Length];
             for (int i = 0; i < result.Length; i++)
             {
@@ -2753,6 +2837,52 @@ namespace RyuGiKen
                 }
             }
             return result;
+        }
+        /// <summary>
+        /// 三维坐标数组转单轴值数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static void GetVectorValue(this Vector3[] value, out float[] x, out float[] y, out float[] z)
+        {
+            if (value == null)
+            {
+                x = y = z = null;
+                return;
+            }
+            x = new float[value.Length];
+            y = new float[value.Length];
+            z = new float[value.Length];
+            for (int i = 0; i < value.Length; i++)
+            {
+                x[i] = value[i].x;
+                y[i] = value[i].y;
+                z[i] = value[i].z;
+            }
+        }
+        /// <summary>
+        /// 数组分离
+        /// </summary>
+        /// <typeparam name="A"></typeparam>
+        /// <typeparam name="B"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="item01"></param>
+        /// <param name="item02"></param>
+        public static void GetTuplesItems<A, B>(this Tuple<A, B>[] array, out A[] item01, out B[] item02)
+        {
+            if (array == null)
+            {
+                item01 = null;
+                item02 = null;
+                return;
+            }
+            item01 = new A[array.Length];
+            item02 = new B[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                item01[i] = array[i].Item1;
+                item02[i] = array[i].Item2;
+            }
         }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
@@ -3231,6 +3361,7 @@ namespace RyuGiKen
             result = temp2.ListAddition().ToArray().ClearNullItem<string>();
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 检查路径输入
         /// </summary>
@@ -3242,6 +3373,7 @@ namespace RyuGiKen
         {
             return CheckPathInAssets(path, fileType, createPath, out string OutputPath, out string OutputFileName);
         }
+#endif
         /// <summary>
         /// 检查路径输入
         /// </summary>
@@ -6139,6 +6271,16 @@ namespace RyuGiKen
                 result = value;
             return result;
         }
+        /// <summary>
+        /// 限位。
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public static float Clamp(this float value, ValueRange range)
+        {
+            return Clamp(value, range.MinValue, range.MaxValue);
+        }
 #if UNITY_STANDALONE || UNITY_EDITOR
         /// <summary>
         /// 限位。
@@ -6987,6 +7129,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float SetRange(float num, ValueRange range)
         {
+            if (num.IsNaN())
+                return float.NaN;
             if (range == null)
                 return num;
             else
@@ -7002,8 +7146,12 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float SetRange(float num, Vector2 range)
         {
+            if (num.IsNaN())
+                return float.NaN;
+#if UNITY_EDITOR || UNITY_STANDALONE
             if (range == null)
                 return num;
+#endif
             else
             {
                 FindMinAndMax(range.x, range.y, out float min, out float max);
@@ -7061,11 +7209,11 @@ namespace RyuGiKen
         /// <param name="lastValue">上一帧值</param>
         /// <param name="Range">循环周期</param>
         /// <returns></returns>
-        public static float UnLoop(float curValue, float lastValue, Vector2 Range)
+        public static float UnLoop(float curValue, float lastValue, ValueRange Range)
         {
             if (Range == null)
                 return curValue;
-            return UnLoop(curValue, lastValue, Range.x, Range.y);
+            return UnLoop(curValue, lastValue, Range.MinValue, Range.MaxValue);
         }
         /// <summary>
         /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
@@ -7351,7 +7499,7 @@ namespace RyuGiKen
             Vector2[] result = new Vector2[(array.Length - 1) * iterations + 1];
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] = new Vector3();
+                result[i] = new Vector2();
                 result[i].x = temp[0] == null ? 0 : temp[0][i];
                 result[i].y = temp[1] == null ? 0 : temp[1][i];
             }
@@ -7834,6 +7982,29 @@ namespace RyuGiKen
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
         /// <param name="value">参数</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float ToPercentPlusMinus01(ValueInRange value, float n = 1, bool limit = true)
+        {
+            return ToPercent01(value, n, limit) * 2 - 1;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[-1，1]
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="range">范围</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float ToPercentPlusMinus01(float value, ValueRange range, float n = 1, bool limit = true)
+        {
+            return ToPercent01(value, range, n, limit) * 2 - 1;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[-1，1]
+        /// </summary>
+        /// <param name="value">参数</param>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
@@ -7855,6 +8026,37 @@ namespace RyuGiKen
         public static double ToPercentPlusMinus01(double value, double min, double max, float n = 1, bool limit = true)
         {
             return ToPercent01(value, min, max, n, limit) * 2 - 1;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static float ToPercent01(ValueInRange value, float n = 1, bool limit = true)
+        {
+            if (value == null || float.IsNaN(value) || float.IsNaN(value.MinValue) || float.IsNaN(value.MaxValue))
+                return float.NaN;
+            else if (value.Length == 0)
+                return 0;
+            return ToPercent01(value, value.MinValue, value.MaxValue, n, limit);
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="range">范围</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static float ToPercent01(float value, ValueRange range, float n = 1, bool limit = true)
+        {
+            if (float.IsNaN(value) || range == null || float.IsNaN(range.MinValue) || float.IsNaN(range.MaxValue))
+                return float.NaN;
+            else if (range.Length == 0)
+                return 0;
+            return ToPercent01(value, range.MinValue, range.MaxValue, n, limit);
         }
         /// <summary>
         /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
