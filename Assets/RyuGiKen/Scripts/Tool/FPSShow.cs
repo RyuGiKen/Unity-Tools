@@ -28,9 +28,10 @@ namespace RyuGiKen.Tools
         [Tooltip("打印平均帧率日志")] public bool FPSLog = false;
         [Header("根据帧数自动切换画质(连续10s)")]
         [Tooltip("根据帧数自动切换画质")] public bool autoAdjustQualityLevel = true;
-        [Tooltip("切换时间")] public int autoAdjustQualityLevelTime = 10;
+        [Tooltip("切换时间")] public int autoAdjustQualityLevelTime = 30;
         [Tooltip("帧率超范围计时")] static float deltaTime = 0;
-        [Tooltip("帧率范围")] public ValueRange adjustFPSRange = new Vector2(20, 55);
+        internal static float autoAdjustQualityLevelTimer { get { return deltaTime; } }
+        [Tooltip("帧率范围")] public ValueRange adjustFPSRange = new Vector2(25, 55);
         [Tooltip("限制帧率")] public int LockFrameRate = 60;
         private void Awake()
         {
@@ -99,7 +100,7 @@ namespace RyuGiKen.Tools
                 FPSText.enabled = !hide;
                 ShowFPS();
             }
-            if (autoAdjustQualityLevel && m_FPS < adjustFPSRange.MinValue)//自动降低画质
+            if (autoAdjustQualityLevel && m_FPS < adjustFPSRange.MinValue && Time.timeSinceLevelLoad > 10)//自动降低画质
             {
                 if (deltaTime <= 0)
                     deltaTime -= Time.unscaledDeltaTime;
@@ -111,7 +112,7 @@ namespace RyuGiKen.Tools
                     AdjustQualityLevel(-1);
                 }
             }
-            else if (autoAdjustQualityLevel && m_FPS > adjustFPSRange.MaxValue)//自动提高画质
+            else if (autoAdjustQualityLevel && m_FPS > adjustFPSRange.MaxValue && Time.timeSinceLevelLoad > 1)//自动提高画质
             {
                 if (deltaTime >= 0)
                     deltaTime += Time.unscaledDeltaTime;
@@ -150,6 +151,16 @@ namespace RyuGiKen.Tools
                 }
             }
             //FPSText.text = "FPS  " + Mathf.RoundToInt(1.0f / deltaTime).ToString();
+        }
+        /// <summary>
+        /// 设置画质等级
+        /// </summary>
+        /// <param name="level"></param>
+        public static void SetQualityLevel(int level = 0)
+        {
+            deltaTime = 0;
+            QualitySettings.vSyncCount = 0;
+            QualitySettings.SetQualityLevel(level);
         }
         /// <summary>
         /// 调整画质等级
@@ -272,6 +283,7 @@ namespace RyuGiKen.Tools
                     SerializedProperty range = adjustFPSRange.FindPropertyRelative("range");
                     Vector2 temp = EditorGUILayout.Vector2Field(Name[8], range.vector2Value).Clamp(Vector2.one, Vector2.one * 600);
                     range.vector2Value = new Vector2Int(temp.x.ToInteger(), temp.y.ToInteger());
+                    EditorGUILayout.Slider(FPSShow.autoAdjustQualityLevelTimer, 0, fps.autoAdjustQualityLevelTime);
                 }
             }
             serializedObject.ApplyModifiedProperties();
