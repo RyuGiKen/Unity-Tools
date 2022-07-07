@@ -33,6 +33,10 @@ namespace RyuGiKen.Tools
         internal static float autoAdjustQualityLevelTimer { get { return deltaTime; } }
         [Tooltip("帧率范围")] public ValueRange adjustFPSRange = new Vector2(25, 55);
         [Tooltip("限制帧率")] public int LockFrameRate = 60;
+        /// <summary>
+        /// 切换画质
+        /// </summary>
+        public MyEvent OnChangeQualityLevel;
         private void Awake()
         {
             if (FPSText == null)
@@ -43,6 +47,18 @@ namespace RyuGiKen.Tools
                 Destroy(this.gameObject);
             QualitySettings.vSyncCount = 0;
             RefreshTargetFPS();
+            OnChangeQualityLevel = ChangeQualityLevel;
+        }
+        /// <summary>
+        /// 切换画质
+        /// </summary>
+        void ChangeQualityLevel()
+        {
+            switch (QualitySettings.GetQualityLevel())
+            {
+                default:
+                    break;
+            }
         }
         private void Reset()
         {
@@ -53,6 +69,10 @@ namespace RyuGiKen.Tools
         {
             RefreshTargetFPS();
         }
+        /// <summary>
+        /// 设置目标帧率
+        /// </summary>
+        /// <param name="num"></param>
         public static void RefreshTargetFPS(int num = -1)
         {
             if (num > 0)
@@ -161,6 +181,8 @@ namespace RyuGiKen.Tools
             deltaTime = 0;
             QualitySettings.vSyncCount = 0;
             QualitySettings.SetQualityLevel(level);
+            if (instance && instance.OnChangeQualityLevel != null)
+                instance.OnChangeQualityLevel();
         }
         /// <summary>
         /// 调整画质等级
@@ -178,6 +200,8 @@ namespace RyuGiKen.Tools
             {
                 QualitySettings.DecreaseLevel(false);
             }
+            if (instance && instance.OnChangeQualityLevel != null)
+                instance.OnChangeQualityLevel();
         }
         public static string Path = Application.streamingAssetsPath;
         static StreamWriter sw;
@@ -283,7 +307,7 @@ namespace RyuGiKen.Tools
                     SerializedProperty range = adjustFPSRange.FindPropertyRelative("range");
                     Vector2 temp = EditorGUILayout.Vector2Field(Name[8], range.vector2Value).Clamp(Vector2.one, Vector2.one * 600);
                     range.vector2Value = new Vector2Int(temp.x.ToInteger(), temp.y.ToInteger());
-                    EditorGUILayout.Slider(FPSShow.autoAdjustQualityLevelTimer, 0, fps.autoAdjustQualityLevelTime);
+                    EditorGUILayout.Slider(FPSShow.autoAdjustQualityLevelTimer.Abs(), 0, fps.autoAdjustQualityLevelTime);
                 }
             }
             serializedObject.ApplyModifiedProperties();
