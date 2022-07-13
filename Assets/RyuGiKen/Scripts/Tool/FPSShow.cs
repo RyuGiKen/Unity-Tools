@@ -26,12 +26,12 @@ namespace RyuGiKen.Tools
         [Tooltip("切换按键")] public KeyCode hideKey = KeyCode.F7;
         [Tooltip("不受时间缩放影响")] public bool UnscaledDeltaTime = true;
         [Tooltip("打印平均帧率日志")] public bool FPSLog = false;
-        [Header("根据帧数自动切换画质(连续10s)")]
+        [Header("根据帧数自动切换画质")]
         [Tooltip("根据帧数自动切换画质")] public bool autoAdjustQualityLevel = true;
         [Tooltip("切换时间")] public int autoAdjustQualityLevelTime = 30;
         [Tooltip("帧率超范围计时")] static float deltaTime = 0;
         internal static float autoAdjustQualityLevelTimer { get { return deltaTime; } }
-        [Tooltip("帧率范围")] public ValueRange adjustFPSRange = new Vector2(25, 55);
+        [Tooltip("帧率范围")] public ValueRange adjustFPSRange = new Vector2(30, 50);
         [Tooltip("限制帧率")] public int LockFrameRate = 60;
         /// <summary>
         /// 切换画质
@@ -270,7 +270,7 @@ namespace RyuGiKen.Tools
                     Name[3] = "不受时间缩放影响";
                     Name[4] = "打印平均帧率日志";
                     Name[5] = "限制帧率";
-                    Name[6] = "根据帧数自动切换画质(连续10s)";
+                    Name[6] = "根据帧数自动切换画质";
                     Name[7] = "切换时间";
                     Name[8] = "最大帧率范围";
                     break;

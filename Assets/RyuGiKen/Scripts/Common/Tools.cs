@@ -20,6 +20,7 @@ using Debug = UnityEngine.Debug;
 using UnityEditor;
 #endif
 using RyuGiKen;
+using WindowsAPI;
 /// <summary>
 /// RyuGiKen's Tools
 /// <para>
@@ -3231,8 +3232,8 @@ namespace RyuGiKen
             float result = 0;
             if (IgnoreCase)
             {
-                str = WindowsAPI.ChineseConverter.ToSimplified(str);
-                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+                str = ChineseConverter.ToSimplified(str);
+                target = ChineseConverter.ToSimplified(target);
             }
             if (Math.Max(str.Length, target.Length) == 0)
             {
@@ -3261,8 +3262,8 @@ namespace RyuGiKen
             int result = 0;
             if (IgnoreCase)
             {
-                str = WindowsAPI.ChineseConverter.ToSimplified(str);
-                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+                str = ChineseConverter.ToSimplified(str);
+                target = ChineseConverter.ToSimplified(target);
             }
             for (int i = 0; i < length; i++)
             {
@@ -3293,8 +3294,8 @@ namespace RyuGiKen
             int result = 0;
             if (IgnoreCase)
             {
-                str = WindowsAPI.ChineseConverter.ToSimplified(str);
-                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+                str = ChineseConverter.ToSimplified(str);
+                target = ChineseConverter.ToSimplified(target);
             }
             for (int i = 0; i < length; i++)
             {
@@ -3327,8 +3328,8 @@ namespace RyuGiKen
                 return 0;
             if (IgnoreCase)
             {
-                str = WindowsAPI.ChineseConverter.ToSimplified(str);
-                target = WindowsAPI.ChineseConverter.ToSimplified(target);
+                str = ChineseConverter.ToSimplified(str);
+                target = ChineseConverter.ToSimplified(target);
             }
             if (exclude1 != null && exclude1.Length > 0)
             {

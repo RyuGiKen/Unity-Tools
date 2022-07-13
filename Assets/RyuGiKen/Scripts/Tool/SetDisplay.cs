@@ -37,7 +37,7 @@ namespace RyuGiKen.Tools
         [Tooltip("鼠标位置误差范围")] static int ErrorRange = 500;//>2
         [Tooltip("覆盖鼠标位置")] bool OverrideMouse;
         [Tooltip("覆盖鼠标位置")] Vector2 OverrideMousePos;
-        bool UseSecondScreen;
+        static bool UseSecondScreen;
         private void Awake()
         {
             if (gameObject.activeInHierarchy)
@@ -54,12 +54,11 @@ namespace RyuGiKen.Tools
             {
                 UseSecondScreen = xmlData.ContainIgnoreCase("True") || xmlData == "1";
             }
-            if (Application.platform == RuntimePlatform.WindowsPlayer)
-            {
-                //HWndIntPtr = (IntPtr)WindowsAPI.User32.FindWindow(null, Application.productName);//工程名，非进程名。非英文会因为编码格式问题找不到窗口。可能误判同名窗口。
-                HWndIntPtr = GetProcessWnd();
-                //HWndIntPtr = WindowsAPI.User32.GetForegroundWindow();//仅检测前台窗体，不一定为Unity。
-            }
+#if UNITY_STANDALONE_WIN
+            //HWndIntPtr = (IntPtr)WindowsAPI.User32.FindWindow(null, Application.productName);//工程名，非进程名。非英文会因为编码格式问题找不到窗口。可能误判同名窗口。
+            HWndIntPtr = GetProcessWnd();
+            //HWndIntPtr = WindowsAPI.User32.GetForegroundWindow();//仅检测前台窗体，不一定为Unity。
+#endif
             if (UseSecondScreen)
             {
                 if (Display.displays.Length > 1)//多显示器
@@ -74,19 +73,17 @@ namespace RyuGiKen.Tools
                     TestMousePos[2] = new Vector2Int(Display.displays[0].systemWidth / 2, -Display.displays[1].systemHeight / 2);
                     TestMousePos[3] = new Vector2Int(Display.displays[0].systemWidth / 2, Display.displays[0].systemHeight + Display.displays[1].systemHeight / 2);
                     User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
-                    if (Application.platform == RuntimePlatform.WindowsPlayer)
-                    {
-                        SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
-                        Invoke(nameof(TestRight), 0.1f);//判定右
-                    }
+#if UNITY_STANDALONE_WIN
+                    SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
+                    Invoke(nameof(TestRight), 0.1f);//判定右
+#endif
                 }
             }
             else
             {
-                if (Application.platform == RuntimePlatform.WindowsPlayer)
-                {
-                    User32.SetForegroundWindow(HWndIntPtr);
-                }
+#if UNITY_STANDALONE_WIN
+                User32.SetForegroundWindow(HWndIntPtr);
+#endif
             }
         }
         private void FixedUpdate()
@@ -213,26 +210,25 @@ namespace RyuGiKen.Tools
         /// </summary>
         public static void SetForegroundWindow()
         {
-            if (Application.platform == RuntimePlatform.WindowsPlayer)
+#if UNITY_STANDALONE_WIN
+            switch (Screen.fullScreenMode)
             {
-                switch (Screen.fullScreenMode)
-                {
-                    case FullScreenMode.ExclusiveFullScreen:
-                    case FullScreenMode.FullScreenWindow:
-                        User32.SetWindowPos(HWndIntPtr, -1, 0, 0, 0, 0, SWP_SHOWWINDOW);
-                        //User32.SwitchToThisWindow(HWndIntPtr, true);
-                        User32.SetForegroundWindow(HWndIntPtr);
-                        User32.SetWindowPos(HWndIntPtr, -2, 0, 0, 0, 0, SWP_SHOWWINDOW);
-                        break;
-                    case FullScreenMode.MaximizedWindow:
-                    case FullScreenMode.Windowed:
-                        User32.SetWindowPos(HWndIntPtr, -1, 0, 0, 0, 0, 1 | 2);
-                        //User32.SwitchToThisWindow(HWndIntPtr, true);
-                        User32.SetForegroundWindow(HWndIntPtr);
-                        User32.SetWindowPos(HWndIntPtr, -2, 0, 0, 0, 0, 1 | 2);
-                        break;
-                }
+                case FullScreenMode.ExclusiveFullScreen:
+                case FullScreenMode.FullScreenWindow:
+                    User32.SetWindowPos(HWndIntPtr, -1, 0, 0, 0, 0, SWP_SHOWWINDOW);
+                    //User32.SwitchToThisWindow(HWndIntPtr, true);
+                    User32.SetForegroundWindow(HWndIntPtr);
+                    User32.SetWindowPos(HWndIntPtr, -2, 0, 0, 0, 0, SWP_SHOWWINDOW);
+                    break;
+                case FullScreenMode.MaximizedWindow:
+                case FullScreenMode.Windowed:
+                    User32.SetWindowPos(HWndIntPtr, -1, 0, 0, 0, 0, 1 | 2);
+                    //User32.SwitchToThisWindow(HWndIntPtr, true);
+                    User32.SetForegroundWindow(HWndIntPtr);
+                    User32.SetWindowPos(HWndIntPtr, -2, 0, 0, 0, 0, 1 | 2);
+                    break;
             }
+#endif
         }
         /// <summary>
         /// 获取当前窗体句柄
@@ -258,6 +254,23 @@ namespace RyuGiKen.Tools
                 return true;
             }), pid);
             return (!bResult && Marshal.GetLastWin32Error() == 0) ? ptrWnd : IntPtr.Zero;
+        }
+        /// <summary>
+        /// 按比例缩放分辨率
+        /// </summary>
+        /// <param name="percent">比例</param>
+        /// <param name="fullscreen">全屏</param>
+        /// <param name="displayIndex">屏幕序号</param>
+        public static void SetResolution(float percent = 1, bool fullscreen = true, int displayIndex = -1)
+        {
+            if (percent <= 0 || displayIndex >= Display.displays.Length)
+                return;
+            if (displayIndex < 0)
+                displayIndex = UseSecondScreen ? 1 : 0;
+            int width = fullscreen ? Display.displays[displayIndex].systemWidth : Screen.width;
+            int height = fullscreen ? Display.displays[displayIndex].systemHeight : Screen.height;
+            Vector2Int resolution = new Vector2Int((width * percent).ToInteger(), (height * percent).ToInteger());
+            Screen.SetResolution(resolution.x, resolution.y, fullscreen);
         }
     }
 }
