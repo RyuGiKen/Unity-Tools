@@ -2184,6 +2184,45 @@ namespace RyuGiKen
     public static partial class ValueAdjust
     {
         /// <summary>
+        /// 转换字节大小、长度, 根据字节大小范围返回KB, MB, GB自适长度
+        /// </summary>
+        /// <param name="length">传入字节大小</param>
+        /// <returns></returns>
+        public static string ConvertSize(long length)
+        {
+            int byteConversion = 1024;
+            double bytes = Convert.ToDouble(length);
+
+            if (bytes >= Math.Pow(byteConversion, 6)) // EB
+            {
+                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 6), 2), " EB");
+            }
+            if (bytes >= Math.Pow(byteConversion, 5)) // PB
+            {
+                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 5), 2), " PB");
+            }
+            else if (bytes >= Math.Pow(byteConversion, 4)) // TB
+            {
+                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 4), 2), " TB");
+            }
+            else if (bytes >= Math.Pow(byteConversion, 3)) // GB
+            {
+                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 3), 2), " GB");
+            }
+            else if (bytes >= Math.Pow(byteConversion, 2)) // MB
+            {
+                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 2), 2), " MB");
+            }
+            else if (bytes >= byteConversion) // KB
+            {
+                return string.Concat(Math.Round(bytes / byteConversion, 2), " KB");
+            }
+            else // Bytes
+            {
+                return string.Concat(bytes, " Bytes");
+            }
+        }
+        /// <summary>
         /// 转速转角速度
         /// </summary>
         /// <param name="RPM">转速(圈每分)</param>
@@ -4377,6 +4416,24 @@ namespace RyuGiKen
                 builder.Append(temp);
             }
             return builder.ToString();
+        }
+        /// <summary>
+        /// 分离字符串中的数字
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static long SubstringNum(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
+            char[] chars = str.ToCharArray();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (char.IsNumber(chars[i]))
+                    stringBuilder.Append(chars[i]);
+            }
+            return stringBuilder.ToString().ToInteger64();
         }
         /// <summary>
         /// 分离混合的字符串和数字

@@ -243,10 +243,10 @@ namespace RyuGiKen.Tools
 		public static string LogVersionDate()
 		{
 			string Info = "";
-			Info += "程序名称：" + GetProgramName() + "\n";
-			Info += "发布版本：" + GetProgramVersion() + "\n";
-			Info += "构建版本：" + GetProgramUnityVersion() + "\n";
-			Info += "打包日期：" + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\n";
+			Info += "程序名称：" + GetProgramName() + "\r\n";
+			Info += "发布版本：" + GetProgramVersion() + "\r\n";
+			Info += "构建版本：" + GetProgramUnityVersion() + "\r\n";
+			Info += "打包日期：" + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n";
 			return Info;
 		}
 		/// <summary>
