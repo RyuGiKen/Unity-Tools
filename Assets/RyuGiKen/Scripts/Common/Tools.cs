@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Net;
@@ -795,6 +794,26 @@ namespace RyuGiKen
                 });
         }
         /// <summary>
+        /// 获得指定路径下所有子目录
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <returns></returns>
+        public static List<DirectoryInfo> GetDirectoryAll(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                path = Directory.GetCurrentDirectory();
+            //Debug.Log(path);
+            List<List<DirectoryInfo>> directory = new List<List<DirectoryInfo>>();
+            DirectoryInfo root = new DirectoryInfo(path);
+            directory.Add(new List<DirectoryInfo>() { root });
+            foreach (DirectoryInfo d in root.GetDirectories())
+            {
+                directory.Add(GetDirectoryAll(d.FullName));
+            }
+            List<DirectoryInfo> result = ValueAdjust.ListAddition(directory);
+            return result;
+        }
+        /// <summary>
         /// 获得指定路径下所有子目录文件名
         /// </summary>
         /// <param name="path">路径</param>
@@ -1190,6 +1209,27 @@ namespace RyuGiKen
     public static partial class ObjectAdjust
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 设置颜色
+        /// </summary>
+        /// <param name="component"></param>
+        public static void TrySetColor(this Component component, Color color)
+        {
+            if (!component)
+                return;
+            if (component.TryGetComponent(out Graphic graphic))
+            {
+                graphic.color = color;
+            }
+            else if (component.TryGetComponent(out SpriteRenderer spriteRenderer))
+            {
+                spriteRenderer.color = color;
+            }
+            else if (component.TryGetComponent(out Renderer lineRenderer))
+            {
+                lineRenderer.material.color = color;
+            }
+        }
         /// <summary>
         /// 获取对象所有子对象
         /// </summary>
@@ -2156,17 +2196,17 @@ namespace RyuGiKen
         {
             return Value + "：" + Range;
         }
-        public static implicit operator ValueInRange(float value) { return new ValueInRange(value); }
+        //public static implicit operator ValueInRange(float value) { return new ValueInRange(value); }
         //public static implicit operator ValueInRange(double value) { return new ValueInRange(value.ToFloat()); }
         //public static implicit operator ValueInRange(decimal value) { return new ValueInRange(value.ToFloat()); }
-        public static implicit operator ValueInRange(int value) { return new ValueInRange(value); }
-        public static implicit operator ValueInRange(uint value) { return new ValueInRange(value); }
-        public static implicit operator ValueInRange(short value) { return new ValueInRange(value); }
-        public static implicit operator ValueInRange(long value) { return new ValueInRange(value); }
+        //public static implicit operator ValueInRange(int value) { return new ValueInRange(value); }
+        //public static implicit operator ValueInRange(uint value) { return new ValueInRange(value); }
+        //public static implicit operator ValueInRange(short value) { return new ValueInRange(value); }
+        //public static implicit operator ValueInRange(long value) { return new ValueInRange(value); }
 
         public static implicit operator float(ValueInRange value) { return value.Value; }
-        //public static implicit operator double(ValueInRange value) { return value.Value; }
-        //public static implicit operator decimal(ValueInRange value) { return value.Value.ToDecimal(); }
+        public static implicit operator double(ValueInRange value) { return value.Value; }
+        public static implicit operator decimal(ValueInRange value) { return value.Value.ToDecimal(); }
         public static implicit operator int(ValueInRange value) { return value.Value.ToInteger(); }
         public static implicit operator uint(ValueInRange value) { return value.Value.ToUInteger(); }
         public static implicit operator short(ValueInRange value) { return (short)value.Value; }
@@ -9172,6 +9212,66 @@ namespace RyuGiKen
             }
             return result;
         }
+        /// <summary>
+        /// 显示颜色名称
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public static string ColorNameCN(HSVColor color)
+        {
+            if (color.alpha == 0)
+                return "透明";
+            string result = "";
+            if (color.Saturation < 0.1f)
+            {
+                if (color.Value >= 0.9f)
+                    result = "白";
+                else if (color.Value <= 0.2f)
+                    result = "黑";
+                else
+                    result = "灰";
+            }
+            else
+            {
+                if (color.Hue <= 5 || color.Hue >= 330 && color.Saturation > 0.1f && color.Saturation <= 0.5f)
+                    result = "粉红";
+                else if (color.Hue <= 10 || color.Hue >= 340)
+                    result = "红";
+                else if (color.Hue >= 10 && color.Hue <= 40)
+                    result = "橙";
+                else if (color.Hue >= 40 && color.Hue <= 65)
+                    result = "黄";
+                else if (color.Hue >= 65 && color.Hue <= 150)
+                    result = "绿";
+                else if (color.Hue >= 150 && color.Hue <= 185)
+                    result = "青";
+                else if (color.Hue >= 185 && color.Hue <= 220)
+                    result = "蓝";
+                else if (color.Hue >= 220 && color.Hue <= 290)
+                    result = "紫";
+                else if (color.Hue >= 290 && color.Hue <= 340)
+                    result = "紫红";
+            }
+            if (result.Length == 1)
+            {
+                if (color.Value > 0.2f && color.Value <= 0.6f)
+                    result = "深" + result;
+                else if (color.Saturation > 0.1f && color.Saturation <= 0.5f)
+                    result = "浅" + result;
+            }
+            if (result.Length == 1)
+                result += "色";
+            return result;
+        }
+        /// <summary>
+        /// 显示颜色名称
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public static string ColorNameCN(Color color)
+        {
+            return ColorNameCN(new HSVColor(color));
+        }
     }
     /// <summary>
     /// 颜色（HSV模式）
@@ -9240,6 +9340,50 @@ namespace RyuGiKen
 #endif
         }
         public static implicit operator Color(HSVColor v) { return v.ToColor(); }
+        /// <summary>
+        /// 透明
+        /// </summary>
+        public readonly static HSVColor clear = new HSVColor(0, 0, 0, 0);
+        /// <summary>
+        /// 黑
+        /// </summary>
+        public readonly static HSVColor black = new HSVColor(0, 0, 0, 1);
+        /// <summary>
+        /// 灰
+        /// </summary>
+        public readonly static HSVColor gray = new HSVColor(0, 0, 0.5f, 1);
+        /// <summary>
+        /// 灰
+        /// </summary>
+        public readonly static HSVColor grey = new HSVColor(0, 0, 0.5f, 1);
+        /// <summary>
+        /// 白
+        /// </summary>
+        public readonly static HSVColor white = new HSVColor(0, 0, 1, 1);
+        /// <summary>
+        /// 红
+        /// </summary>
+        public readonly static HSVColor red = new HSVColor(0, 1, 1, 1);
+        /// <summary>
+        /// 绿
+        /// </summary>
+        public readonly static HSVColor green = new HSVColor(120, 1, 1, 1);
+        /// <summary>
+        /// 蓝
+        /// </summary>
+        public readonly static HSVColor blue = new HSVColor(240, 1, 1, 1);
+        /// <summary>
+        /// 黄
+        /// </summary>
+        public readonly static HSVColor yellow = new HSVColor(60, 1, 1, 1);
+        /// <summary>
+        /// 青
+        /// </summary>
+        public readonly static HSVColor cyan = new HSVColor(180, 1, 1, 1);
+        /// <summary>
+        /// 品红
+        /// </summary>
+        public readonly static HSVColor magenta = new HSVColor(300, 1, 1, 1);
     }
     /// <summary>
     /// 颜色调整
@@ -9344,6 +9488,54 @@ namespace RyuGiKen
                     break;
             }
             return result;
+        }
+        /// <summary>
+        /// 字符串转颜色
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static HSVColor ToHSVColor(string str)
+        {
+            if (string.IsNullOrWhiteSpace(str) || str.CountNumInString() < 1)
+                return HSVColor.clear;
+            StringBuilder data = new StringBuilder();
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (char.IsNumber(str[i]) || str[i] == '.' || str[i] == ',')
+                {
+                    data.Append(str[i]);
+                }
+            }
+            string[] temp = data.ToString().Split(',');
+            if (temp.Length >= 4)
+                return new HSVColor(temp[0].ToFloat(), temp[1].ToFloat(), temp[2].ToFloat(), temp[3].ToFloat());
+            else if (temp.Length >= 3)
+                return new HSVColor(temp[0].ToFloat(), temp[1].ToFloat(), temp[2].ToFloat());
+            return HSVColor.clear;
+        }
+        /// <summary>
+        /// 字符串转颜色
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static Color ToColor(string str)
+        {
+            if (string.IsNullOrWhiteSpace(str) || str.CountNumInString() < 1)
+                return Color.clear;
+            StringBuilder data = new StringBuilder();
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (char.IsNumber(str[i]) || str[i] == '.' || str[i] == ',')
+                {
+                    data.Append(str[i]);
+                }
+            }
+            string[] temp = data.ToString().Split(',');
+            if (temp.Length >= 4)
+                return new Color(temp[0].ToFloat(), temp[1].ToFloat(), temp[2].ToFloat(), temp[3].ToFloat());
+            else if (temp.Length >= 3)
+                return new Color(temp[0].ToFloat(), temp[1].ToFloat(), temp[2].ToFloat());
+            return Color.clear;
         }
         /// <summary>
         /// 三维坐标转颜色

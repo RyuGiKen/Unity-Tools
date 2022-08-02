@@ -17,6 +17,7 @@ namespace RyuGiKen.Localization
         public bool StartSet = true;
         public bool Seted = false;
         public LocalizationConfigurationBase configuration;
+        public bool SetColorClearWhenNoSprite = true;
         public Component[] components;
         protected void Awake()
         {
@@ -91,11 +92,21 @@ namespace RyuGiKen.Localization
                             else if (components[i].TryGetComponent(out AudioSource audio))
                                 audio.clip = objects.Find(language);
                             else if (components[i].TryGetComponent(out Image image))
-                                image.sprite = objects.Find(language);
+                            {
+                                Sprite sprite = objects.Find(language);
+                                image.sprite = sprite;
+                                if (SetColorClearWhenNoSprite && !sprite)
+                                    image.color = Color.clear;
+                            }
                             else if (components[i].TryGetComponent(out RawImage rawImage))
                                 rawImage.texture = objects.Find(language);
                             else if (components[i].TryGetComponent(out SpriteRenderer spriteRenderer))
-                                spriteRenderer.sprite = objects.Find(language);
+                            {
+                                Sprite sprite = objects.Find(language);
+                                spriteRenderer.sprite = sprite;
+                                if (SetColorClearWhenNoSprite && !sprite)
+                                    spriteRenderer.color = Color.clear;
+                            }
                             else if (components[i].TryGetComponent(out MeshRenderer meshRenderer))
                                 meshRenderer.material.mainTexture = objects.Find(language);
                             else if (components[i].TryGetComponent(out SkinnedMeshRenderer skinnedMeshRenderer))
