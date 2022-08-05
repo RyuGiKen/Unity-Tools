@@ -26,7 +26,7 @@ namespace RyuGiKen.Tools
         void Awake()
         {
             shadowList = new List<GhostShadow>();
-            meshRenderer = this.GetComponentsInChildren<SkinnedMeshRenderer>().ToList<Renderer>().AddList(this.GetComponentsInChildren<MeshRenderer>().ToList<Renderer>()).ToArray();
+            meshRenderer = ValueAdjust.AddList(this.GetComponentsInChildren<SkinnedMeshRenderer>()?.ToList<Renderer>(), this.GetComponentsInChildren<MeshRenderer>()?.ToList<Renderer>(), false).ToArray();
         }
         private void Start()
         {

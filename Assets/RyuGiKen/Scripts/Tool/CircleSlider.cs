@@ -535,11 +535,16 @@ namespace RyuGiKen.Tools
             {
                 rectTransform.anchoredPosition = Vector2.zero;
                 if (rectTransform.sizeDelta.magnitude < 1)
+                {
                     rectTransform.sizeDelta = this.rectTransform.sizeDelta;
+                }
             }
-            else //if (!rectTransform.offsetMin.JudgeRange(Vector2.zero, Vector2.one * 0.01f) || !rectTransform.offsetMax.JudgeRange(Vector2.zero, Vector2.one * 0.01f))
+            else
             {
-                rectTransform.offsetMin = rectTransform.offsetMax = Vector2.zero;
+                if (!rectTransform.offsetMin.JudgeRange(Vector2.zero, Vector2.one * 0.01f) || !rectTransform.offsetMax.JudgeRange(Vector2.zero, Vector2.one * 0.01f))
+                {
+                    rectTransform.offsetMin = rectTransform.offsetMax = Vector2.zero;
+                }
                 if (Mathf.Approximately(rectTransform.anchorMin.magnitude, 0) && Mathf.Approximately(rectTransform.anchorMax.magnitude, 0))
                 {
                     rectTransform.anchorMin = Vector2.zero;
