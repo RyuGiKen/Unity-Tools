@@ -14,6 +14,8 @@ namespace RyuGiKen.Tools
     public class SetDisplay : MonoBehaviour
     {
         public static SetDisplay instance;
+        public MyEvent OnScreenAxisChange;
+        public Camera.FieldOfViewAxis ScreenAxis;
         const int WS_POPUP = 0x800000;
         const int GWL_STYLE = -16;
         const uint SWP_SHOWWINDOW = 0x0040;
@@ -44,6 +46,8 @@ namespace RyuGiKen.Tools
                 if (!instance) instance = this;
             if (instance != this)
                 DestroyImmediate(this);
+
+            OnScreenAxisChange = ChangeScreenAxis;
         }
         void Start()
         {
@@ -91,6 +95,15 @@ namespace RyuGiKen.Tools
             if (OverrideMouse)
             {
                 User32.SetCursorPos((int)OverrideMousePos.x, (int)OverrideMousePos.y);
+            }
+        }
+        void LateUpdate()
+        {
+            Camera.FieldOfViewAxis axis = CheckScreenAxis();
+            if (axis != ScreenAxis)
+            {
+                ScreenAxis = axis;
+                OnScreenAxisChange();
             }
         }
         void SetOverrideMousePos(float X, float Y, bool Override)
@@ -265,12 +278,27 @@ namespace RyuGiKen.Tools
         {
             if (percent <= 0 || displayIndex >= Display.displays.Length)
                 return;
+            if (UseSecondScreen && Display.displays.Length > 1)
+                return;
             if (displayIndex < 0)
-                displayIndex = UseSecondScreen ? 1 : 0;
+                displayIndex = (UseSecondScreen ? 1 : 0).Clamp(0, Display.displays.Length - 1);
             int width = fullscreen ? Display.displays[displayIndex].systemWidth : Screen.width;
             int height = fullscreen ? Display.displays[displayIndex].systemHeight : Screen.height;
             Vector2Int resolution = new Vector2Int((width * percent).ToInteger(), (height * percent).ToInteger());
             Screen.SetResolution(resolution.x, resolution.y, fullscreen);
         }
+        /// <summary>
+        /// 判断横竖屏
+        /// </summary>
+        /// <returns></returns>
+        public static Camera.FieldOfViewAxis CheckScreenAxis()
+        {
+            if (Screen.height > Screen.width * 1.2f)
+            {
+                return Camera.FieldOfViewAxis.Vertical;
+            }
+            return Camera.FieldOfViewAxis.Horizontal;
+        }
+        public void ChangeScreenAxis() { }
     }
 }
