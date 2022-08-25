@@ -63,8 +63,7 @@ namespace RyuGiKen.Tools
             {
                 if (CanPrint && LogList.Count > 0)
                 {
-                    if (sw == null)
-                        CheckStreamWriter();
+                    CheckStreamWriter();
                     try
                     {
                         //StreamWriter sw = new StreamWriter(Path + "/Log.txt", true);
@@ -113,7 +112,7 @@ namespace RyuGiKen.Tools
             {
                 CheckStreamWriter();
                 Print(sw, Content, true);
-                if (sw != null)
+                if (!CheckStreamWriterClosed(sw))
                 {
                     sw.Close();
                     sw = null;
@@ -132,7 +131,7 @@ namespace RyuGiKen.Tools
             {
                 CheckStreamWriter();
                 Print(sw, Content, true);
-                if (sw != null)
+                if (!CheckStreamWriterClosed(sw))
                 {
                     sw.Close();
                     sw = null;
@@ -151,7 +150,7 @@ namespace RyuGiKen.Tools
                 Directory.CreateDirectory(Path);
             File.WriteAllText(Path + "/Log.txt", string.Empty, Encoding.UTF8);
             CanPrint = originEnable;
-            if (sw != null)
+            if (!CheckStreamWriterClosed(sw))
             {
                 sw.Close();
                 sw = null;
@@ -164,11 +163,15 @@ namespace RyuGiKen.Tools
         }
         protected static void CheckStreamWriter()
         {
-            if (sw == null)
+            if (sw == null || sw.BaseStream == null)
             {
                 SetPath();
                 sw = new StreamWriter(Path + "/Log.txt", true, Encoding.UTF8);
             }
+        }
+        protected static bool CheckStreamWriterClosed(StreamWriter sw)
+        {
+            return sw == null || sw.BaseStream == null;
         }
         protected virtual void OnDisable()
         {
@@ -176,7 +179,7 @@ namespace RyuGiKen.Tools
             {
                 if (th != null)
                     th.Abort();
-                if (sw != null)
+                if (!CheckStreamWriterClosed(sw))
                 {
                     sw.Flush();
                     sw.Close();

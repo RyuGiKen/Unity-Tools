@@ -6092,7 +6092,12 @@ PrefabInstance:
     - target: {fileID: 3631144649121579223, guid: 5fa442f0420ab4f4185b16bcb0e7b3b1,
         type: 3}
       propertyPath: m_FillAmount
-      value: 0.00069444446
+      value: 0.0013888889
+      objectReference: {fileID: 0}
+    - target: {fileID: 3631144649121579223, guid: 5fa442f0420ab4f4185b16bcb0e7b3b1,
+        type: 3}
+      propertyPath: m_FillClockwise
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3631144649165108624, guid: 5fa442f0420ab4f4185b16bcb0e7b3b1,
         type: 3}
@@ -10423,7 +10428,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1993250402}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc6cf54864546a243aeb732444449b24, type: 3}
+  m_Script: {fileID: 11500000, guid: 424061618c538484a959dc424657eabc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ListCount: 0

@@ -1210,6 +1210,26 @@ namespace RyuGiKen
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 显示
+        /// </summary>
+        public static bool IsActiveAndEnabledAndNotClear(this Graphic graphic)
+        {
+            if (graphic && graphic.isActiveAndEnabled && !graphic.IsClear())
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 是否透明
+        /// </summary>
+        /// <param name="graphic"></param>
+        /// <returns></returns>
+        public static bool IsClear(this Graphic graphic)
+        {
+            if (graphic && Mathf.Approximately(graphic.color.a, 0))
+                return true;
+            return false;
+        }
+        /// <summary>
         /// 设置颜色
         /// </summary>
         /// <param name="component"></param>
@@ -1532,6 +1552,42 @@ namespace RyuGiKen
                 if (item)
                     item.gameObject.SetActive(active);
             }
+        }
+        /// <summary>
+        /// 设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetEnable(this Behaviour GO, bool active)
+        {
+            if (GO == null)
+                return;
+            if (GO)
+                GO.enabled = active;
+        }
+        /// <summary>
+        /// 设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetEnable(this Collider GO, bool active)
+        {
+            if (GO == null)
+                return;
+            if (GO)
+                GO.enabled = active;
+        }
+        /// <summary>
+        /// 设置活动状态
+        /// </summary>
+        /// <param name="GO"></param>
+        /// <param name="active">活动状态</param>
+        public static void SetEnable(this Renderer GO, bool active)
+        {
+            if (GO == null)
+                return;
+            if (GO)
+                GO.enabled = active;
         }
         /// <summary>
         /// 批量设置活动状态
@@ -4456,6 +4512,46 @@ namespace RyuGiKen
                 builder.Append(temp);
             }
             return builder.ToString();
+        }
+        /// <summary>
+        /// 转全角字符
+        /// </summary>
+        /// <param name="input">任意字符串</param>
+        /// <returns>全角字符串</returns>
+        public static string ToFullWidthCharacters(this string input)
+        {
+            char[] c = input.ToCharArray();
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i] == 32)
+                {
+                    c[i] = (char)12288;
+                    continue;
+                }
+                if (c[i] < 127)
+                    c[i] = (char)(c[i] + 65248);
+            }
+            return new string(c);
+        }
+        /// <summary>
+        /// 转半角字符
+        /// </summary>
+        /// <param name="input">任意字符串</param>
+        /// <returns>半角字符串</returns>
+        public static string ToHalfWidthCharacters(this string input)
+        {
+            char[] c = input.ToCharArray();
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i] == 12288)
+                {
+                    c[i] = (char)32;
+                    continue;
+                }
+                if (c[i] > 65280 && c[i] < 65375)
+                    c[i] = (char)(c[i] - 65248);
+            }
+            return new string(c);
         }
         /// <summary>
         /// 分离字符串中的数字
