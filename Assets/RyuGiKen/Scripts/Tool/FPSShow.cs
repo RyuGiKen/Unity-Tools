@@ -180,7 +180,7 @@ namespace RyuGiKen.Tools
         {
             deltaTime = 0;
             QualitySettings.vSyncCount = 0;
-            QualitySettings.SetQualityLevel(level);
+            QualitySettings.SetQualityLevel(level, false);
             if (instance && instance.OnChangeQualityLevel != null)
                 instance.OnChangeQualityLevel();
         }

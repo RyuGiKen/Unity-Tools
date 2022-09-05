@@ -14,15 +14,41 @@ namespace RyuGiKen.Tools
     public class SetDisplay : MonoBehaviour
     {
         public static SetDisplay instance;
+        /// <summary>
+        /// 屏幕横竖比例切换
+        /// </summary>
         public MyEvent OnScreenAxisChange;
         public Camera.FieldOfViewAxis ScreenAxis;
         const int WS_POPUP = 0x800000;
         const int GWL_STYLE = -16;
         const uint SWP_SHOWWINDOW = 0x0040;
-        [Tooltip("窗口宽")] int WindowWidth = 1920;
-        [Tooltip("窗口高")] int WindowHeight = 1080;
-        [Tooltip("窗口左上角的X")] int WindowPosX = 1920;
-        [Tooltip("窗口左上角的Y")] int WindowPosY = 0;
+        /// <summary>
+        /// 屏幕状态
+        /// </summary>
+        public struct ScreenState
+        {
+            /// <summary>
+            /// 屏幕数量
+            /// </summary>
+            public int DisplayLength;
+            /// <summary>
+            /// 窗口宽
+            /// </summary>
+            public int WindowWidth;
+            /// <summary>
+            /// 窗口高
+            /// </summary>
+            public int WindowHeight;
+            /// <summary>
+            /// 窗口左上角的X
+            /// </summary>
+            public int WindowPosX;
+            /// <summary>
+            /// 窗口左上角的Y
+            /// </summary>
+            public int WindowPosY;
+        }
+        public ScreenState state;
         /// <summary>
         /// 窗口句柄
         /// </summary>
@@ -39,7 +65,16 @@ namespace RyuGiKen.Tools
         [Tooltip("鼠标位置误差范围")] static int ErrorRange = 500;//>2
         [Tooltip("覆盖鼠标位置")] bool OverrideMouse;
         [Tooltip("覆盖鼠标位置")] Vector2 OverrideMousePos;
-        static bool UseSecondScreen;
+        static bool useSecondScreen;
+        public static bool UseSecondScreen
+        {
+            get
+            {
+                return useSecondScreen && Display.displays.Length > 1;
+            }
+        }
+        bool canRefreshSecondScreen;
+
         private void Awake()
         {
             if (gameObject.activeInHierarchy)
@@ -47,6 +82,7 @@ namespace RyuGiKen.Tools
             if (instance != this)
                 DestroyImmediate(this);
 
+            canRefreshSecondScreen = true;
             OnScreenAxisChange = ChangeScreenAxis;
         }
         void Start()
@@ -56,32 +92,16 @@ namespace RyuGiKen.Tools
             string xmlData = GetFile.LoadXmlData(new string[] { "UseSecondScreen", "SecondScreen" }, Application.streamingAssetsPath + "/Setting.xml", "Data", true);
             if (!string.IsNullOrWhiteSpace(xmlData))
             {
-                UseSecondScreen = xmlData.ContainIgnoreCase("True") || xmlData == "1";
+                useSecondScreen = xmlData.ContainIgnoreCase("True") || xmlData == "1";
             }
 #if UNITY_STANDALONE_WIN
             //HWndIntPtr = (IntPtr)WindowsAPI.User32.FindWindow(null, Application.productName);//工程名，非进程名。非英文会因为编码格式问题找不到窗口。可能误判同名窗口。
             HWndIntPtr = GetProcessWnd();
             //HWndIntPtr = WindowsAPI.User32.GetForegroundWindow();//仅检测前台窗体，不一定为Unity。
 #endif
-            if (UseSecondScreen)
+            if (UseSecondScreen)//多显示器
             {
-                if (Display.displays.Length > 1)//多显示器
-                {
-                    WindowWidth = Display.displays[1].systemWidth;
-                    WindowHeight = Display.displays[1].systemHeight;
-                    WindowPosX = Display.displays[0].systemWidth;
-                    WindowPosY = 0;
-                    ErrorRange = Mathf.Clamp(ErrorRange, 2, Mathf.Min(Display.displays[0].systemWidth, Display.displays[0].systemHeight, Display.displays[1].systemWidth, Display.displays[1].systemHeight) - 5);
-                    TestMousePos[0] = new Vector2Int(Display.displays[0].systemWidth + Display.displays[1].systemWidth / 2, Display.displays[1].systemHeight / 2);
-                    TestMousePos[1] = new Vector2Int(-Display.displays[1].systemWidth, Display.displays[1].systemHeight / 2);
-                    TestMousePos[2] = new Vector2Int(Display.displays[0].systemWidth / 2, -Display.displays[1].systemHeight / 2);
-                    TestMousePos[3] = new Vector2Int(Display.displays[0].systemWidth / 2, Display.displays[0].systemHeight + Display.displays[1].systemHeight / 2);
-                    User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
-#if UNITY_STANDALONE_WIN
-                    SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
-                    Invoke(nameof(TestRight), 0.1f);//判定右
-#endif
-                }
+                UpdateToSecondScreen();
             }
             else
             {
@@ -89,6 +109,29 @@ namespace RyuGiKen.Tools
                 User32.SetForegroundWindow(HWndIntPtr);
 #endif
             }
+        }
+        /// <summary>
+        /// 检测切换副屏
+        /// </summary>
+        public void UpdateToSecondScreen()
+        {
+            if (!canRefreshSecondScreen || IsInvoking(nameof(TestRight)) || IsInvoking(nameof(TestLeft)) || IsInvoking(nameof(TestUp)) || IsInvoking(nameof(TestDown)))
+                return;
+            canRefreshSecondScreen = false;
+            state.WindowWidth = Display.displays[1].systemWidth;
+            state.WindowHeight = Display.displays[1].systemHeight;
+            state.WindowPosX = Display.displays[0].systemWidth;
+            state.WindowPosY = 0;
+            ErrorRange = Mathf.Clamp(ErrorRange, 2, Mathf.Min(Display.displays[0].systemWidth, Display.displays[0].systemHeight, Display.displays[1].systemWidth, Display.displays[1].systemHeight) - 5);
+            TestMousePos[0] = new Vector2Int(Display.displays[0].systemWidth + Display.displays[1].systemWidth / 2, Display.displays[1].systemHeight / 2);
+            TestMousePos[1] = new Vector2Int(-Display.displays[1].systemWidth, Display.displays[1].systemHeight / 2);
+            TestMousePos[2] = new Vector2Int(Display.displays[0].systemWidth / 2, -Display.displays[1].systemHeight / 2);
+            TestMousePos[3] = new Vector2Int(Display.displays[0].systemWidth / 2, Display.displays[0].systemHeight + Display.displays[1].systemHeight / 2);
+            User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
+#if UNITY_STANDALONE_WIN
+            SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
+            Invoke(nameof(TestRight), 0.1f);//判定右
+#endif
         }
         private void FixedUpdate()
         {
@@ -178,14 +221,13 @@ namespace RyuGiKen.Tools
         /// <summary>
         /// 设置无边框窗口化（副屏相对主屏的位置差）
         /// </summary>
-        /// <param name="index"></param>
         public void SetPosition(int X, int Y)
         {
             StartCoroutine(Setposition(X, Y));
         }
         IEnumerator Setposition(int X, int Y)
         {
-            Screen.SetResolution(WindowWidth, WindowHeight, false);
+            Screen.SetResolution(state.WindowWidth, state.WindowHeight, false);
             yield return new WaitForSeconds(0.01f);
             OverrideMouse = false;
             User32.SetWindowLong(HWndIntPtr, GWL_STYLE, WS_POPUP);//无边框
@@ -194,29 +236,29 @@ namespace RyuGiKen.Tools
             switch (X + "," + Y)
             {
                 case "-1,0":
-                    WindowPosX = -Display.displays[1].systemWidth;
-                    WindowPosY = 0;
+                    state.WindowPosX = -Display.displays[1].systemWidth;
+                    state.WindowPosY = 0;
                     break;
                 default:
                 case "0,0":
-                    WindowPosX = 0;
-                    WindowPosY = 0;
+                    state.WindowPosX = 0;
+                    state.WindowPosY = 0;
                     break;
                 case "1,0":
-                    WindowPosX = Display.displays[0].systemWidth;
-                    WindowPosY = 0;
+                    state.WindowPosX = Display.displays[0].systemWidth;
+                    state.WindowPosY = 0;
                     break;
                 case "0,1":
-                    WindowPosX = 0;
-                    WindowPosY = Display.displays[0].systemHeight;
+                    state.WindowPosX = 0;
+                    state.WindowPosY = Display.displays[0].systemHeight;
                     break;
                 case "0,-1":
-                    WindowPosX = 0;
-                    WindowPosY = -Display.displays[1].systemHeight;
+                    state.WindowPosX = 0;
+                    state.WindowPosY = -Display.displays[1].systemHeight;
                     break;
             }
-            bool result = User32.SetWindowPos(HWndIntPtr, 1, WindowPosX, WindowPosY, WindowWidth, WindowHeight, SWP_SHOWWINDOW);//设置屏幕大小和位置
-            DebugL.Log("副屏设置" + result);
+            bool result = User32.SetWindowPos(HWndIntPtr, 1, state.WindowPosX, state.WindowPosY, state.WindowWidth, state.WindowHeight, SWP_SHOWWINDOW);//设置屏幕大小和位置
+            canRefreshSecondScreen = true;
         }
         /// <summary>
         /// 窗口置顶
@@ -278,7 +320,7 @@ namespace RyuGiKen.Tools
         {
             if (percent <= 0 || displayIndex >= Display.displays.Length)
                 return;
-            if (UseSecondScreen && Display.displays.Length > 1)
+            if (UseSecondScreen)
                 return;
             if (displayIndex < 0)
                 displayIndex = (UseSecondScreen ? 1 : 0).Clamp(0, Display.displays.Length - 1);

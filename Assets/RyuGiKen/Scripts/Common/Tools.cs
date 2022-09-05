@@ -453,35 +453,25 @@ namespace RyuGiKen
                 return null;
 
             List<FileInfo> result = new List<FileInfo>();
-            for (int k = 0; k < 2; k++)
+            for (int i = files1.Count - 1; i >= 0; i--)
             {
-                int count1 = k == 0 ? files1.Count : files2.Count;
-                int count2 = k == 0 ? files2.Count : files1.Count;
-                List<FileInfo> data1 = k == 0 ? files1 : files2;
-                List<FileInfo> data2 = k == 0 ? files2 : files1;
-                for (int i = 0; i < count1; i++)
+                for (int j = files2.Count - 1; j >= 0; j--)
                 {
-                    string name1 = data1[i].GetFileNameWithOutType();
-                    bool NoSame = true;
-                    for (int j = 0; j < count2; j++)
+                    if ((IgnoreCase && files1[i].Name.ToLower() == files2[j].Name.ToLower()) || (!IgnoreCase && files1[i].Name == files2[j].Name))
                     {
-                        string name2 = data2[j].GetFileNameWithOutType();
-                        //if (ValueAdjust.GetSequenceSimilarityRatio(name1, name2, IgnoreCase) > 0.9f)
-                        if (IgnoreCase && name1.ToLower() == name2.ToLower())
-                        {
-                            NoSame = false;
-                            break;
-                        }
-                        else if (!IgnoreCase && name1 == name2)
-                        {
-                            NoSame = false;
-                            break;
-                        }
+                        files1.RemoveAt(i);
+                        files2.RemoveAt(j);
+                        break;
                     }
-                    if (NoSame)
-                        result.Add(data1[i]);
-                    Thread.Sleep(0);
                 }
+            }
+            for (int i = 0; i < files1.Count; i++)
+            {
+                result.Add(files1[i]);
+            }
+            for (int j = 0; j < files2.Count; j++)
+            {
+                result.Add(files2[j]);
             }
             return result.ToArray().ClearRepeatingItem();
         }
@@ -1209,6 +1199,50 @@ namespace RyuGiKen
     public static partial class ObjectAdjust
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 获取活动项
+        /// </summary>
+        public static T[] GetActiveAndEnabled<T>(this T[] GO) where T : Component
+        {
+            if (GO == null || GO.Length < 1)
+                return null;
+            List<T> result = new List<T>();
+            foreach (var item in GO)
+            {
+                if (item)
+                {
+                    if (item is Collider)
+                    {
+                        if (item.gameObject.activeInHierarchy && (item as Collider).enabled)
+                            result.Add(item);
+                    }
+                    else if (item is Renderer)
+                    {
+                        if (item.gameObject.activeInHierarchy && (item as Renderer).enabled)
+                            result.Add(item);
+                    }
+                    else if (item is Behaviour)
+                    {
+                        if ((item as Behaviour).isActiveAndEnabled)
+                            result.Add(item);
+                    }
+                    else
+                    {
+                        //result.Add(item);
+                    }
+                }
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 显示
+        /// </summary>
+        public static bool IsActiveAndEnabled(this Behaviour behaviour)
+        {
+            if (behaviour && behaviour.isActiveAndEnabled)
+                return true;
+            return false;
+        }
         /// <summary>
         /// 显示
         /// </summary>
@@ -2004,6 +2038,10 @@ namespace RyuGiKen
             this.b = Blue;
             this.a = Alpha;
         }
+        /// <summary>
+        /// 透明
+        /// </summary>
+        public readonly static Color clear = new Color(0, 0, 0, 0);
     }
     public struct Vector2
     {
@@ -2019,6 +2057,7 @@ namespace RyuGiKen
         public static implicit operator Vector3(Vector2 v) { return new Vector3(v.x, v.y, 0); }
         public static Vector2 operator +(Vector2 a, Vector2 b) { return new Vector2(a.x + b.x, a.y + b.y); }
         public static Vector2 operator -(Vector2 a, Vector2 b) { return new Vector2(a.x - b.x, a.y - b.y); }
+        public readonly static Vector2 up = new Vector2(0, 1);
     }
     public struct Vector3
     {
@@ -2263,10 +2302,10 @@ namespace RyuGiKen
         public static implicit operator float(ValueInRange value) { return value.Value; }
         public static implicit operator double(ValueInRange value) { return value.Value; }
         public static implicit operator decimal(ValueInRange value) { return value.Value.ToDecimal(); }
-        public static implicit operator int(ValueInRange value) { return value.Value.ToInteger(); }
-        public static implicit operator uint(ValueInRange value) { return value.Value.ToUInteger(); }
-        public static implicit operator short(ValueInRange value) { return (short)value.Value; }
-        public static implicit operator long(ValueInRange value) { return value.Value.ToInteger64(); }
+        //public static implicit operator int(ValueInRange value) { return value.Value.ToInteger(); }
+        //public static implicit operator uint(ValueInRange value) { return value.Value.ToUInteger(); }
+        //public static implicit operator short(ValueInRange value) { return (short)value.Value; }
+        //public static implicit operator long(ValueInRange value) { return value.Value.ToInteger64(); }
     }
     public enum RotationAxis
     {
@@ -2705,6 +2744,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 转元组
         /// </summary>
@@ -2714,7 +2754,6 @@ namespace RyuGiKen
         {
             return new Tuple<int, int>(value.x, value.y);
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 全局方向转局部角度
         /// </summary>
@@ -4186,6 +4225,40 @@ namespace RyuGiKen
             }
             //Debug.Log(PrintArray(result));
             return result;
+        }
+        /// <summary>
+        /// 交错数组初始化
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="length1"></param>
+        /// <param name="length2"></param>
+        /// <returns></returns>
+        public static T[][] ArrayInitialize<T>(int length1, int length2)
+        {
+            T[][] result = new T[length1][];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new T[length2];
+            }
+            return result;
+        }
+        /// <summary>
+        /// 交错数组初始化
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="length1"></param>
+        /// <param name="length2"></param>
+        /// <returns></returns>
+        public static T[][] ArrayInitialize<T>(ref T[][] array, int length1, int length2)
+        {
+            array = new T[length1][];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = new T[length2];
+            }
+            return array;
         }
         /// <summary>
         /// 数组转换
@@ -7925,6 +7998,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float GetAverage(this float[] array, int index = -1, int size = 1, int startIndex = -1, int endIndex = -1)
         {
+            if (array == null || array.Length < 1)
+                return 0;
             float result = 0;
             float sum = 0;
             if (startIndex < 0 && endIndex < 0)
@@ -7972,6 +8047,26 @@ namespace RyuGiKen
             }
             return result;
         }
+        /// <summary>
+        /// 取连续数组内特定值在一定范围内的平均值
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="index">取值序号(-1为全部)</param>
+        /// <param name="size">平滑范围</param>
+        /// <param name="startIndex">开始序号</param>
+        /// <param name="endIndex">结束序号</param>
+        /// <returns></returns>
+        public static float[] GetAverage(this float[][] array, int index = -1, int size = 1, int startIndex = -1, int endIndex = -1)
+        {
+            if (array == null || array.Length < 1)
+                return null;
+            float[] result = new float[array.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = GetAverage(array[i], index, size, startIndex, endIndex);
+            }
+            return result;
+        }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 取平均值
@@ -7993,6 +8088,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector3 GetAverage(this Vector3[] array, int startIndex = -1, int endIndex = -1)
         {
+            if (array == null || array.Length < 1)
+                return Vector3.zero;
             Vector3 Max = new Vector3();
             if (startIndex < 0 && endIndex < 0)
             {
