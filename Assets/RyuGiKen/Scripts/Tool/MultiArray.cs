@@ -92,7 +92,7 @@ namespace RyuGiKen
             }
         }
     }
-    public static partial class Extension
+    public static partial class MultiArrayExtension
     {
         /// <summary>
         /// 数组转换

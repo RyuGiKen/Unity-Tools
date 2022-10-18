@@ -48,6 +48,34 @@ namespace RyuGiKen.Tools
             QualitySettings.vSyncCount = 0;
             RefreshTargetFPS();
             OnChangeQualityLevel = ChangeQualityLevel;
+
+            string xmlData = GetFile.LoadXmlData("AutoAdjustQualityLevel", Application.streamingAssetsPath + "/Setting.xml", "Data", true);
+            if (!string.IsNullOrEmpty(xmlData))
+            {
+                if (xmlData.ContainIgnoreCase("True") || xmlData.ContainIgnoreCase("Yes") || xmlData == "1")
+                    autoAdjustQualityLevel = true;
+                else if (xmlData.ContainIgnoreCase("False") || xmlData.ContainIgnoreCase("No") || xmlData == "0")
+                    autoAdjustQualityLevel = false;
+            }
+            xmlData = GetFile.LoadXmlData("AutoAdjustQualityLevelTime", Application.streamingAssetsPath + "/Setting.xml", "Data", true);
+            if (!string.IsNullOrEmpty(xmlData))
+            {
+                int time = xmlData.ToInteger(-1);
+                if (time > 0)
+                    autoAdjustQualityLevelTime = time;
+            }
+            if (autoAdjustQualityLevel)
+            {
+                xmlData = GetFile.LoadXmlData("AutoAdjustQualityLevelRange", Application.streamingAssetsPath + "/Setting.xml", "Data", true);
+                if (!string.IsNullOrEmpty(xmlData))
+                {
+                    ValueRange range = xmlData.ToVector2();
+                    if (range.Length > 1)
+                        adjustFPSRange = range;
+                }
+                if (adjustFPSRange.Length < 1)
+                    autoAdjustQualityLevel = false;
+            }
         }
         /// <summary>
         /// 切换画质

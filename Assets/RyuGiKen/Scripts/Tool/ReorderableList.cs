@@ -65,7 +65,7 @@ namespace RyuGiKen
             this.items = list;
         }
     }
-    public static partial class Extension
+    public static partial class ReorderableListExtension
     {
         /// <summary>
         /// 转数组

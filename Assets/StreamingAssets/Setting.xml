@@ -1,3 +1,6 @@
 <Data>
 	<UseSecondScreen>True</UseSecondScreen>
+	<AutoAdjustQualityLevel>True</AutoAdjustQualityLevel>
+	<AutoAdjustQualityLevelTime>0</AutoAdjustQualityLevelTime>
+	<AutoAdjustQualityLevelRange>(24,59)</AutoAdjustQualityLevelRange>
 </Data>

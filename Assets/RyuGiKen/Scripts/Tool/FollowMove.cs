@@ -27,12 +27,15 @@ namespace RyuGiKen.Tools
         }
         [Tooltip("目标跟随对象")] public Transform target;
         [Tooltip("目标初始缩放")] public Vector3 targetScale;
-        [Tooltip("跟随模式")] [SerializeField] FollowMode space = FollowMode.WorldPositon;
+        public bool X = true;
+        public bool Y = true;
+        public bool Z = true;
+        [Tooltip("跟随模式")][SerializeField] FollowMode space = FollowMode.WorldPositon;
         [Tooltip("跟随移动对象")] public Transform[] follower;
         [Tooltip("全局位置坐标差")] public Vector3[] startPosDifferenceValue_World;
         [Tooltip("局部位置坐标差")] public Vector3[] startPosDifferenceValue_Self;
         [Tooltip("跟随旋转")] public bool FollowRotation;
-        [Tooltip("旋转差")] [SerializeField] Quaternion[] followerRotation;
+        [Tooltip("旋转差")][SerializeField] Quaternion[] followerRotation;
         void Start()
         {
             if (target != null && follower[0] != null)
@@ -59,7 +62,14 @@ namespace RyuGiKen.Tools
                     {
                         default:
                         case FollowMode.WorldPositon:
-                            follower[i].position = target.position + startPosDifferenceValue_World[i];
+                            Vector3 pos = target.position + startPosDifferenceValue_World[i];
+                            if (!X)
+                                pos.x = follower[i].position.x;
+                            if (!Y)
+                                pos.y = follower[i].position.y;
+                            if (!Z)
+                                pos.z = follower[i].position.z;
+                            follower[i].position = pos;
                             break;
                         case FollowMode.LocalPosion:
                             follower[i].position = target.TransformPoint(startPosDifferenceValue_Self[i]);

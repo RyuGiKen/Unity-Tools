@@ -2182,6 +2182,13 @@ namespace RyuGiKen
             get { return Range.x; }
         }
         /// <summary>
+        /// 中间值
+        /// </summary>
+        public float MiddleValue
+        {
+            get { return (Range.x + Range.y) * 0.5f; }
+        }
+        /// <summary>
         /// 最大值
         /// </summary>
         public float MaxValue
@@ -2207,7 +2214,7 @@ namespace RyuGiKen
         /// 设置范围
         /// </summary>
         /// <param name="range"></param>
-        public void SetRange(Vector2 range)
+        public virtual void SetRange(Vector2 range)
         {
             ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
         }
@@ -2216,13 +2223,17 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
-        public void SetRange(float min, float max)
+        public virtual void SetRange(float min, float max)
         {
             ValueAdjust.FindMinAndMax(min, max, out range.x, out range.y);
         }
         public override string ToString()
         {
             return Range.ToString();
+        }
+        public virtual string ToString(string format)
+        {
+            return Range.ToString(format);
         }
         //public static implicit operator ValueRange(ValueInRange value) { return new ValueRange(value.Range); }
         public static implicit operator ValueRange(Vector2 value) { return new ValueRange(value); }
@@ -2241,6 +2252,7 @@ namespace RyuGiKen
         [SerializeField]
 #endif
         private float value;
+        public bool LockRange;
         public float Value
         {
             set { this.value = value.Clamp(range); }
@@ -2263,33 +2275,62 @@ namespace RyuGiKen
         {
             value = 0;
             range = new Vector2(float.NaN, float.NaN);
+            LockRange = false;
         }
         public ValueInRange(float value)
         {
             this.value = value;
             range = new Vector2(float.NaN, float.NaN);
+            LockRange = false;
         }
-        public ValueInRange(float value, float min, float max)
+        public ValueInRange(float value, float min, float max, bool lockRange = false)
         {
             this.value = value;
             range = new Vector2();
             SetRange(min, max);
+            LockRange = lockRange;
         }
-        public ValueInRange(float value, Vector2 range)
+        public ValueInRange(float value, Vector2 range, bool lockRange = false)
         {
             this.value = value;
             this.range = new Vector2();
             SetRange(range);
+            LockRange = lockRange;
         }
-        public ValueInRange(float value, ValueRange range)
+        public ValueInRange(float value, ValueRange range, bool lockRange = false)
         {
             this.value = value;
             this.range = new Vector2();
             SetRange(range);
+            LockRange = lockRange;
+        }
+        public override void SetRange(Vector2 range)
+        {
+            if (!LockRange)
+                base.SetRange(range);
+
+            ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
+        }
+        public override void SetRange(float min, float max)
+        {
+            if (!LockRange)
+                base.SetRange(min, max);
         }
         public override string ToString()
         {
             return Value + "：" + Range;
+        }
+        public string ToString(bool includeRange = false)
+        {
+            return Value.ToString() + (includeRange ? Range.ToString() : "");
+        }
+        public override string ToString(string format)
+        {
+            return Value.ToString(format) + Range.ToString(format);
+        }
+        public string ToString(string format, bool includeRange = false)
+        {
+            return Value.ToString(format) + (includeRange ? Range.ToString(format) : "");
         }
         //public static implicit operator ValueInRange(float value) { return new ValueInRange(value); }
         //public static implicit operator ValueInRange(double value) { return new ValueInRange(value.ToFloat()); }
@@ -2299,13 +2340,144 @@ namespace RyuGiKen
         //public static implicit operator ValueInRange(short value) { return new ValueInRange(value); }
         //public static implicit operator ValueInRange(long value) { return new ValueInRange(value); }
 
-        public static implicit operator float(ValueInRange value) { return value.Value; }
-        public static implicit operator double(ValueInRange value) { return value.Value; }
-        public static implicit operator decimal(ValueInRange value) { return value.Value.ToDecimal(); }
+        public static implicit operator float(ValueInRange value) { return value != null ? value.Value : 0; }
+        public static implicit operator double(ValueInRange value) { return value != null ? value.Value : 0; }
+        public static implicit operator decimal(ValueInRange value) { return value != null ? value.Value.ToDecimal() : 0; }
         //public static implicit operator int(ValueInRange value) { return value.Value.ToInteger(); }
         //public static implicit operator uint(ValueInRange value) { return value.Value.ToUInteger(); }
         //public static implicit operator short(ValueInRange value) { return (short)value.Value; }
         //public static implicit operator long(ValueInRange value) { return value.Value.ToInteger64(); }
+
+        public static float operator +(ValueInRange a, ValueInRange b) { return a.Value + b.Value; }
+        public static float operator -(ValueInRange a, ValueInRange b) { return a.Value - b.Value; }
+        public static float operator *(ValueInRange a, ValueInRange b) { return a.Value * b.Value; }
+        public static float operator /(ValueInRange a, ValueInRange b) { return a.Value / b.Value; }
+        public static float operator +(ValueInRange a, int b) { return a.Value + b; }
+        public static float operator -(ValueInRange a, int b) { return a.Value - b; }
+        public static float operator *(ValueInRange a, int b) { return a.Value * b; }
+        public static float operator /(ValueInRange a, int b) { return a.Value / b; }
+        public static float operator +(ValueInRange a, float b) { return a.Value + b; }
+        public static float operator -(ValueInRange a, float b) { return a.Value - b; }
+        public static float operator *(ValueInRange a, float b) { return a.Value * b; }
+        public static float operator /(ValueInRange a, float b) { return a.Value / b; }
+        public static double operator +(ValueInRange a, double b) { return a.Value + b; }
+        public static double operator -(ValueInRange a, double b) { return a.Value - b; }
+        public static double operator *(ValueInRange a, double b) { return a.Value * b; }
+        public static double operator /(ValueInRange a, double b) { return a.Value / b; }
+        public static decimal operator +(ValueInRange a, decimal b) { return a.Value.ToDecimal() + b; }
+        public static decimal operator -(ValueInRange a, decimal b) { return a.Value.ToDecimal() - b; }
+    }
+    /// <summary>
+    /// 双轴值(Vector2限位值)
+    /// </summary>
+    [Serializable]
+    public struct BiaxValue
+    {
+        [SerializeField]
+        private Vector2 value;
+        /// <summary>
+        /// 整数
+        /// </summary>
+        public bool m_WholeNumbers;
+        public Vector2 Value
+        {
+            set { this.value = ClampValue(value, m_WholeNumbers); }
+            get { return ClampValue(value, m_WholeNumbers); }
+        }
+        public ValueInRange X
+        {
+            get { return new ValueInRange(value.x, -1, 1); }
+        }
+        public ValueInRange Y
+        {
+            get { return new ValueInRange(value.y, -1, 1); }
+        }
+        public float x
+        {
+            get { return ClampValue(value.x, m_WholeNumbers); }
+        }
+        public float y
+        {
+            get { return ClampValue(value.y, m_WholeNumbers); }
+        }
+        public void SetX(float x)
+        {
+            value.x = ClampValue(x, m_WholeNumbers);
+        }
+        public void SetY(float y)
+        {
+            value.y = ClampValue(y, m_WholeNumbers);
+        }
+        static float ClampValue(float value, bool wholeNumbers)
+        {
+            if (wholeNumbers)
+                return value.ToInteger().Clamp(-1, 1);
+            else
+                return value.Clamp(-1, 1);
+        }
+        static Vector2 ClampValue(Vector2 value, bool wholeNumbers)
+        {
+            return new Vector2(ClampValue(value.x, wholeNumbers), ClampValue(value.y, wholeNumbers));
+        }
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
+        public Vector2Int ToInteger()
+        {
+            return new Vector2Int(value.x.ToInteger(), value.y.ToInteger());
+        }
+        public BiaxValue(bool wholeNumbers = false)
+        {
+            value = new Vector2();
+            m_WholeNumbers = wholeNumbers;
+        }
+        public BiaxValue(Vector2 value, bool wholeNumbers = false)
+        {
+            this.value = ClampValue(value, wholeNumbers);
+            m_WholeNumbers = wholeNumbers;
+        }
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+        public override bool Equals(object other)
+        {
+            if (other is Vector2)
+            {
+                return Equals((Vector2)other);
+            }
+            else if (other is BiaxValue)
+            {
+                return Equals((BiaxValue)other);
+            }
+            return false;
+        }
+        public bool Equals(Vector2 other)
+        {
+            return value == other;
+        }
+        public bool Equals(BiaxValue other)
+        {
+            return value == other.value;
+        }
+        public static implicit operator BiaxValue(Vector2 value) { return new BiaxValue(value); }
+        public static implicit operator Vector2(BiaxValue value) { return value.Value; }
+        public static BiaxValue operator +(BiaxValue a, Vector2 b) { return a.value + b; }
+        public static BiaxValue operator +(BiaxValue a, BiaxValue b) { return a.value + b.value; }
+        public static BiaxValue operator -(BiaxValue a, Vector2 b) { return a.value + b; }
+        public static BiaxValue operator -(BiaxValue a, BiaxValue b) { return a.value - b.value; }
+        public static BiaxValue operator *(BiaxValue a, Vector2 b) { return a.value * b; }
+        public static BiaxValue operator *(BiaxValue a, BiaxValue b) { return a.value * b.value; }
+        public static BiaxValue operator /(BiaxValue a, Vector2 b) { return a.value / b; }
+        public static BiaxValue operator /(BiaxValue a, BiaxValue b) { return a.value / b.value; }
+        public static BiaxValue operator *(BiaxValue a, float d) { return a.value * d; }
+        public static BiaxValue operator *(float d, BiaxValue a) { return a.value * d; }
+        public static BiaxValue operator /(BiaxValue a, float d) { return a.value / d; }
+        public static bool operator ==(BiaxValue lhs, Vector2 rhs) { return lhs.value == rhs; }
+        public static bool operator ==(BiaxValue lhs, BiaxValue rhs) { return lhs.value == rhs.value; }
+        public static bool operator !=(BiaxValue lhs, Vector2 rhs) { return !(lhs == rhs); }
+        public static bool operator !=(BiaxValue lhs, BiaxValue rhs) { return !(lhs == rhs); }
     }
     public enum RotationAxis
     {
@@ -2623,6 +2795,18 @@ namespace RyuGiKen
         /// 二维坐标转三维坐标
         /// </summary>
         /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3 ToVector3(this Vector2 value, bool swapYZ, float valueY = 0)
+        {
+            if (swapYZ)
+                return new Vector3(value.x, valueY, value.y);
+            else
+                return new Vector3(value.x, value.y);
+        }
+        /// <summary>
+        /// 二维坐标转三维坐标
+        /// </summary>
+        /// <param name="value"></param>
         /// <param name="valueZ"></param>
         /// <returns></returns>
         public static Vector3 ToVector3(this Vector2 value, float valueZ = 0)
@@ -2661,13 +2845,62 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 字符串转转三维坐标
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static Vector3 ToVector3(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str) || str.CountNumInString() < 1)
+                return Vector3.zero;
+            StringBuilder data = new StringBuilder();
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (char.IsNumber(str[i]) || str[i] == '.' || str[i] == ',')
+                {
+                    data.Append(str[i]);
+                }
+            }
+            string[] temp = data.ToString().Split(',');
+            if (temp.Length >= 3)
+                return new Vector3(temp[0].ToFloat(), temp[1].ToFloat(), temp[2].ToFloat());
+            else if (temp.Length >= 2)
+                return new Vector3(temp[0].ToFloat(), temp[1].ToFloat());
+            return Vector3.zero;
+        }
+        /// <summary>
+        /// 字符串转转二维坐标
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static Vector2 ToVector2(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str) || str.CountNumInString() < 1)
+                return Vector2.zero;
+            StringBuilder data = new StringBuilder();
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (char.IsNumber(str[i]) || str[i] == '.' || str[i] == ',')
+                {
+                    data.Append(str[i]);
+                }
+            }
+            string[] temp = data.ToString().Split(',');
+            if (temp.Length >= 2)
+                return new Vector2(temp[0].ToFloat(), temp[1].ToFloat());
+            return Vector2.zero;
+        }
+        /// <summary>
         /// 三维坐标转二维坐标
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Vector2 ToVector2(this Vector3 value)
+        public static Vector2 ToVector2(this Vector3 value, bool swapYZ = false)
         {
-            return new Vector2(value.x, value.y);
+            if (swapYZ)
+                return new Vector2(value.x, value.z);
+            else
+                return new Vector2(value.x, value.y);
         }
         /// <summary>
         /// x,y数组转二维坐标数组
@@ -2763,6 +2996,15 @@ namespace RyuGiKen
         public static Vector3 DirectionToLocalEulerAngles(this Transform transform, Vector3 direction)
         {
             Vector3 LocalDirection = transform.InverseTransformDirection(direction);//局部方向
+            return DirectionToEulerAngles(LocalDirection);
+        }
+        /// <summary>
+        /// 方向转角度
+        /// </summary>
+        /// <param name="LocalDirection">方向</param>
+        /// <returns></returns>
+        public static Vector3 DirectionToEulerAngles(Vector3 LocalDirection)
+        {
             Vector3 LocalEulerAngles = Vector3.zero;
             LocalEulerAngles.x = -Mathf.Atan2(LocalDirection.y, LocalDirection.z) / Mathf.PI * 180;
             LocalEulerAngles.y = Mathf.Atan2(LocalDirection.x, LocalDirection.z) / Mathf.PI * 180;
@@ -4143,6 +4385,68 @@ namespace RyuGiKen
                 return array;
             else
                 return result;
+        }
+        /// <summary>
+        /// 检查数组长度
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="targetLength"></param>
+        /// <returns></returns>
+        public static bool CheckArrayLength<T>(this T[] array, int targetLength)
+        {
+            return array != null && array.Length >= targetLength;
+        }
+        /// <summary>
+        /// 检查数组长度
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="targetLength"></param>
+        /// <returns></returns>
+        public static bool CheckListLength<T>(this List<T> list, int targetLength)
+        {
+            return list != null && list.Count >= targetLength;
+        }
+        /// <summary>
+        /// 数组取值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static T GetItem<T>(this T[] array, int index)
+        {
+            if (array == null || !CheckArrayLength(array, index + 1))
+                return default(T);
+            try
+            {
+                return array[index];
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+        /// <summary>
+        /// 列表取值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static T GetItem<T>(this List<T> list, int index)
+        {
+            if (list == null || !CheckListLength(list, index + 1))
+                return default(T);
+            try
+            {
+                return list[index];
+            }
+            catch
+            {
+                return default(T);
+            }
         }
         /// <summary>
         /// 随机抽取
@@ -5526,6 +5830,60 @@ namespace RyuGiKen
             return (float)Math.Sqrt(Math.Abs((X + b) / k));
         }
         /// <summary>
+        /// 获取抛物线位置
+        /// </summary>
+        /// <param name="StartPos">起点</param>
+        /// <param name="Speed">速度</param>
+        /// <param name="time">事件</param>
+        /// <returns></returns>
+        public static Vector3 GetParabolaPositionByTime(Vector3 StartPos, Vector3 Speed, float time)
+        {
+            return StartPos + time * Speed + (0.5f * time * time) * Physics.gravity;
+        }
+        /// <summary>
+        /// 获取抛物线最高点
+        /// </summary>
+        /// <param name="StartPos"></param>
+        /// <param name="StartSpeed"></param>
+        /// <returns></returns>
+        public static Vector3 GetParabolaZenith(Vector3 StartPos, Vector3 StartSpeed)
+        {
+            float UpTime = 0;
+            if (StartSpeed.y <= 0)
+                return StartPos;
+            else
+            {
+                UpTime = (StartSpeed.y / Physics.gravity.y).Abs();
+                Vector3 SpeedXZ = new Vector3(StartSpeed.x, 0, StartSpeed.z);
+                Vector3 result = StartPos;
+                result.y += 0.5f * StartSpeed.y * UpTime;
+                result += SpeedXZ * UpTime;
+                return result;
+            }
+        }
+        /// <summary>
+        /// 获取抛物线飞行时间
+        /// </summary>
+        /// <param name="StartPos">起点</param>
+        /// <param name="StartSpeed">速度</param>
+        /// <param name="MinHeight">结束高度</param>
+        /// <returns></returns>
+        public static float GetParabolaTime(Vector3 StartPos, Vector3 StartSpeed, float MinHeight)
+        {
+            float UpTime = 0;
+            float MaxHeight = 0;
+            if (StartSpeed.y > 0)
+            {
+                UpTime = (StartSpeed.y / Physics.gravity.y).Abs();
+                MaxHeight = 0.5f * StartSpeed.y * UpTime;
+            }
+            float Length = StartPos.y + MaxHeight - MinHeight;
+            if (Length <= 0)
+                Length = Mathf.Max(StartPos.y, MaxHeight, 0);
+            float DownTime = Mathf.Sqrt(Length * 2f / Physics.gravity.y.Abs());
+            return UpTime + DownTime;
+        }
+        /// <summary>
         /// 是否非数
         /// </summary>
         /// <param name="num"></param>
@@ -6653,6 +7011,18 @@ namespace RyuGiKen
             return Clamp(value, range.x, range.y);
         }
         /// <summary>
+        /// 限位。返回不小于min的值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <returns></returns>
+        public static Vector2 Clamp(this Vector2 value, Vector2 min)
+        {
+            Vector2 result = new Vector2();
+            result = new Vector2(value.x.Clamp(min.x), value.y.Clamp(min.y));
+            return result;
+        }
+        /// <summary>
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
         /// <param name="value"></param>
@@ -7314,9 +7684,9 @@ namespace RyuGiKen
         /// <summary>
         /// 判断点位于线段上
         /// </summary>
-        /// <param name="value">点</param>
-        /// <param name="start">起点</param>
-        /// <param name="end">重点</param>
+        /// <param name="point">点</param>
+        /// <param name="linePoint1">起点</param>
+        /// <param name="linePoint2">重点</param>
         /// <param name="errorRange">误差半径</param>
         /// <returns></returns>
         public static bool InLine(Vector3 point, Vector3 linePoint1, Vector3 linePoint2, float errorRange)
@@ -7331,6 +7701,38 @@ namespace RyuGiKen
                     result = true;
             }
             return result;
+        }
+        /// <summary>
+        /// 判断点位于连线范围内
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="border"></param>
+        /// <returns></returns>
+        public static bool InRange(Vector2 point, Vector2[] border)
+        {
+            if (border == null || border.Length < 1)
+                return false;
+            else if (border.Length < 2)
+                return point == border[0];
+            int i = 0;
+            int j = border.Length - 1;
+            int c = 0;
+            for (; i < border.Length; j = i++)
+            {
+                if (((border[i][1] > point[1]) != (border[j][1] > point[1]))
+                    && (point[0] < (border[j][0] - border[i][0]) * (point[1] - border[i][1]) / (border[j][1] - border[i][1]) + border[i][0]))
+                {
+                    c = 1 + c;
+                }
+            }
+            if (c % 2 == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
         /// <summary>
         /// 点到平面距离，三点确定一平面  
@@ -8862,6 +9264,50 @@ namespace RyuGiKen
         /// 不对称范围映射
         /// </summary>
         /// <param name="value">参数</param>
+        /// <param name="range">参数范围</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMiddle">输出中间值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float MappingAsymmetryRange(float value, ValueRange range, float OutputMin, float OutputMiddle, float OutputMax, int n = 1, bool limit = true)
+        {
+            return MappingAsymmetryRange(value, range.MinValue, range.MiddleValue, range.MaxValue, OutputMin, OutputMiddle, OutputMax, n, limit);
+        }
+        /// <summary>
+        /// 不对称范围映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMiddle">输出中间值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float MappingAsymmetryRange(ValueInRange value, float OutputMin, float OutputMiddle, float OutputMax, int n = 1, bool limit = true)
+        {
+            return MappingAsymmetryRange(value, value.MinValue, value.MiddleValue, value.MaxValue, OutputMin, OutputMiddle, OutputMax, n, limit);
+        }
+        /// <summary>
+        /// 不对称范围映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="min">参数最小值</param>
+        /// <param name="middle">参数中间值</param>
+        /// <param name="max">参数最大值</param>
+        /// <param name="OutputRange">输出范围</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float MappingAsymmetryRange(float value, float min, float middle, float max, ValueRange OutputRange, int n = 1, bool limit = true)
+        {
+            return MappingAsymmetryRange(value, min, middle, max, OutputRange.MinValue, OutputRange.MiddleValue, OutputRange.MaxValue, n, limit);
+        }
+        /// <summary>
+        /// 不对称范围映射
+        /// </summary>
+        /// <param name="value">参数</param>
         /// <param name="min">参数最小值</param>
         /// <param name="middle">参数中间值</param>
         /// <param name="max">参数最大值</param>
@@ -10133,13 +10579,50 @@ namespace RyuGiKenEditor
             float width = (position.width - 50f) / 3f;
             Rect valueRect = new Rect(position.x, position.y, width, position.height);
             Rect rangeRect = new Rect(valueRect.x + valueRect.width + 40, position.y, width * 2, position.height);
+            Rect lockRect = new Rect(valueRect.x + valueRect.width + 10, position.y, 30, position.height);
 
             float value = EditorGUI.DelayedFloatField(valueRect, property.FindPropertyRelative("value").floatValue);
-
+            bool lockRange = property.FindPropertyRelative("LockRange").boolValue;
+            property.FindPropertyRelative("LockRange").boolValue = EditorGUI.Toggle(lockRect, lockRange);
             Vector2 range = EditorGUI.Vector2Field(rangeRect, GUIContent.none, property.FindPropertyRelative("range").vector2Value);
-            property.FindPropertyRelative("range").vector2Value = ValueAdjust.FindMinAndMax(range.x, range.y);
-
+            if (!lockRange)
+                property.FindPropertyRelative("range").vector2Value = ValueAdjust.FindMinAndMax(range.x, range.y);
             property.FindPropertyRelative("value").floatValue = value.Clamp(property.FindPropertyRelative("range").vector2Value);
+            EditorGUI.indentLevel = indent;
+        }
+    }
+    [CustomPropertyDrawer(typeof(BiaxValue))]
+    public class BiaxValuePropertyDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            Rect wholeNumberRect = new Rect(position.x, position.y, 20, position.height);
+            Rect valueRect = new Rect(position.x + wholeNumberRect.width, position.y, position.width - wholeNumberRect.width, position.height);
+            bool wholeNumber = property.FindPropertyRelative("m_WholeNumbers").boolValue;
+            property.FindPropertyRelative("m_WholeNumbers").boolValue = EditorGUI.Toggle(wholeNumberRect, wholeNumber);
+            Vector2 value = EditorGUI.Vector2Field(valueRect, GUIContent.none, property.FindPropertyRelative("value").vector2Value);
+            if (wholeNumber)
+            {
+                value.x = value.x.ToInteger().Clamp(-1, 1);
+                value.y = value.y.ToInteger().Clamp(-1, 1);
+            }
+            else
+            {
+                value.x = value.x.Clamp(-1, 1);
+                value.y = value.y.Clamp(-1, 1);
+            }
+            property.FindPropertyRelative("value").vector2Value = value;
+
             EditorGUI.indentLevel = indent;
         }
     }
