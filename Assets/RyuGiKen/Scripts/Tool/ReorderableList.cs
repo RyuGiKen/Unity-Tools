@@ -363,6 +363,41 @@ namespace RyuGiKen
         public ReorderableListCamera(Camera[] array) { this.items = array != null ? array.ToList() : new List<Camera>(); }
         public ReorderableListCamera(List<Camera> list) { this.items = list; }
     }
+    [System.Serializable]
+    public class ReorderableListTexture : ReorderableList<Texture>
+    {
+        public ReorderableListTexture() { this.items = new List<Texture>(); }
+        public ReorderableListTexture(Texture[] array) { this.items = array != null ? array.ToList() : new List<Texture>(); }
+        public ReorderableListTexture(List<Texture> list) { this.items = list; }
+    }
+    [System.Serializable]
+    public class ReorderableListSprite : ReorderableList<Sprite>
+    {
+        public ReorderableListSprite() { this.items = new List<Sprite>(); }
+        public ReorderableListSprite(Sprite[] array) { this.items = array != null ? array.ToList() : new List<Sprite>(); }
+        public ReorderableListSprite(List<Sprite> list) { this.items = list; }
+    }
+    [System.Serializable]
+    public class ReorderableListAudioClip : ReorderableList<AudioClip>
+    {
+        public ReorderableListAudioClip() { this.items = new List<AudioClip>(); }
+        public ReorderableListAudioClip(AudioClip[] array) { this.items = array != null ? array.ToList() : new List<AudioClip>(); }
+        public ReorderableListAudioClip(List<AudioClip> list) { this.items = list; }
+    }
+    [System.Serializable]
+    public class ReorderableListMaterial : ReorderableList<Material>
+    {
+        public ReorderableListMaterial() { this.items = new List<Material>(); }
+        public ReorderableListMaterial(Material[] array) { this.items = array != null ? array.ToList() : new List<Material>(); }
+        public ReorderableListMaterial(List<Material> list) { this.items = list; }
+    }
+    [System.Serializable]
+    public class ReorderableListAnimationClip : ReorderableList<AnimationClip>
+    {
+        public ReorderableListAnimationClip() { this.items = new List<AnimationClip>(); }
+        public ReorderableListAnimationClip(AnimationClip[] array) { this.items = array != null ? array.ToList() : new List<AnimationClip>(); }
+        public ReorderableListAnimationClip(List<AnimationClip> list) { this.items = list; }
+    }
 #endif
     [System.Serializable]
     public class ReorderableListValueRange : ReorderableList<ValueRange>

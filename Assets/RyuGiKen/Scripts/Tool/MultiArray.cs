@@ -2110,6 +2110,316 @@ namespace RyuGiKen
             }
         }
     }
+    [Serializable]
+    public class MultiArrayTexture : MultiArrayExtension<Texture>
+    {
+        public new List<ReorderableListTexture> items;
+        public MultiArrayTexture(Texture[][] array)
+        {
+            this.items = new List<ReorderableListTexture>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListTexture(array[i]));
+        }
+        public MultiArrayTexture(ReorderableList<Texture>[] array)
+        {
+            this.items = new List<ReorderableListTexture>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListTexture(array[i].ToArray()));
+        }
+        public MultiArrayTexture(ReorderableListTexture[] array)
+        {
+            this.items = new List<ReorderableListTexture>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayTexture(List<ReorderableList<Texture>> list)
+        {
+            this.items = new List<ReorderableListTexture>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListTexture(list[i].ToArray()));
+        }
+        public MultiArrayTexture(List<ReorderableListTexture> list) { this.items = list; }
+        public override Texture GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override Texture GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
+    public class MultiArraySprite : MultiArrayExtension<Sprite>
+    {
+        public new List<ReorderableListSprite> items;
+        public MultiArraySprite(Sprite[][] array)
+        {
+            this.items = new List<ReorderableListSprite>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListSprite(array[i]));
+        }
+        public MultiArraySprite(ReorderableList<Sprite>[] array)
+        {
+            this.items = new List<ReorderableListSprite>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListSprite(array[i].ToArray()));
+        }
+        public MultiArraySprite(ReorderableListSprite[] array)
+        {
+            this.items = new List<ReorderableListSprite>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArraySprite(List<ReorderableList<Sprite>> list)
+        {
+            this.items = new List<ReorderableListSprite>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListSprite(list[i].ToArray()));
+        }
+        public MultiArraySprite(List<ReorderableListSprite> list) { this.items = list; }
+        public override Sprite GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override Sprite GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
+    public class MultiArrayAudioClip : MultiArrayExtension<AudioClip>
+    {
+        public new List<ReorderableListAudioClip> items;
+        public MultiArrayAudioClip(AudioClip[][] array)
+        {
+            this.items = new List<ReorderableListAudioClip>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListAudioClip(array[i]));
+        }
+        public MultiArrayAudioClip(ReorderableList<AudioClip>[] array)
+        {
+            this.items = new List<ReorderableListAudioClip>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListAudioClip(array[i].ToArray()));
+        }
+        public MultiArrayAudioClip(ReorderableListAudioClip[] array)
+        {
+            this.items = new List<ReorderableListAudioClip>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayAudioClip(List<ReorderableList<AudioClip>> list)
+        {
+            this.items = new List<ReorderableListAudioClip>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListAudioClip(list[i].ToArray()));
+        }
+        public MultiArrayAudioClip(List<ReorderableListAudioClip> list) { this.items = list; }
+        public override AudioClip GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override AudioClip GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
+    public class MultiArrayMaterial : MultiArrayExtension<Material>
+    {
+        public new List<ReorderableListMaterial> items;
+        public MultiArrayMaterial(Material[][] array)
+        {
+            this.items = new List<ReorderableListMaterial>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListMaterial(array[i]));
+        }
+        public MultiArrayMaterial(ReorderableList<Material>[] array)
+        {
+            this.items = new List<ReorderableListMaterial>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListMaterial(array[i].ToArray()));
+        }
+        public MultiArrayMaterial(ReorderableListMaterial[] array)
+        {
+            this.items = new List<ReorderableListMaterial>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayMaterial(List<ReorderableList<Material>> list)
+        {
+            this.items = new List<ReorderableListMaterial>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListMaterial(list[i].ToArray()));
+        }
+        public MultiArrayMaterial(List<ReorderableListMaterial> list) { this.items = list; }
+        public override Material GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override Material GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
+    public class MultiArrayAnimationClip : MultiArrayExtension<AnimationClip>
+    {
+        public new List<ReorderableListAnimationClip> items;
+        public MultiArrayAnimationClip(AnimationClip[][] array)
+        {
+            this.items = new List<ReorderableListAnimationClip>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListAnimationClip(array[i]));
+        }
+        public MultiArrayAnimationClip(ReorderableList<AnimationClip>[] array)
+        {
+            this.items = new List<ReorderableListAnimationClip>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListAnimationClip(array[i].ToArray()));
+        }
+        public MultiArrayAnimationClip(ReorderableListAnimationClip[] array)
+        {
+            this.items = new List<ReorderableListAnimationClip>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayAnimationClip(List<ReorderableList<AnimationClip>> list)
+        {
+            this.items = new List<ReorderableListAnimationClip>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListAnimationClip(list[i].ToArray()));
+        }
+        public MultiArrayAnimationClip(List<ReorderableListAnimationClip> list) { this.items = list; }
+        public override AnimationClip GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override AnimationClip GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
 #endif
     [Serializable]
     public class MultiArrayValueRange : MultiArrayExtension<ValueRange>
