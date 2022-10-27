@@ -1,9 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using RyuGiKen.Tools;
+using UnityEngine.Rendering.VirtualTexturing;
+
 namespace RyuGiKenEditor.Tools
 {
     /// <summary>
@@ -26,7 +28,20 @@ namespace RyuGiKenEditor.Tools
             string input = RyuGiKen.Tools.Version.SetVersionNumber(Application.version);
             if ((buildOptions & BuildOptions.Development) == BuildOptions.Development)
             {
-                input = input.Replace("v", "b");
+                switch (Version.SignType)//前缀
+                {
+                    case Version.VersionSignType.None:
+                    case Version.VersionSignType.SamePrefix:
+                        break;
+                    case Version.VersionSignType.BothPrefix:
+                    case Version.VersionSignType.BothPostfix:
+                        input = input.Replace(Version.ReleaseSign, Version.DebugSign);
+                        break;
+                    case Version.VersionSignType.SamePrefixAndOnlyDebugPostfix:
+                    case Version.VersionSignType.OnlyDebugPostfix:
+                        input = input.Replace(Version.DebugSign, "");
+                        break;
+                }
             }
             string str = "构建前请确定版本号\n设置版本号为：" + Application.version + "\n";
             if (PlayerSettings.bundleVersion != input)
