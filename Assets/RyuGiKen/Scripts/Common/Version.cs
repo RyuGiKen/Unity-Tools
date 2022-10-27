@@ -77,6 +77,10 @@ namespace RyuGiKen.Tools
 		void UpdateVersionNumber()
 		{
 			versionNumber = SetVersionNumber(Application.version);
+#if UNITY_EDITOR && false
+			if (UnityEditor.PlayerSettings.bundleVersion != versionNumber)
+				UnityEditor.PlayerSettings.bundleVersion = versionNumber;
+#endif
 			this.GetComponent<Text>().text = versionNumber;
 		}
 		/// <summary>

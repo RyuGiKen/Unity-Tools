@@ -35,6 +35,16 @@ namespace WindowsAPI
         //[DllImport("user32.dll", EntryPoint = "SetScrollInfo", CallingConvention = CallingConvention.StdCall)]
         //public static extern int SetScrollInfo(IntPtr hwnd, int fnBar, [In] ref SCROLLINFO lpsi, bool fRedraw);
         /// <summary>
+        /// 弹窗提示
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <param name="message">内容</param>
+        /// <param name="title">标题</param>
+        /// <param name="type">0确定，1确定/取消，2终止/重试/忽略，3是/否/取消，4是/否，5重试/取消</param>
+        /// <returns>1确定，2取消，3终止，4重试，5忽略，6是，7否</returns>
+        [DllImport("user32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Unicode)]
+        public static extern int MessageBox(IntPtr hWnd, string message, string title, uint type = 0);
+        /// <summary>
         /// 限制屏幕旋转
         /// <para>0不指定</para>
         /// <para>1横屏</para>
