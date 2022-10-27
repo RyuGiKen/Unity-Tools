@@ -259,6 +259,7 @@ namespace RyuGiKen.Tools
             }
             bool result = User32.SetWindowPos(HWndIntPtr, 1, state.WindowPosX, state.WindowPosY, state.WindowWidth, state.WindowHeight, SWP_SHOWWINDOW);//设置屏幕大小和位置
             canRefreshSecondScreen = true;
+            DebugL.Log("副屏设置" + result);
         }
         /// <summary>
         /// 窗口置顶
@@ -328,6 +329,13 @@ namespace RyuGiKen.Tools
             int height = fullscreen ? Display.displays[displayIndex].systemHeight : Screen.height;
             Vector2Int resolution = new Vector2Int((width * percent).ToInteger(), (height * percent).ToInteger());
             Screen.SetResolution(resolution.x, resolution.y, fullscreen);
+        }
+        /// <summary>
+        /// 分辨率
+        /// </summary>
+        public static string GetResolution()
+        {
+            return string.Format("{0} x {1} @ {2}Hz", Screen.width, Screen.height, Screen.currentResolution.refreshRate);
         }
         /// <summary>
         /// 判断横竖屏

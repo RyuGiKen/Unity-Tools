@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Net;
@@ -1246,6 +1247,15 @@ namespace RyuGiKen
         /// <summary>
         /// 显示
         /// </summary>
+        public static bool IsActiveAndEnabled(this Renderer benderer)
+        {
+            if (benderer && benderer.enabled && benderer.gameObject.activeInHierarchy)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 显示
+        /// </summary>
         public static bool IsActiveAndEnabledAndNotClear(this Graphic graphic)
         {
             if (graphic && graphic.isActiveAndEnabled && !graphic.IsClear())
@@ -2318,17 +2328,23 @@ namespace RyuGiKen
         }
         public override string ToString()
         {
-            return Value + "：" + Range;
-        }
-        public string ToString(bool includeRange = false)
-        {
-            return Value.ToString() + (includeRange ? Range.ToString() : "");
+            return ToString(true);
         }
         public override string ToString(string format)
         {
-            return Value.ToString(format) + Range.ToString(format);
+            if (bool.TryParse(format, out bool includeRange))
+                return ToString(includeRange);
+            return ToString(true, format);
         }
-        public string ToString(string format, bool includeRange = false)
+        public string ToString(bool includeRange)
+        {
+            return Value.ToString() + (includeRange ? ("：" + Range.ToString()) : "");
+        }
+        public string ToString(bool includeRange, string format)
+        {
+            return Value.ToString(format) + (includeRange ? ("：" + Range.ToString(format)) : "");
+        }
+        public string ToString(string format, bool includeRange)
         {
             return Value.ToString(format) + (includeRange ? Range.ToString(format) : "");
         }
@@ -2528,6 +2544,50 @@ namespace RyuGiKen
             {
                 return string.Concat(bytes, " Bytes");
             }
+        }
+        /// <summary>
+        /// 获取范围内点
+        /// </summary>
+        /// <param name="bounds"></param>
+        /// <param name="x">[-1，1]</param>
+        /// <param name="y">[-1，1]</param>
+        /// <param name="z">[-1，1]</param>
+        /// <returns></returns>
+        public static Vector3 GetPoint(this Bounds bounds, int x, int y, int z)
+        {
+            Vector3 result = new Vector3();
+            if (x > 0)
+                result.x = bounds.max.x;
+            else if (x < 0)
+                result.x = bounds.min.x;
+            else
+                result.x = bounds.center.x;
+
+            if (y > 0)
+                result.y = bounds.max.y;
+            else if (y < 0)
+                result.y = bounds.min.y;
+            else
+                result.y = bounds.center.y;
+
+            if (z > 0)
+                result.z = bounds.max.z;
+            else if (z < 0)
+                result.z = bounds.min.z;
+            else
+                result.z = bounds.center.z;
+
+            return result;
+        }
+        /// <summary>
+        /// 获取范围内点
+        /// </summary>
+        /// <param name="bounds"></param>
+        /// <param name="percent">[-1，1]</param>
+        /// <returns></returns>
+        public static Vector3 GetPoint(this Bounds bounds, Vector3Int percent)
+        {
+            return GetPoint(bounds, percent.x, percent.y, percent.z);
         }
         /// <summary>
         /// 转速转角速度
@@ -4534,7 +4594,6 @@ namespace RyuGiKen
         /// 交错数组初始化
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="array"></param>
         /// <param name="length1"></param>
         /// <param name="length2"></param>
         /// <returns></returns>
@@ -4630,7 +4689,34 @@ namespace RyuGiKen
             {
                 str += "  [" + i + "] ";
                 if (array[i] != null)
+                {
                     str += array[i].ToString();
+                }
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="includeRange">包含范围</param>
+        /// <param name="newline">换行</param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static string PrintArray(this ValueInRange[] array, bool includeRange, bool newline = false, string format = null)
+        {
+            if (array == null || array.Length < 1)
+                return "";
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                str += "  [" + i + "] ";
+                if (array[i] != null)
+                {
+                    str += array[i].ToString(format, includeRange);
+                }
                 if (newline)
                     str += "\n";
             }

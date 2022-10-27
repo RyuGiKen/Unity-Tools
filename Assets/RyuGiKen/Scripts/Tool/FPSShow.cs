@@ -7,6 +7,8 @@ using UnityEngine.UI;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using RyuGiKen;
+using RyuGiKen.Tools;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -262,6 +264,9 @@ namespace RyuGiKen.Tools
                 Log();
         }
     }
+}
+namespace RyuGiKenEditor
+{
 #if UNITY_EDITOR
     [CustomEditor(typeof(FPSShow))]
     public class FPSShowEditor : Editor

@@ -13,6 +13,7 @@ namespace RyuGiKen.Tools
     /// </summary>
     [AddComponentMenu("RyuGiKen/实时显示Transform属性")]
     [RequireComponent(typeof(Transform))]
+    [DisallowMultipleComponent]
     public class ShowTransfromData : MonoBehaviour
     {
         [SerializeField] Transform _Transform;
@@ -32,10 +33,6 @@ namespace RyuGiKen.Tools
         {
             if (!_Transform)
                 _Transform = this.GetComponent<Transform>();
-        }
-        private void LateUpdate()
-        {
-
         }
     }
 }
