@@ -387,45 +387,6 @@ namespace RyuGiKenEditor.Localization
             {
                 Clear(true);
             }
-#if false
-            if (GUILayout.Button("Copy From Setting"))
-            {
-                SerializedProperty[] settings = new SerializedProperty[3];
-                for (int i = 0; i < 3; i++)
-                {
-                    settings[i] = serializedObject.FindProperty("setting").GetArrayElementAtIndex(i);
-                }
-                for (int i = 0; i < Size.Length; i++)
-                {
-                    LanguageSettingItem[] temp = ((LanguageSetting)settings[0].objectReferenceValue).items;
-                    /*Debug.Log(temp);
-                    Debug.Log(temp.Length);
-                    Debug.Log(temp[i]);
-                    Debug.Log(temp[i].type);
-                    Debug.Log(Items[i]);
-                    Debug.Log(items.GetArrayElementAtIndex(i).FindPropertyRelative("type").enumValueIndex);*/
-                    items.GetArrayElementAtIndex(i).FindPropertyRelative("type").enumValueIndex = (int)temp[i].type;
-                    for (int j = 0; j < 3; j++)
-                    {
-                        try
-                        {
-                            LanguageSettingItem settemp = ((LanguageSetting)settings[j].objectReferenceValue).items[i];
-                            SerializedProperty itemtemp = Items[i].GetArrayElementAtIndex(j);
-                            if ((int)((LanguageSetting)settings[j].objectReferenceValue).language == itemtemp.FindPropertyRelative("language").enumValueIndex)
-                            {
-                                itemtemp.FindPropertyRelative("type").enumValueIndex = (int)settemp.type;
-                                itemtemp.FindPropertyRelative("str").stringValue = settemp.str;
-                                itemtemp.FindPropertyRelative("audioClip").objectReferenceValue = settemp.audioClip;
-                                itemtemp.FindPropertyRelative("sprite").objectReferenceValue = settemp.sprite;
-                                itemtemp.FindPropertyRelative("texture").objectReferenceValue = settemp.texture;
-                                itemtemp.FindPropertyRelative("otherObject").objectReferenceValue = settemp.otherObject;
-                            }
-                        }
-                        catch { }
-                    }
-                }
-            }
-#endif
             serializedObject.ApplyModifiedProperties();
             base.OnInspectorGUI();
         }

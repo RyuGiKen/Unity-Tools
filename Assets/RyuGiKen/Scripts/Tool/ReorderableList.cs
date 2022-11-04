@@ -461,6 +461,10 @@ namespace RyuGiKenEditor
                     else
                         ReorderableList.defaultBehaviours.DoAddButton(List);
                 };
+                //list.onChangedCallback = (ReorderableList List) =>
+                //{
+                //    Debug.Log("Changed");
+                //};
                 //list.onRemoveCallback = (ReorderableList List) =>
                 //{
                 //    //ReorderableList.defaultBehaviours.DoRemoveButton(List);

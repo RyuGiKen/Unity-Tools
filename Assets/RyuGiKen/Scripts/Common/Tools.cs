@@ -4165,33 +4165,28 @@ namespace RyuGiKen
         /// <returns></returns>
         public static List<T> AddList<T>(this List<T> list01, List<T> list02, bool changeSelf = true)
         {
+            if (list01 == null)
+                return null;
+            if (list02 == null)
+                return list01;
             List<T> result = new List<T>();
             if (changeSelf)
             {
-                if (list01 != null)
+                for (int i = 0; i < list02.Count; i++)
                 {
-                    for (int i = 0; i < list02.Count; i++)
-                    {
-                        list01.Add(list02[i]);
-                    }
+                    list01.Add(list02[i]);
                 }
                 result = list01;
             }
             else
             {
-                if (list01 != null)
+                for (int i = 0; i < list01.Count; i++)
                 {
-                    for (int i = 0; i < list01.Count; i++)
-                    {
-                        result.Add(list01[i]);
-                    }
+                    result.Add(list01[i]);
                 }
-                if (list02 != null)
+                for (int i = 0; i < list02.Count; i++)
                 {
-                    for (int i = 0; i < list02.Count; i++)
-                    {
-                        result.Add(list02[i]);
-                    }
+                    result.Add(list02[i]);
                 }
             }
             return result;
@@ -7787,6 +7782,16 @@ namespace RyuGiKen
                     result = true;
             }
             return result;
+        }
+        /// <summary>
+        /// 判断点位于范围内
+        /// </summary>
+        /// <param name="bounds"></param>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public static bool InRange(Bounds bounds, Vector3 pos)
+        {
+            return pos.x.InRange(bounds.min.x, bounds.max.x) && pos.y.InRange(bounds.min.y, bounds.max.y) && pos.z.InRange(bounds.min.z, bounds.max.z);
         }
         /// <summary>
         /// 判断点位于连线范围内
