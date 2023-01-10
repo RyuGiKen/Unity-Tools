@@ -1295,6 +1295,47 @@ namespace RyuGiKen
             }
         }
         /// <summary>
+        /// 设置文本
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="str"></param>
+        public static void SetText(this Text text, string str)
+        {
+            if (!text)
+                return;
+            text.text = str;
+        }
+        /// <summary>
+        /// 设置文本
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="str"></param>
+        public static void SetText(this Text[] text, string[] str)
+        {
+            if (!text.CheckArrayLength(1))
+                return;
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i])
+                    text[i].text = str.GetItem(i);
+            }
+        }
+        /// <summary>
+        /// 设置文本
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="str"></param>
+        public static void SetText(this List<Text> text, string[] str)
+        {
+            if (!text.CheckListLength(1))
+                return;
+            for (int i = 0; i < text.Count; i++)
+            {
+                if (text[i])
+                    text[i].text = str.GetItem(i);
+            }
+        }
+        /// <summary>
         /// 获取对象所有子对象
         /// </summary>
         /// <param name="GO"></param>
