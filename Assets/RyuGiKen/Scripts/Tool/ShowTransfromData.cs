@@ -72,7 +72,8 @@ namespace RyuGiKenEditor.Tools
                     EditorGUILayout.Vector2Field("sizeDelta", rectTransform.sizeDelta);
                     EditorGUILayout.Vector2Field("anchorMin", rectTransform.anchorMin);
                     EditorGUILayout.Vector2Field("anchorMax", rectTransform.anchorMax);
-                    EditorGUILayout.Vector4Field("rect：", new Vector4(rectTransform.rect.x, rectTransform.rect.y, rectTransform.rect.width, rectTransform.rect.height));
+                    //EditorGUILayout.Vector4Field("rect：", new Vector4(rectTransform.rect.x, rectTransform.rect.y, rectTransform.rect.width, rectTransform.rect.height));
+                    EditorGUILayout.RectField("rect：", rectTransform.rect);
                 }
             }
         }
