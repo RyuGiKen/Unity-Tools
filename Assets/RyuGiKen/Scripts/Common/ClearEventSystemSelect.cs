@@ -13,10 +13,12 @@ public class ClearEventSystemSelect : MonoBehaviour
     public GameObject Selected;
     void Update()
     {
-        Selected = EventSystem.current.currentSelectedGameObject;
+        Selected = EventSystem.current?.currentSelectedGameObject;
     }
     void LateUpdate()
     {
+        if (!EventSystem.current)
+            return;
         Selectable selectable = null;
         if (EventSystem.current.currentSelectedGameObject)
             EventSystem.current.currentSelectedGameObject.TryGetComponent<Selectable>(out selectable);

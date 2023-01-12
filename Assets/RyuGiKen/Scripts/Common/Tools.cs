@@ -2153,7 +2153,7 @@ namespace RyuGiKen
     /// 范围
     /// </summary>
     [Serializable]
-    public class ValueRange
+    public struct ValueRange
     {
         /// <summary>
         /// 范围长度
@@ -2174,7 +2174,7 @@ namespace RyuGiKen
 #if UNITY_EDITOR || UNITY_STANDALONE
         [SerializeField]
 #endif
-        protected Vector2 range;
+        private Vector2 range;
         /// <summary>
         /// 范围
         /// </summary>
@@ -2206,10 +2206,10 @@ namespace RyuGiKen
             set { SetRange(Range.x, value); }
             get { return Range.y; }
         }
-        public ValueRange()
+        /*public ValueRange()
         {
             range = new Vector2(float.NaN, float.NaN);
-        }
+        }*/
         public ValueRange(float min, float max)
         {
             range = new Vector2();
@@ -2224,7 +2224,7 @@ namespace RyuGiKen
         /// 设置范围
         /// </summary>
         /// <param name="range"></param>
-        public virtual void SetRange(Vector2 range)
+        public void SetRange(Vector2 range)
         {
             ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
         }
@@ -2233,7 +2233,7 @@ namespace RyuGiKen
         /// </summary>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>
-        public virtual void SetRange(float min, float max)
+        public void SetRange(float min, float max)
         {
             ValueAdjust.FindMinAndMax(min, max, out range.x, out range.y);
         }
@@ -2241,13 +2241,33 @@ namespace RyuGiKen
         {
             return Range.ToString();
         }
-        public virtual string ToString(string format)
+        public string ToString(string format)
         {
             return Range.ToString(format);
+        }
+        public override int GetHashCode()
+        {
+            return range.GetHashCode();
+        }
+        public override bool Equals(object other)
+        {
+            if (other is Vector2)
+            {
+                return Equals((Vector2)other);
+            }
+            return false;
+        }
+        public bool Equals(Vector2 other)
+        {
+            return range == other;
         }
         //public static implicit operator ValueRange(ValueInRange value) { return new ValueRange(value.Range); }
         public static implicit operator ValueRange(Vector2 value) { return new ValueRange(value); }
         public static implicit operator Vector2(ValueRange value) { return value.range; }
+        public static bool operator ==(ValueRange lhs, Vector2 rhs) { return lhs.range == rhs; }
+        public static bool operator ==(ValueRange lhs, ValueRange rhs) { return lhs.range == rhs.range; }
+        public static bool operator !=(ValueRange lhs, Vector2 rhs) { return !(lhs == rhs); }
+        public static bool operator !=(ValueRange lhs, ValueRange rhs) { return !(lhs == rhs); }
 #if UNITY_EDITOR || UNITY_STANDALONE
         public static implicit operator ValueRange(Vector2Int value) { return new ValueRange(value); }
 #endif
@@ -2256,13 +2276,44 @@ namespace RyuGiKen
     /// 限位值
     /// </summary>
     [Serializable]
-    public class ValueInRange : ValueRange
+    public struct ValueInRange
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         [SerializeField]
 #endif
         private float value;
+        /// <summary>
+        /// 范围
+        /// </summary>
+#if UNITY_EDITOR || UNITY_STANDALONE
+        [SerializeField]
+#endif
+        private Vector2 range;
+        /// <summary>
+        /// 锁定范围
+        /// </summary>
         public bool LockRange;
+        /// <summary>
+        /// 范围
+        /// </summary>
+        public Vector2 Range
+        {
+            set { SetRange(value); }
+            get { return range; }
+        }
+        /// <summary>
+        /// 范围长度
+        /// </summary>
+        public float Length
+        {
+            get
+            {
+                if (float.IsNaN(Range.x) || float.IsNaN(Range.y))
+                    return float.NaN;
+                else
+                    return (Range.y - Range.x).Abs();
+            }
+        }
         public float Value
         {
             set { this.value = value.Clamp(range); }
@@ -2281,56 +2332,77 @@ namespace RyuGiKen
                 return this.ToPercent01();
             }
         }
-        public ValueInRange()
+        /// <summary>
+        /// 最小值
+        /// </summary>
+        public float MinValue
+        {
+            set { SetRange(value, Range.y); }
+            get { return Range.x; }
+        }
+        /// <summary>
+        /// 中间值
+        /// </summary>
+        public float MiddleValue
+        {
+            get { return (Range.x + Range.y) * 0.5f; }
+        }
+        /// <summary>
+        /// 最大值
+        /// </summary>
+        public float MaxValue
+        {
+            set { SetRange(Range.x, value); }
+            get { return Range.y; }
+        }
+        /*public ValueInRange()
         {
             value = 0;
             range = new Vector2(float.NaN, float.NaN);
             LockRange = false;
-        }
+        }*/
         public ValueInRange(float value)
         {
             this.value = value;
             range = new Vector2(float.NaN, float.NaN);
             LockRange = false;
         }
-        public ValueInRange(float value, float min, float max, bool lockRange = false)
+        public ValueInRange(float Value, float min, float max, bool lockRange = false)
         {
-            this.value = value;
             range = new Vector2();
+            LockRange = lockRange;
+            value = Value;
             SetRange(min, max);
-            LockRange = lockRange;
         }
-        public ValueInRange(float value, Vector2 range, bool lockRange = false)
+        public ValueInRange(float Value, Vector2 m_Range, bool lockRange = false)
         {
-            this.value = value;
-            this.range = new Vector2();
-            SetRange(range);
+            value = Value;
+            range = new Vector2();
             LockRange = lockRange;
+            SetRange(m_Range);
         }
-        public ValueInRange(float value, ValueRange range, bool lockRange = false)
+        public ValueInRange(float Value, ValueRange m_Range, bool lockRange = false)
         {
-            this.value = value;
-            this.range = new Vector2();
-            SetRange(range);
+            value = Value;
+            range = new Vector2();
             LockRange = lockRange;
+            SetRange(m_Range);
         }
-        public override void SetRange(Vector2 range)
+        public void SetRange(Vector2 range)
         {
             if (!LockRange)
-                base.SetRange(range);
-
-            ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
+                ValueAdjust.FindMinAndMax(range.x, range.y, out this.range.x, out this.range.y);
         }
-        public override void SetRange(float min, float max)
+        public void SetRange(float min, float max)
         {
             if (!LockRange)
-                base.SetRange(min, max);
+                ValueAdjust.FindMinAndMax(min, max, out range.x, out range.y);
         }
         public override string ToString()
         {
             return ToString(true);
         }
-        public override string ToString(string format)
+        public string ToString(string format)
         {
             if (bool.TryParse(format, out bool includeRange))
                 return ToString(includeRange);
@@ -2347,6 +2419,30 @@ namespace RyuGiKen
         public string ToString(string format, bool includeRange)
         {
             return Value.ToString(format) + (includeRange ? Range.ToString(format) : "");
+        }
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+        public override bool Equals(object other)
+        {
+            if (other is ValueInRange)
+            {
+                return Equals((ValueInRange)other);
+            }
+            if (other is float)
+            {
+                return Equals((float)other);
+            }
+            return false;
+        }
+        public bool Equals(float other)
+        {
+            return value == other;
+        }
+        public bool Equals(ValueInRange other)
+        {
+            return value == other.value && range == other.range;
         }
         //public static implicit operator ValueInRange(float value) { return new ValueInRange(value); }
         //public static implicit operator ValueInRange(double value) { return new ValueInRange(value.ToFloat()); }
@@ -2382,6 +2478,10 @@ namespace RyuGiKen
         public static double operator /(ValueInRange a, double b) { return a.Value / b; }
         public static decimal operator +(ValueInRange a, decimal b) { return a.Value.ToDecimal() + b; }
         public static decimal operator -(ValueInRange a, decimal b) { return a.Value.ToDecimal() - b; }
+        public static bool operator ==(ValueInRange lhs, float rhs) { return lhs.value == rhs; }
+        public static bool operator ==(ValueInRange lhs, ValueInRange rhs) { return lhs.value == rhs.value; }
+        public static bool operator !=(ValueInRange lhs, float rhs) { return !(lhs.value == rhs); }
+        public static bool operator !=(ValueInRange lhs, ValueInRange rhs) { return !(lhs == rhs); }
     }
     /// <summary>
     /// 双轴值(Vector2限位值)
@@ -2769,6 +2869,78 @@ namespace RyuGiKen
         public static int GetEnumLength(Type enumType)
         {
             return System.Enum.GetNames(enumType).Length;
+        }
+        /// <summary>
+        /// 元组提取元素
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="tuples"></param>
+        /// <returns></returns>
+        public static T1[] TupleArrayGetItem1<T1, T2>(this Tuple<T1, T2>[] tuples)
+        {
+            if (tuples == null || tuples.Length < 1)
+                return null;
+            T1[] result = new T1[tuples.Length];
+            for (int i = 0; i < tuples.Length; i++)
+            {
+                result[i] = tuples[i].Item1;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 元组提取元素
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="tuples"></param>
+        /// <returns></returns>
+        public static T2[] TupleArrayGetItem2<T1, T2>(this Tuple<T1, T2>[] tuples)
+        {
+            if (tuples == null || tuples.Length < 1)
+                return null;
+            T2[] result = new T2[tuples.Length];
+            for (int i = 0; i < tuples.Length; i++)
+            {
+                result[i] = tuples[i].Item2;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 元组提取元素
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="tuples"></param>
+        /// <returns></returns>
+        public static List<T1> TupleListGetItem1<T1, T2>(this List<Tuple<T1, T2>> tuples)
+        {
+            if (tuples == null || tuples.Count < 1)
+                return null;
+            List<T1> result = new List<T1>();
+            for (int i = 0; i < tuples.Count; i++)
+            {
+                result.Add(tuples[i].Item1);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 元组提取元素
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="tuples"></param>
+        /// <returns></returns>
+        public static List<T2> TupleListGetItem2<T1, T2>(this List<Tuple<T1, T2>> tuples)
+        {
+            if (tuples == null || tuples.Count < 1)
+                return null;
+            List<T2> result = new List<T2>();
+            for (int i = 0; i < tuples.Count; i++)
+            {
+                result.Add(tuples[i].Item2);
+            }
+            return result;
         }
 #if UNITY_STANDALONE || UNITY_EDITOR
         /// <summary>
@@ -10629,6 +10801,37 @@ namespace RyuGiKen
 namespace RyuGiKenEditor
 {
 #if UNITY_EDITOR
+    [CustomPropertyDrawer(typeof(Vector4))]
+    public class Vector4PropertyDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            SerializedProperty X = property.FindPropertyRelative("x");
+            SerializedProperty Y = property.FindPropertyRelative("y");
+            SerializedProperty Z = property.FindPropertyRelative("z");
+            SerializedProperty W = property.FindPropertyRelative("w");
+
+            Vector4 vector4 = new Vector4(X.floatValue, Y.floatValue, Z.floatValue, W.floatValue);
+            Vector4 result = EditorGUI.Vector4Field(position, "", vector4);
+
+            X.floatValue = result.x;
+            Y.floatValue = result.y;
+            Z.floatValue = result.z;
+            W.floatValue = result.w;
+
+            EditorGUI.indentLevel = indent;
+        }
+    }
     [CustomPropertyDrawer(typeof(ValueRange))]
     public class ValueRangePropertyDrawer : PropertyDrawer
     {

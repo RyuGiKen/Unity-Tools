@@ -4,6 +4,8 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using WindowsAPI;
+using System.Threading;
+
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -66,6 +68,7 @@ namespace RyuGiKen.Tools
         [Tooltip("覆盖鼠标位置")] bool OverrideMouse;
         [Tooltip("覆盖鼠标位置")] Vector2 OverrideMousePos;
         static bool useSecondScreen;
+        Thread th_SetMouse;
         public static bool UseSecondScreen
         {
             get
@@ -84,6 +87,18 @@ namespace RyuGiKen.Tools
 
             canRefreshSecondScreen = true;
             OnScreenAxisChange = ChangeScreenAxis;
+        }
+        private void OnEnable()
+        {
+            if (th_SetMouse != null)
+                th_SetMouse.Abort();
+            th_SetMouse = new Thread(new ThreadStart(SetMousePos));
+            th_SetMouse.Start();
+        }
+        private void OnDisable()
+        {
+            if (th_SetMouse != null)
+                th_SetMouse.Abort();
         }
         void Start()
         {
@@ -105,9 +120,13 @@ namespace RyuGiKen.Tools
             }
             else
             {
+                try
+                {
 #if UNITY_STANDALONE_WIN
-                User32.SetForegroundWindow(HWndIntPtr);
+                    User32.SetForegroundWindow(HWndIntPtr);
 #endif
+                }
+                catch { }
             }
         }
         /// <summary>
@@ -130,14 +149,18 @@ namespace RyuGiKen.Tools
             User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
 #if UNITY_STANDALONE_WIN
             SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
-            Invoke(nameof(TestRight), 0.1f);//判定右
+            Invoke(nameof(TestRight), 0.2f);//判定右
 #endif
         }
-        private void FixedUpdate()
+        private void SetMousePos()
         {
-            if (OverrideMouse)
+            while (true)
             {
-                User32.SetCursorPos((int)OverrideMousePos.x, (int)OverrideMousePos.y);
+                if (OverrideMouse)
+                {
+                    User32.SetCursorPos((int)OverrideMousePos.x, (int)OverrideMousePos.y);
+                }
+                Thread.Sleep(50);
             }
         }
         void LateUpdate()
@@ -172,7 +195,7 @@ namespace RyuGiKen.Tools
             if (result)
                 SetPosition(1, 0);//右
             else
-                Invoke(nameof(TestLeft), 0.1f);//判定左
+                Invoke(nameof(TestLeft), 0.2f);//判定左
         }
         /// <summary>
         /// 测试副屏是否在主屏左方
@@ -187,7 +210,7 @@ namespace RyuGiKen.Tools
             if (result)
                 SetPosition(-1, 0);//左
             else
-                Invoke(nameof(TestUp), 0.1f);//判定上
+                Invoke(nameof(TestUp), 0.2f);//判定上
         }
         /// <summary>
         /// 测试副屏是否在主屏上方
@@ -202,7 +225,7 @@ namespace RyuGiKen.Tools
             if (result)
                 SetPosition(0, -1);//上
             else
-                Invoke(nameof(TestDown), 0.1f);//判定下
+                Invoke(nameof(TestDown), 0.2f);//判定下
         }
         /// <summary>
         /// 测试副屏是否在主屏下方
@@ -243,6 +266,7 @@ namespace RyuGiKen.Tools
                 case "0,0":
                     state.WindowPosX = 0;
                     state.WindowPosY = 0;
+                    yield break;
                     break;
                 case "1,0":
                     state.WindowPosX = Display.displays[0].systemWidth;

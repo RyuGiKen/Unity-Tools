@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using RyuGiKen.Tools;
-using UnityEngine.Rendering.VirtualTexturing;
-
 namespace RyuGiKenEditor.Tools
 {
     /// <summary>
