@@ -1201,6 +1201,49 @@ namespace RyuGiKen
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 获取布局子项
+        /// </summary>
+        /// <param name="layoutGroup"></param>
+        /// <returns></returns>
+        public static RectTransform[] GetChildrenInLayout(this LayoutGroup layoutGroup)
+        {
+            if (!layoutGroup)
+                return null;
+            List<RectTransform> children = new List<RectTransform>();
+            for (int i = 0; i < layoutGroup.transform.childCount; i++)
+            {
+                layoutGroup.transform.GetChild(i).TryGetComponent(out RectTransform rectTransform);
+                /*if (rectTransform)
+                {
+                    if (rectTransform.TryGetComponent(out LayoutElement layoutElement) && layoutElement.enabled && layoutElement.ignoreLayout)
+                        continue;
+                    if (rectTransform.gameObject.activeInHierarchy)
+                        children.Add(rect);
+                }*/
+                if (rectTransform == null || !rectTransform.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+                List<Component> list = new List<Component>();
+                rectTransform.GetComponents(typeof(ILayoutIgnorer), list);
+                if (list.Count == 0)
+                {
+                    children.Add(rectTransform);
+                    continue;
+                }
+                for (int j = 0; j < list.Count; j++)
+                {
+                    ILayoutIgnorer layoutIgnorer = (ILayoutIgnorer)list[j];
+                    if (!layoutIgnorer.ignoreLayout)
+                    {
+                        children.Add(rectTransform);
+                        break;
+                    }
+                }
+            }
+            return children.ToArray();
+        }
+        /// <summary>
         /// 获取活动项
         /// </summary>
         public static T[] GetActiveAndEnabled<T>(this T[] GO) where T : Component
