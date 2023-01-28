@@ -19,6 +19,7 @@ namespace RyuGiKen.Tools
         public Mode mode = Mode.Min;
         public RectTransform rectTransform;
         public RectTransform parent;
+        public Vector2 NormalSize;
         private void Awake()
         {
             rectTransform = this.GetComponent<RectTransform>();
@@ -28,10 +29,20 @@ namespace RyuGiKen.Tools
         {
             if (parent && rectTransform)
             {
-                if ((parent.rect.size.x > parent.rect.size.y && mode == Mode.Min) || (mode == Mode.Max && parent.rect.size.x < parent.rect.size.y))
-                    rectTransform.sizeDelta = rectTransform.sizeDelta * parent.rect.size.y / rectTransform.rect.size.y;
+                if (NormalSize != Vector2.zero)
+                {
+                    if (float.IsNaN(rectTransform.sizeDelta.x) || float.IsNaN(rectTransform.sizeDelta.y) || rectTransform.sizeDelta.x <= 0 || rectTransform.sizeDelta.y <= 0)
+                        rectTransform.sizeDelta = NormalSize;
+                }
+                float ThisRatio = NormalSize.x / NormalSize.y;
+                float ParentRatio = parent.rect.size.x / parent.rect.size.y;
+                Vector2 rect = Vector2.zero;
+                if ((mode == Mode.Min && ThisRatio > ParentRatio) || (mode == Mode.Max && ThisRatio < ParentRatio))
+                    rect = NormalSize * parent.rect.size.y / NormalSize.y;
                 else
-                    rectTransform.sizeDelta = rectTransform.sizeDelta * parent.rect.size.x / rectTransform.rect.size.x;
+                    rect = NormalSize * parent.rect.size.x / NormalSize.x;
+
+                rectTransform.sizeDelta = new Vector2(rect.x.Clamp(1), rect.y.Clamp(1));
             }
         }
     }

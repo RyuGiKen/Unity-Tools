@@ -1201,6 +1201,17 @@ namespace RyuGiKen
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 获取行间隔为1时的preferredHeight
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static float GetTextPreferredHeightForceLineSpacing1(this Text text)
+        {
+            TextGenerationSettings generationSettings = text.GetGenerationSettings(new Vector2(text.GetPixelAdjustedRect().size.x, 0f));
+            generationSettings.lineSpacing = 1f;
+            return text.cachedTextGenerator.GetPreferredHeight(text.text, generationSettings) / text.pixelsPerUnit;
+        }
+        /// <summary>
         /// 获取布局子项
         /// </summary>
         /// <param name="layoutGroup"></param>

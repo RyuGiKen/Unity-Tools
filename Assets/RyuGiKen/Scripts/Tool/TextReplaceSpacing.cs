@@ -135,10 +135,10 @@ namespace RyuGiKenEditor.Tools
                 m_Text.SetText(str);
                 Canvas.ForceUpdateCanvases();
             }
-            if((target as TextReplaceSpacing).TryGetComponent(out PanelTextArea panelTextArea))
+            /*if((target as TextReplaceSpacing).TryGetComponent(out PanelTextArea panelTextArea))
             {
                 panelTextArea.Input = str;
-            }
+            }*/
             TempString.stringValue = str;
         }
     }
