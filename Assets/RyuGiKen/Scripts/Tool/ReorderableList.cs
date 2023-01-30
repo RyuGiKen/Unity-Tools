@@ -421,7 +421,7 @@ namespace RyuGiKenEditor
     public class ReorderableListPropertyDrawer : PropertyDrawer
     {
         protected const int minSpacing = 2;
-        Dictionary<Tuple<SerializedObject, string>, ReorderableList> dictionary;
+        protected Dictionary<Tuple<SerializedObject, string>, ReorderableList> dictionary;
         protected virtual ReorderableList CreateReorderableList(SerializedProperty property, SerializedProperty listProperty)
         {
             return CreateReorderableList(property, listProperty, true);

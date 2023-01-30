@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 #if UNITY_EDITOR || UNITY_STANDALONE
 using UnityEngine;
@@ -5873,6 +5874,49 @@ namespace RyuGiKen
                     result += size;
             }
             return result;
+        }
+        /// <summary>
+        /// 移除富文本所有标签
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <returns></returns>
+        public static string RemoveRichTextTag(this string txt, bool all = true)
+        {
+            txt = Regex.Replace(txt, "<style[^>]*?>[\\s\\S]*?<\\/style>", "");//删除css
+            txt = Regex.Replace(txt, "<script[^>]*?>[\\s\\S]*?<\\/script>", "");//删除js
+            txt = Regex.Replace(txt, "<[^>]+>", "");//删除html标记
+            if (all)
+                txt = Regex.Replace(txt, "\\s*|\t|\r|\n", "");//去除tab、空格、空行
+            txt = Regex.Replace(txt, "&nbsp;", "");
+            if (all)
+            {
+                txt = txt.Replace(" ", "");
+                txt = txt.Replace("\"", "");//去除异常的引号" " "
+                txt = txt.Replace("\"", "");
+            }
+            return txt;
+        }
+        /// <summary>
+        /// 移除富文本多余的属性
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <returns></returns>
+        public static string RemoveRichTextContent(this string txt)
+        {
+            txt = Regex.Replace(txt, "<source.*?>", "");
+            txt = Regex.Replace(txt, "<video.*?>", "");
+            txt = Regex.Replace(txt, "</video>", "");
+            txt = Regex.Replace(txt, "class[^=]*=[\"']*[^\"'>]+[\"']*", "");
+            txt = Regex.Replace(txt, "style[^=]*=[\"']*[^\"'>]+[\"']*", "");
+            txt = Regex.Replace(txt, "width[^=]*=[\"']*[^\"'>]+[\"']*", "");
+            txt = Regex.Replace(txt, "height[^=]*=[\"']*[^\"'>]+[\"']*", "");
+            txt = Regex.Replace(txt, "href[^=]*=[\"']*[^\"'>]+[\"']*", "");//去除a标签 href
+            txt = Regex.Replace(txt, "<style[^>]*?>[\\s\\S]*?<\\/style>", "");//去除style
+            txt = Regex.Replace(txt, "<script[^>]*?>[\\s\\S]*?<\\/script>", "");//去除script
+            txt = Regex.Replace(txt, "&nbsp;", "");
+            txt = Regex.Replace(txt, "<p></p>", "");
+            txt = Regex.Replace(txt, "figure", "p");
+            return txt;
         }
         /// <summary>
         /// 是否相同（忽略大小写）

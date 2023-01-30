@@ -43,6 +43,7 @@ namespace RyuGiKenEditor.Tools
             EditorGUILayout.LabelField("preferredHeight", string.Format("{0}(ForLayout) /  {1}(lineSpacing 1)", m_Text.preferredHeight.ToString(), m_Text.GetTextPreferredHeightForceLineSpacing1().ToString()));
 
             EditorGUILayout.LabelField("fontSizeUsedForBestFit", string.Format("{0}  /  {1}(ForLayout)", m_Text.cachedTextGenerator.fontSizeUsedForBestFit, m_Text.cachedTextGeneratorForLayout.fontSizeUsedForBestFit));
+            EditorGUILayout.LabelField("characterLength", string.Format("{0}  /  {1}(NoRich)", m_Text.text.Length, m_Text.text.RemoveRichTextTag().Length));
             EditorGUILayout.LabelField("characters", string.Format("{0}  /  {1}(ForLayout)", m_Text.cachedTextGenerator.characters.Count, m_Text.cachedTextGeneratorForLayout.characters.Count));
             EditorGUILayout.LabelField("characterCount", string.Format("{0}  /  {1}(ForLayout)", m_Text.cachedTextGenerator.characterCountVisible, m_Text.cachedTextGeneratorForLayout.characterCountVisible));
 

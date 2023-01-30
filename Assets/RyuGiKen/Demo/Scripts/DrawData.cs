@@ -11,19 +11,21 @@ namespace RyuGiKen.Tools
     /// </summary>
     public class DrawData : MonoBehaviour
     {
-        public static DrawData instance;
+        //public static DrawData instance;
         [Tooltip("绘制点父级")] public RectTransform DataImageParent;
         [Tooltip("绘制点")] public RectTransform DataImage_Prefab;
         [Tooltip("绘制点")] public List<RectTransform> DataImages;
         [Tooltip("记录")] public List<float> RecordData = new List<float>();
         [Tooltip("最大记录量")] public int MaxRecord = 1;
-        [Tooltip("数据取值范围")] public Vector2 DataRange = new Vector2(0, 120);
+        [Tooltip("数据取值范围")] public ValueRange DataRange = new Vector2(0, 120);
         [Tooltip("范围")] public Text[] RangeText = new Text[2];
+        [Tooltip("当前值")] public Text ValueText;
+        public string showCurValue;
         [Tooltip("参考线")] List<RectTransform> ReferenceLine = new List<RectTransform>();
         [Tooltip("参考值")] public float[] ReferenceValue;
         private void Start()
         {
-            instance = this;
+            //instance = this;
             UpdateDataRange();
             SetMaxRecord((int)(DataImageParent.sizeDelta.x * 1f / DataImage_Prefab.sizeDelta.x));
         }
@@ -53,7 +55,7 @@ namespace RyuGiKen.Tools
         [ContextMenu("刷新范围")]
         void UpdateDataRange()
         {
-            SetDataRange(DataRange.x, DataRange.y, ReferenceValue);
+            SetDataRange(DataRange.MinValue, DataRange.MaxValue, ReferenceValue);
         }
         /// <summary>
         /// 设置范围
@@ -64,8 +66,8 @@ namespace RyuGiKen.Tools
         public void SetDataRange(float min, float max, float[] referenceValue = null)
         {
             DataRange = new Vector2(min, max);
-            RangeText[0].text = ShowNum(DataRange.x);
-            RangeText[1].text = ShowNum(DataRange.y);
+            RangeText[0].text = ShowNum(DataRange.MinValue);
+            RangeText[1].text = ShowNum(DataRange.MaxValue);
             ReferenceValue = referenceValue;
             UpdateReferenceLine();
         }
@@ -119,7 +121,7 @@ namespace RyuGiKen.Tools
             if (DataImageParent.gameObject.activeInHierarchy)
                 for (int i = 0; i < ReferenceValue.Length; i++)
                 {
-                    float value = ValueAdjust.ToPercent01(ReferenceValue[i], DataRange.x, DataRange.y) * DataImageParent.sizeDelta.y;
+                    float value = ValueAdjust.ToPercent01(ReferenceValue[i], DataRange) * DataImageParent.sizeDelta.y;
                     ReferenceLine[i].offsetMax = new Vector2(DataImageParent.sizeDelta.x, value + 1);
                     ReferenceLine[i].offsetMin = new Vector2(0, value - 1);
                     Color newColor = new HSVColor(360f * i / ReferenceValue.Length, 1, 1, 1).ToColor();
@@ -162,6 +164,7 @@ namespace RyuGiKen.Tools
         private void OnDraw()
         {
             if (DataImageParent.gameObject.activeInHierarchy)
+            {
                 for (int i = 0; i < DataImages.Count; i++)
                 {
                     if (RecordData.Count - DataImages.Count + i <= 0)
@@ -173,9 +176,24 @@ namespace RyuGiKen.Tools
                     {
                         float data = RecordData[RecordData.Count - DataImages.Count + i];
                         //DataImages[i].sizeDelta = new Vector2(DataImage_Prefab.sizeDelta.x, RecordData[RecordData.Count - DataImages.Count + i] * 3);
-                        DataImages[i].localScale = new Vector3(1, ValueAdjust.ToPercent01(data, DataRange.x, DataRange.y, 1, false), 1);
+                        DataImages[i].localScale = new Vector3(1, ValueAdjust.ToPercent01(data, DataRange, 1, false).Clamp(-1, 2), 1);
                     }
                 }
+                if (RecordData != null && RecordData.Count > 0)
+                {
+                    string temp = RecordData[RecordData.Count - 1].ToString();
+                    ValueText.text = showCurValue + temp;
+                    int pointIndex = temp.IndexOf('.');
+                    if (pointIndex >= 0)
+                    {
+                        ValueText.text = showCurValue + temp.Substring(0, (pointIndex + 4).Clamp(0, temp.Length));
+                    }
+                }
+                else
+                {
+                    ValueText.text = "";
+                }
+            }
         }
         private void LateUpdate()
         {
