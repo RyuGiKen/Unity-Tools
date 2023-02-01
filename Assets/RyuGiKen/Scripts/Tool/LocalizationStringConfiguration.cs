@@ -14,8 +14,9 @@ namespace RyuGiKen.Localization
     /// <summary>
     /// 多语言配置父类
     /// </summary>
-    public class LocalizationConfigurationBase : ScriptableObject
+    public abstract class LocalizationConfigurationBase : ScriptableObject
     {
+        public bool SupportMultiLine;
         //public MultiArrayLocalizationString configurations;
         [HideInInspector] public string comments;
     }
@@ -93,6 +94,10 @@ namespace RyuGiKen.Localization
     [System.Serializable]
     public class LocalizationString : ReorderableList<LocalizationStringItem>
     {
+        /// <summary>
+        /// 多行
+        /// </summary>
+        public bool multiLineString;
         public LocalizationString() { this.items = new List<LocalizationStringItem>(); }
         public LocalizationString(LocalizationStringItem[] array) { this.items = array != null ? array.ToList() : new List<LocalizationStringItem>(); }
         public LocalizationString(List<LocalizationStringItem> list) { this.items = list; }
@@ -104,7 +109,10 @@ namespace RyuGiKen.Localization
         /// 语言
         /// </summary>
         public GamesLanguage language;
-        //public bool mutiLineString;
+        /// <summary>
+        /// 多行
+        /// </summary>
+        public bool multiLineString;
         /// <summary>
         /// 文本
         /// </summary>
@@ -309,7 +317,17 @@ namespace RyuGiKenEditor.Localization
         protected static float LineHeight { get { return EditorGUIUtility.singleLineHeight; } }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return base.GetPropertyHeight(property, label);
+            return base.GetPropertyHeight(property, label) + (LineHeight - 3) * (CheckStringLine(property) - 1);
+        }
+        public static int CheckStringLine(SerializedProperty property)
+        {
+            if ((property.type != nameof(LocalizationItem) && property.FindPropertyRelative("multiLineString").boolValue) || (property.type == nameof(LocalizationItem) && (ObjectType)property.FindPropertyRelative("type")?.enumValueIndex == ObjectType.StringMultiLine))
+            {
+                string str = property.FindPropertyRelative("str").stringValue;
+                int line = (str.Length - str.ReplaceAny("\n\r", "").Length + 1).Clamp(1);
+                return line;
+            }
+            return 1;
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -329,7 +347,8 @@ namespace RyuGiKenEditor.Localization
         /// <param name="property"></param>
         /// <param name="showType"></param>
         /// <param name="startX"></param>
-        public static void DrawContent(Rect rect, SerializedProperty property, bool showType, float startX = float.NaN)
+        /// <param name="multiLine"></param>
+        public static void DrawContent(Rect rect, SerializedProperty property, bool showType, float startX = float.NaN, bool? multiLine = null)
         {
             if (!float.IsNaN(startX))
             {
@@ -337,14 +356,21 @@ namespace RyuGiKenEditor.Localization
                 rect.x = startX;
             }
             float width = (rect.width / 4f).Clamp(60);
-            Rect languageRect = new Rect(rect.x, rect.y, width, rect.height);
-            Rect valueRect = new Rect(languageRect.x + languageRect.width, rect.y, rect.width - languageRect.width, LineHeight);
+            Rect languageRect = new Rect(rect.x, rect.y, width, LineHeight);
+            Rect multiLineRect = new Rect(languageRect.xMax, rect.y, (multiLine == null ? 20 : 0), LineHeight);
+            Rect valueRect = new Rect(multiLineRect.xMax, rect.y, rect.width - width - multiLineRect.width, rect.height);
+            if (multiLine == null)
+                multiLine = property.FindPropertyRelative("multiLineString").boolValue = EditorGUI.Toggle(multiLineRect, property.FindPropertyRelative("multiLineString").boolValue);
+            valueRect.height = multiLine == true ? rect.height : LineHeight;
 
             GamesLanguage language = (GamesLanguage)property.FindPropertyRelative("language").enumValueIndex;
             language = (GamesLanguage)EditorGUI.EnumPopup(languageRect, language, EditorStyles.popup);
             property.FindPropertyRelative("language").enumValueIndex = (int)language;
 
-            property.FindPropertyRelative("str").stringValue = EditorGUI.DelayedTextField(valueRect, property.FindPropertyRelative("str").stringValue, EditorStyles.textField);
+            if (multiLine == true)
+                property.FindPropertyRelative("str").stringValue = EditorGUI.TextArea(valueRect, property.FindPropertyRelative("str").stringValue, EditorStyles.textArea);
+            else
+                property.FindPropertyRelative("str").stringValue = EditorGUI.DelayedTextField(valueRect, property.FindPropertyRelative("str").stringValue, EditorStyles.textField);
         }
     }
     [CustomPropertyDrawer(typeof(LocalizationString))]
@@ -356,24 +382,44 @@ namespace RyuGiKenEditor.Localization
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return GetReorderableList(property).GetHeight() + minSpacing;// + EditorGUIUtility.singleLineHeight;
+            return GetReorderableList(property).GetHeight() + minSpacing + EditorGUIUtility.singleLineHeight;
+        }
+        protected virtual string[] GetNames()
+        {
+            string[] Name = new string[3];
+            switch (Application.systemLanguage)
+            {
+                case SystemLanguage.Chinese:
+                case SystemLanguage.ChineseSimplified:
+                case SystemLanguage.ChineseTraditional:
+                    Name[0] = "多行";
+                    break;
+                default:
+                    Name[0] = "MultiLine";
+                    break;
+            }
+            return Name;
         }
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            Rect multiLineRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+            bool multiLine = property.FindPropertyRelative("multiLineString").boolValue = EditorGUI.Foldout(multiLineRect, property.FindPropertyRelative("multiLineString").boolValue, GetNames()[0]);
             var list = GetReorderableList(property);
             var listProperty = property.FindPropertyRelative("items");
             var height = 0f;
             for (var i = 0; i < listProperty.arraySize; i++)
             {
                 height = Mathf.Max(height, GetPropertyHeight(listProperty.GetArrayElementAtIndex(i)));
+                listProperty.GetArrayElementAtIndex(i).FindPropertyRelative("multiLineString").boolValue = multiLine;
             }
             list.elementHeight = height;
+            position.y += EditorGUIUtility.singleLineHeight;
             list.DoList(position);
             //list.DoLayoutList();
         }
         protected override void DrawListItems(Rect rect, SerializedProperty property)
         {
-            LocalizationStringItemPropertyDrawer.DrawContent(rect, property, false);
+            LocalizationStringItemPropertyDrawer.DrawContent(rect, property, false, float.NaN, property.FindPropertyRelative("multiLineString").boolValue);
             //EditorGUI.PropertyField(rect, property, true);
         }
     }
@@ -382,6 +428,7 @@ namespace RyuGiKenEditor.Localization
     {
         protected SerializedProperty Configurations;
         protected SerializedProperty[] Items;
+        protected SerializedProperty SupportMultiLine;
         protected SerializedProperty Comments;
         protected bool EditComments = false;
         protected const int MinCount = 1;
@@ -416,6 +463,7 @@ namespace RyuGiKenEditor.Localization
         protected virtual void LimitCount()
         {
             Configurations = serializedObject.FindProperty("configurations");
+            SupportMultiLine = serializedObject.FindProperty("SupportMultiLine");
             Comments = serializedObject.FindProperty("comments");
             SerializedProperty items = Configurations.FindPropertyRelative("items");
             if (items.arraySize != items.arraySize.Clamp(MinCount))
@@ -425,6 +473,15 @@ namespace RyuGiKenEditor.Localization
             {
                 Items[i] = items.GetArrayElementAtIndex(i).FindPropertyRelative("items");
             }
+            MultiLineSupport(items);
+        }
+        /// <summary>
+        /// 多行输入支持
+        /// </summary>
+        /// <param name="items"></param>
+        protected virtual void MultiLineSupport(SerializedProperty items)
+        {
+            SupportMultiLine = serializedObject.FindProperty("SupportMultiLine");
         }
         /// <summary>
         /// 限制语言
@@ -458,7 +515,7 @@ namespace RyuGiKenEditor.Localization
                 for (int j = 0; j < (Items[i].isArray ? Items[i].arraySize : 0); j++)
                 {
                     SerializedProperty item = Items[i].GetArrayElementAtIndex(j);
-                    //item.FindPropertyRelative("mutiLineString").boolValue = false;
+                    //item.FindPropertyRelative("multiLineString").boolValue = false;
                     item.FindPropertyRelative("str").stringValue = "";
                 }
             }
@@ -487,6 +544,22 @@ namespace RyuGiKenEditor.Localization
             }
             serializedObject.ApplyModifiedProperties();
             base.OnInspectorGUI();
+        }
+        protected override void MultiLineSupport(SerializedProperty items)
+        {
+            SupportMultiLine = serializedObject.FindProperty("SupportMultiLine");
+            for (int i = 0; i < (items.isArray ? items.arraySize : 0); i++)
+                if (!SupportMultiLine.boolValue)
+                    items.GetArrayElementAtIndex(i).FindPropertyRelative("multiLineString").boolValue = false;
+            if (!SupportMultiLine.boolValue)
+                for (int i = 0; i < Items.Length; i++)
+                {
+                    for (int j = 0; j < (Items[i].isArray ? Items[i].arraySize : 0); j++)
+                    {
+                        SerializedProperty item = Items[i].GetArrayElementAtIndex(j);
+                        item.FindPropertyRelative("str").stringValue = item.FindPropertyRelative("str").stringValue.ReplaceAny("\n\r", "");
+                    }
+                }
         }
     }
 #endif

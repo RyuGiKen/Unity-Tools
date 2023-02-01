@@ -31,6 +31,7 @@ namespace RyuGiKen.Localization
         Sprite,
         Texture,
         OtherObject,
+        StringMultiLine,
     }
     [System.Serializable]
     public class MultiArrayLocalization : MultiArrayExtension<LocalizationItem>
@@ -119,7 +120,40 @@ namespace RyuGiKen.Localization
         }
         public Localization() { this.items = new List<LocalizationItem>(); }
         public Localization(LocalizationItem[] array) { this.items = array != null ? array.ToList() : new List<LocalizationItem>(); }
+        public Localization(LocalizationStringItem[] array)
+        {
+            this.items = new List<LocalizationItem>();
+            if (array?.Length > 0)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    items.Add(array[i].ToLocalizationItem());
+                }
+            }
+        }
         public Localization(List<LocalizationItem> list) { this.items = list; }
+        public static implicit operator Localization(LocalizationString value)
+        {
+            Localization result = null;
+            if (value != null)
+            {
+                result = new Localization(value.items.ToArray());
+            }
+            return result;
+        }
+        public static implicit operator LocalizationString(Localization value)
+        {
+            LocalizationString result = null;
+            if (value != null)
+            {
+                result = new LocalizationString();
+                for (int i = 0; i < value.items.Count; i++)
+                {
+                    result.items.Add(value.items[i].ToLocalizationItem());
+                }
+            }
+            return result;
+        }
     }
     /// <summary>
     /// 复合多语言参数项
@@ -127,6 +161,7 @@ namespace RyuGiKen.Localization
     [System.Serializable]
     public class LocalizationItem : LocalizationStringItem
     {
+        //private new bool multiLineString;
         //public GamesLanguage language;
         /// <summary>
         /// 对象类型
@@ -138,7 +173,7 @@ namespace RyuGiKen.Localization
         public Texture texture;
         public Object otherObject;
 
-        public static implicit operator string(LocalizationItem value) { return (value != null && value.type == ObjectType.String) ? value.str : null; }
+        public static implicit operator string(LocalizationItem value) { return (value != null && (value.type == ObjectType.String || value.type == ObjectType.StringMultiLine)) ? value.str : null; }
         public static implicit operator AudioClip(LocalizationItem value) { return (value != null && value.type == ObjectType.AudioClip) ? value.audioClip : null; }
         public static implicit operator Sprite(LocalizationItem value) { return (value != null && value.type == ObjectType.Sprite) ? value.sprite : null; }
         public static implicit operator Texture(LocalizationItem value) { return (value != null && value.type == ObjectType.Texture) ? value.texture : null; }
@@ -146,6 +181,30 @@ namespace RyuGiKen.Localization
     }
     public static partial class Extension
     {
+        public static LocalizationItem ToLocalizationItem(this LocalizationStringItem value)
+        {
+            LocalizationItem result = null;
+            if (value is LocalizationItem)
+                return (LocalizationItem)value;
+            if (value != null)
+            {
+                result = new LocalizationItem();
+                result.type = value?.multiLineString == true ? ObjectType.StringMultiLine : ObjectType.String;
+                result.str = value?.str;
+            }
+            return result;
+        }
+        public static LocalizationStringItem ToLocalizationStringItem(this LocalizationItem value)
+        {
+            LocalizationStringItem result = null;
+            if (value != null)
+            {
+                result = new LocalizationStringItem();
+                result.multiLineString = value?.type == ObjectType.StringMultiLine;
+                result.str = value?.str;
+            }
+            return result;
+        }
         public static LocalizationItem GetLocalization(this LocalizationConfiguration configuration, GamesLanguage language, int index)
         {
             if (configuration == null || configuration.configurations == null || configuration.configurations.items == null || OutIndex(index, configuration.configurations.items.Count))
@@ -174,7 +233,7 @@ namespace RyuGiKen.Localization
         public static string GetLocalizationString(this MultiArrayLocalization array, GamesLanguage language, int index)
         {
             LocalizationItem item = array.GetLocalization(language, index);
-            if (item == null || item.type != ObjectType.String)
+            if (item == null || (item.type != ObjectType.String && item.type != ObjectType.StringMultiLine))
                 return null;
             else
                 return item;
@@ -197,7 +256,7 @@ namespace RyuGiKen.Localization
             if (array == null || language == GamesLanguage.Auto || index < 0)
                 return exception;
             LocalizationItem item = array.GetLocalization(language, index);
-            if (item == null || item.type != ObjectType.String)
+            if (item == null || (item.type != ObjectType.String && item.type != ObjectType.StringMultiLine))
                 return exception;
             else
                 return item;
@@ -268,6 +327,17 @@ namespace RyuGiKenEditor.Localization
     [CustomPropertyDrawer(typeof(LocalizationItem))]
     public class LocalizationItemPropertyDrawer : LocalizationStringItemPropertyDrawer
     {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            DrawContent(position, property, true);
+            EditorGUI.indentLevel = indent;
+        }
         /// <summary>
         /// 内容绘制
         /// </summary>
@@ -275,18 +345,33 @@ namespace RyuGiKenEditor.Localization
         /// <param name="property"></param>
         /// <param name="showType"></param>
         /// <param name="startX"></param>
-        public static new void DrawContent(Rect rect, SerializedProperty property, bool showType, float startX = float.NaN)
+        /// <param name="multiLine"></param>
+        public static new void DrawContent(Rect rect, SerializedProperty property, bool showType, float startX = float.NaN, bool? multiLine = null)
         {
             if (!float.IsNaN(startX))
             {
                 rect.width += (rect.x - startX);
                 rect.x = startX;
             }
-            float width = showType ? (rect.width / 4f).Clamp(60, 100) : (rect.width / 4f).Clamp(60);
-            Rect typeRect = new Rect(rect.x, rect.y, showType ? width : 0, rect.height);
-            Rect languageRect = new Rect(rect.x + typeRect.width, rect.y, width, rect.height);
-            Rect valueRect = new Rect(languageRect.x + languageRect.width, rect.y, rect.width - languageRect.width - typeRect.width, LineHeight);
             ObjectType type = (ObjectType)property.FindPropertyRelative("type").enumValueIndex;
+            switch (type)
+            {
+                default:
+                case ObjectType.String:
+                    multiLine = false;
+                    break;
+                case ObjectType.StringMultiLine:
+                    multiLine = true;
+                    break;
+            }
+            float width = showType ? (rect.width / 4f).Clamp(60, 100) : (rect.width / 4f).Clamp(60);
+            Rect typeRect = new Rect(rect.x, rect.y, showType ? width : 0, LineHeight);
+            Rect languageRect = new Rect(rect.x + typeRect.width, rect.y, width, LineHeight);
+            Rect multiLineRect = new Rect(languageRect.xMax, rect.y, (multiLine == null ? 20 : 0), LineHeight);
+            Rect valueRect = new Rect(multiLineRect.xMax, rect.y, rect.width - width - (showType ? width : 0) - multiLineRect.width, rect.height);
+            //if (multiLine == null)
+            //    multiLine = property.FindPropertyRelative("multiLineString").boolValue = EditorGUI.Toggle(multiLineRect, property.FindPropertyRelative("multiLineString").boolValue);
+            valueRect.height = multiLine == true ? rect.height : LineHeight;
             GamesLanguage language = (GamesLanguage)property.FindPropertyRelative("language").enumValueIndex;
             if (showType)
             {
@@ -299,6 +384,9 @@ namespace RyuGiKenEditor.Localization
             {
                 case ObjectType.String:
                     property.FindPropertyRelative("str").stringValue = EditorGUI.DelayedTextField(valueRect, property.FindPropertyRelative("str").stringValue, EditorStyles.textField);
+                    break;
+                case ObjectType.StringMultiLine:
+                    property.FindPropertyRelative("str").stringValue = EditorGUI.TextArea(valueRect, property.FindPropertyRelative("str").stringValue, EditorStyles.textArea);
                     break;
                 case ObjectType.AudioClip:
                     EditorGUI.ObjectField(valueRect, property.FindPropertyRelative("audioClip"), typeof(AudioClip), GUIContent.none);
@@ -345,7 +433,7 @@ namespace RyuGiKenEditor.Localization
         }
         protected override void DrawListItems(Rect rect, SerializedProperty property)
         {
-            LocalizationItemPropertyDrawer.DrawContent(rect, property, false);
+            LocalizationItemPropertyDrawer.DrawContent(rect, property, false, float.NaN, property.FindPropertyRelative("type").enumValueIndex == (int)ObjectType.StringMultiLine);
             //EditorGUI.PropertyField(rect, property, true);
         }
         /// <summary>
@@ -390,6 +478,25 @@ namespace RyuGiKenEditor.Localization
             serializedObject.ApplyModifiedProperties();
             base.OnInspectorGUI();
         }
+        protected override void MultiLineSupport(SerializedProperty items)
+        {
+            SupportMultiLine = serializedObject.FindProperty("SupportMultiLine");
+            for (int i = 0; i < (items.isArray ? items.arraySize : 0); i++)
+            {
+                SerializedProperty item = items.GetArrayElementAtIndex(i);
+                if (!SupportMultiLine.boolValue && item.FindPropertyRelative("type").enumValueIndex == (int)ObjectType.StringMultiLine)
+                    item.FindPropertyRelative("type").enumValueIndex = (int)ObjectType.String;
+            }
+            if (!SupportMultiLine.boolValue)
+                for (int i = 0; i < Items.Length; i++)
+                {
+                    for (int j = 0; j < (Items[i].isArray ? Items[i].arraySize : 0); j++)
+                    {
+                        SerializedProperty item = Items[i].GetArrayElementAtIndex(j);
+                        item.FindPropertyRelative("str").stringValue = item.FindPropertyRelative("str").stringValue.ReplaceAny("\n\r", "");
+                    }
+                }
+        }
         protected override void Clear(bool all)
         {
             for (int i = 0; i < Items.Length; i++)
@@ -400,7 +507,7 @@ namespace RyuGiKenEditor.Localization
                     if (all)
                     {
                         item.FindPropertyRelative("type").enumValueIndex = 0;
-                        //item.FindPropertyRelative("mutiLineString").boolValue = false;
+                        //item.FindPropertyRelative("multiLineString").boolValue = false;
                         item.FindPropertyRelative("str").stringValue = "";
                         item.FindPropertyRelative("audioClip").objectReferenceValue = null;
                         item.FindPropertyRelative("sprite").objectReferenceValue = null;
@@ -412,7 +519,8 @@ namespace RyuGiKenEditor.Localization
                         switch ((ObjectType)item.FindPropertyRelative("type").enumValueIndex)
                         {
                             case ObjectType.String:
-                                //item.FindPropertyRelative("mutiLineString").boolValue = false;
+                            case ObjectType.StringMultiLine:
+                                //item.FindPropertyRelative("multiLineString").boolValue = false;
                                 //item.FindPropertyRelative("str").stringValue = "";
                                 item.FindPropertyRelative("audioClip").objectReferenceValue = null;
                                 item.FindPropertyRelative("sprite").objectReferenceValue = null;
@@ -420,7 +528,7 @@ namespace RyuGiKenEditor.Localization
                                 item.FindPropertyRelative("otherObject").objectReferenceValue = null;
                                 break;
                             case ObjectType.AudioClip:
-                                //item.FindPropertyRelative("mutiLineString").boolValue = false;
+                                //item.FindPropertyRelative("multiLineString").boolValue = false;
                                 item.FindPropertyRelative("str").stringValue = "";
                                 //item.FindPropertyRelative("audioClip").objectReferenceValue = null;
                                 item.FindPropertyRelative("sprite").objectReferenceValue = null;
@@ -428,7 +536,7 @@ namespace RyuGiKenEditor.Localization
                                 item.FindPropertyRelative("otherObject").objectReferenceValue = null;
                                 break;
                             case ObjectType.Sprite:
-                                //item.FindPropertyRelative("mutiLineString").boolValue = false;
+                                //item.FindPropertyRelative("multiLineString").boolValue = false;
                                 item.FindPropertyRelative("str").stringValue = "";
                                 item.FindPropertyRelative("audioClip").objectReferenceValue = null;
                                 //item.FindPropertyRelative("sprite").objectReferenceValue = null;
@@ -436,7 +544,7 @@ namespace RyuGiKenEditor.Localization
                                 item.FindPropertyRelative("otherObject").objectReferenceValue = null;
                                 break;
                             case ObjectType.Texture:
-                                //item.FindPropertyRelative("mutiLineString").boolValue = false;
+                                //item.FindPropertyRelative("multiLineString").boolValue = false;
                                 item.FindPropertyRelative("str").stringValue = "";
                                 item.FindPropertyRelative("audioClip").objectReferenceValue = null;
                                 item.FindPropertyRelative("sprite").objectReferenceValue = null;
@@ -444,7 +552,7 @@ namespace RyuGiKenEditor.Localization
                                 item.FindPropertyRelative("otherObject").objectReferenceValue = null;
                                 break;
                             case ObjectType.OtherObject:
-                                //item.FindPropertyRelative("mutiLineString").boolValue = false;
+                                //item.FindPropertyRelative("multiLineString").boolValue = false;
                                 item.FindPropertyRelative("str").stringValue = "";
                                 item.FindPropertyRelative("audioClip").objectReferenceValue = null;
                                 item.FindPropertyRelative("sprite").objectReferenceValue = null;
