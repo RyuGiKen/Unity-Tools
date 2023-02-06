@@ -423,7 +423,7 @@ namespace RyuGiKenEditor.Localization
             //EditorGUI.PropertyField(rect, property, true);
         }
     }
-    [CustomEditor(typeof(LocalizationConfigurationBase))]
+    [CustomEditor(typeof(LocalizationConfigurationBase), true)]
     public class LocalizationConfigurationBaseEditor : Editor
     {
         protected SerializedProperty Configurations;

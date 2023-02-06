@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using RyuGiKen;
+using RyuGiKen.Localization;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditorInternal;
@@ -18,7 +20,9 @@ namespace RyuGiKen.Localization
         public bool Seted = false;
         public LocalizationConfigurationBase configuration;
         public bool SetColorClearWhenNoSprite = true;
+        //[HideInInspector]
         public Component[] components;
+        [HideInInspector] public bool showComponentGroup = true;
         protected void Awake()
         {
             Seted = false;
@@ -156,6 +160,28 @@ namespace RyuGiKen.Localization
     }
     public static partial class Extension
     {
+        public static int GetItemCount(this LocalizationConfigurationBase configuration)
+        {
+            int result = 0;
+            if (configuration is null) { }
+            else if (configuration is LocalizationConfiguration)
+            {
+                try
+                {
+                    result = (configuration as LocalizationConfiguration).configurations.items.Count;
+                }
+                catch { }
+            }
+            else if (configuration is LocalizationStringConfiguration)
+            {
+                try
+                {
+                    result = (configuration as LocalizationStringConfiguration).configurations.items.Count;
+                }
+                catch { }
+            }
+            return result;
+        }
         public static LocalizationItem TryGetLocalization(this LocalizationSwitcher switcher, int index)
         {
             if (!switcher || switcher.configuration == null || switcher.language == GamesLanguage.Auto || index < 0)
@@ -201,4 +227,94 @@ namespace RyuGiKen.Localization
             return switcher.configuration.TryGetLocalizationStringFormat(language, index, exception, args);
         }
     }
+}
+namespace RyuGiKenEditor.Localization
+{
+#if UNITY_EDITOR
+    [CustomEditor(typeof(LocalizationSwitcher), true)]
+    public class LocalizationSwitcherEditor : Editor
+    {
+        protected SerializedProperty components;
+        protected SerializedProperty showComponentGroup;
+        private void OnEnable()
+        {
+            components = serializedObject.FindProperty("components");
+            showComponentGroup = serializedObject.FindProperty("showComponentGroup");
+        }
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+
+            string[] Name = new string[1];
+            switch (Application.systemLanguage)
+            {
+                case SystemLanguage.Chinese:
+                case SystemLanguage.ChineseSimplified:
+                case SystemLanguage.ChineseTraditional:
+                    Name[0] = "显示翻译";
+                    break;
+                default:
+                    Name[0] = "Show Localization";
+                    break;
+            }
+            showComponentGroup.boolValue = EditorGUILayout.Foldout(showComponentGroup.boolValue, Name[0]);
+            if (showComponentGroup.boolValue)
+            {
+                LocalizationConfigurationBase configuration = (target as LocalizationSwitcher).configuration;
+                int MaxCount = configuration.GetItemCount();
+
+                GamesLanguage language = (target as LocalizationSwitcher).language;
+                if (language == GamesLanguage.Auto)
+                    language = LocalizationSwitcher.SystemLanguageToGamesLanguage(Application.systemLanguage);
+
+                int indent = EditorGUI.indentLevel;
+                for (int i = 0; i < components.arraySize; i++)
+                {
+                    if (i < Mathf.Min(components.arraySize, MaxCount))
+                    {
+                        EditorGUILayout.PrefixLabel(i.ToString());
+                        EditorGUI.indentLevel += 2;
+                        components.GetArrayElementAtIndex(i).objectReferenceValue = EditorGUILayout.ObjectField(components.GetArrayElementAtIndex(i).objectReferenceValue, typeof(Component), true);
+
+                        if (configuration is LocalizationConfiguration)
+                        {
+                            LocalizationConfiguration temp = configuration as LocalizationConfiguration;
+                            LocalizationItem item = temp.configurations.GetItem(i, (int)(language - 1));
+                            ObjectType type = item.type;
+
+                            switch (type)
+                            {
+                                case ObjectType.String:
+                                    EditorGUILayout.DelayedTextField(item.str);
+                                    break;
+                                case ObjectType.AudioClip:
+                                    EditorGUILayout.ObjectField(item.audioClip, typeof(AudioClip), false);
+                                    break;
+                                case ObjectType.Sprite:
+                                    EditorGUILayout.ObjectField(item.sprite, typeof(Sprite), false);
+                                    break;
+                                case ObjectType.Texture:
+                                    EditorGUILayout.ObjectField(item.texture, typeof(Texture), false);
+                                    break;
+                                case ObjectType.OtherObject:
+                                    EditorGUILayout.ObjectField(item.otherObject, typeof(Object), false);
+                                    break;
+                            }
+                        }
+                        else if (configuration is LocalizationStringConfiguration)
+                        {
+                            LocalizationStringConfiguration temp = configuration as LocalizationStringConfiguration;
+                            LocalizationStringItem item = temp.configurations.GetItem(i, (int)(language - 1));
+
+                            EditorGUILayout.DelayedTextField(item.str);
+                        }
+
+                    }
+                    EditorGUI.indentLevel = indent;
+                }
+            }
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
+#endif
 }
