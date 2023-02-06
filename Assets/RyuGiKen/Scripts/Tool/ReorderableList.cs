@@ -315,6 +315,13 @@ namespace RyuGiKen
         public ReorderableListTransform(List<Transform> list) { this.items = list; }
     }
     [System.Serializable]
+    public class ReorderableListRectTransform : ReorderableList<RectTransform>
+    {
+        public ReorderableListRectTransform() { this.items = new List<RectTransform>(); }
+        public ReorderableListRectTransform(RectTransform[] array) { this.items = array != null ? array.ToList() : new List<RectTransform>(); }
+        public ReorderableListRectTransform(List<RectTransform> list) { this.items = list; }
+    }
+    [System.Serializable]
     public class ReorderableListBehaviour : ReorderableList<Behaviour>
     {
         public ReorderableListBehaviour() { this.items = new List<Behaviour>(); }
@@ -362,6 +369,20 @@ namespace RyuGiKen
         public ReorderableListCamera() { this.items = new List<Camera>(); }
         public ReorderableListCamera(Camera[] array) { this.items = array != null ? array.ToList() : new List<Camera>(); }
         public ReorderableListCamera(List<Camera> list) { this.items = list; }
+    }
+    [System.Serializable]
+    public class ReorderableListCollider : ReorderableList<Collider>
+    {
+        public ReorderableListCollider() { this.items = new List<Collider>(); }
+        public ReorderableListCollider(Collider[] array) { this.items = array != null ? array.ToList() : new List<Collider>(); }
+        public ReorderableListCollider(List<Collider> list) { this.items = list; }
+    }
+    [System.Serializable]
+    public class ReorderableListCollider2D : ReorderableList<Collider2D>
+    {
+        public ReorderableListCollider2D() { this.items = new List<Collider2D>(); }
+        public ReorderableListCollider2D(Collider2D[] array) { this.items = array != null ? array.ToList() : new List<Collider2D>(); }
+        public ReorderableListCollider2D(List<Collider2D> list) { this.items = list; }
     }
     [System.Serializable]
     public class ReorderableListTexture : ReorderableList<Texture>

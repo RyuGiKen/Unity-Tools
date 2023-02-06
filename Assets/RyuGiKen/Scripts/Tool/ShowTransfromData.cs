@@ -75,6 +75,18 @@ namespace RyuGiKenEditor.Tools
                     //EditorGUILayout.Vector4Field("rect：", new Vector4(rectTransform.rect.x, rectTransform.rect.y, rectTransform.rect.width, rectTransform.rect.height));
                     EditorGUILayout.RectField("rect：", rectTransform.rect);
                 }
+                if (transform.TryGetComponent(out Collider collider))
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.Vector3Field("bounds.min", collider.bounds.min);
+                    EditorGUILayout.Vector3Field("bounds.max", collider.bounds.max);
+                }
+                else if (transform.TryGetComponent(out Collider2D collider2D))
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.Vector3Field("bounds.min", collider2D.bounds.min);
+                    EditorGUILayout.Vector3Field("bounds.max", collider2D.bounds.max);
+                }
             }
         }
     }

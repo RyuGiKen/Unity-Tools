@@ -23,6 +23,7 @@ namespace RyuGiKen.Localization
         //[HideInInspector]
         public Component[] components;
         [HideInInspector] public bool showComponentGroup = true;
+        [HideInInspector][Range(0, 2)] public int hideBlank = 2;
         protected void Awake()
         {
             Seted = false;
@@ -236,25 +237,31 @@ namespace RyuGiKenEditor.Localization
     {
         protected SerializedProperty components;
         protected SerializedProperty showComponentGroup;
+        protected SerializedProperty hideBlank;
         private void OnEnable()
         {
             components = serializedObject.FindProperty("components");
             showComponentGroup = serializedObject.FindProperty("showComponentGroup");
+            hideBlank = serializedObject.FindProperty("hideBlank");
         }
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
 
-            string[] Name = new string[1];
+            string[] Name = new string[3];
             switch (Application.systemLanguage)
             {
                 case SystemLanguage.Chinese:
                 case SystemLanguage.ChineseSimplified:
                 case SystemLanguage.ChineseTraditional:
                     Name[0] = "显示翻译";
+                    Name[1] = "隐藏空值";
+                    Name[2] = "未设置";
                     break;
                 default:
                     Name[0] = "Show Localization";
+                    Name[1] = "Hide Blank";
+                    Name[2] = "Not Seted";
                     break;
             }
             showComponentGroup.boolValue = EditorGUILayout.Foldout(showComponentGroup.boolValue, Name[0]);
@@ -267,14 +274,20 @@ namespace RyuGiKenEditor.Localization
                 if (language == GamesLanguage.Auto)
                     language = LocalizationSwitcher.SystemLanguageToGamesLanguage(Application.systemLanguage);
 
+                hideBlank.intValue = EditorGUILayout.IntSlider(Name[1], hideBlank.intValue, 0, 2);
                 int indent = EditorGUI.indentLevel;
                 for (int i = 0; i < components.arraySize; i++)
                 {
                     if (i < Mathf.Min(components.arraySize, MaxCount))
                     {
-                        EditorGUILayout.PrefixLabel(i.ToString());
-                        EditorGUI.indentLevel += 2;
-                        components.GetArrayElementAtIndex(i).objectReferenceValue = EditorGUILayout.ObjectField(components.GetArrayElementAtIndex(i).objectReferenceValue, typeof(Component), true);
+                        Object component = components.GetArrayElementAtIndex(i).objectReferenceValue;
+                        if (hideBlank.intValue == 2 && !component)
+                            continue;
+                        EditorGUILayout.ToggleLeft(i.ToString() + (component ? "" : ("（" + Name[2] + "）")), component);
+                        if (hideBlank.intValue == 1 && !component)
+                            continue;
+                        EditorGUI.indentLevel += 3;
+                        components.GetArrayElementAtIndex(i).objectReferenceValue = EditorGUILayout.ObjectField(component, typeof(Component), true);
 
                         if (configuration is LocalizationConfiguration)
                         {
@@ -286,6 +299,9 @@ namespace RyuGiKenEditor.Localization
                             {
                                 case ObjectType.String:
                                     EditorGUILayout.DelayedTextField(item.str);
+                                    break;
+                                case ObjectType.StringMultiLine:
+                                    EditorGUILayout.TextArea(item.str);
                                     break;
                                 case ObjectType.AudioClip:
                                     EditorGUILayout.ObjectField(item.audioClip, typeof(AudioClip), false);
@@ -305,10 +321,17 @@ namespace RyuGiKenEditor.Localization
                         {
                             LocalizationStringConfiguration temp = configuration as LocalizationStringConfiguration;
                             LocalizationStringItem item = temp.configurations.GetItem(i, (int)(language - 1));
-
-                            EditorGUILayout.DelayedTextField(item.str);
+                            ObjectType type = item.multiLineString ? ObjectType.StringMultiLine : ObjectType.String;
+                            switch (type)
+                            {
+                                case ObjectType.String:
+                                    EditorGUILayout.DelayedTextField(item.str);
+                                    break;
+                                case ObjectType.StringMultiLine:
+                                    EditorGUILayout.TextArea(item.str);
+                                    break;
+                            }
                         }
-
                     }
                     EditorGUI.indentLevel = indent;
                 }

@@ -1677,6 +1677,68 @@ namespace RyuGiKen
         }
     }
     [Serializable]
+    public class MultiArrayRectTransform : MultiArrayExtension<RectTransform>
+    {
+        public new List<ReorderableListRectTransform> items;
+        public MultiArrayRectTransform(RectTransform[][] array)
+        {
+            this.items = new List<ReorderableListRectTransform>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListRectTransform(array[i]));
+        }
+        public MultiArrayRectTransform(ReorderableList<RectTransform>[] array)
+        {
+            this.items = new List<ReorderableListRectTransform>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListRectTransform(array[i].ToArray()));
+        }
+        public MultiArrayRectTransform(ReorderableListRectTransform[] array)
+        {
+            this.items = new List<ReorderableListRectTransform>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayRectTransform(List<ReorderableList<RectTransform>> list)
+        {
+            this.items = new List<ReorderableListRectTransform>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListRectTransform(list[i].ToArray()));
+        }
+        public MultiArrayRectTransform(List<ReorderableListRectTransform> list) { this.items = list; }
+        public override RectTransform GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override RectTransform GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
     public class MultiArrayBehaviour : MultiArrayExtension<Behaviour>
     {
         public new List<ReorderableListBehaviour> items;
@@ -2086,6 +2148,130 @@ namespace RyuGiKen
             return items[index1].items.GetRandomItem();
         }
         public override Camera GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
+    public class MultiArrayCollider : MultiArrayExtension<Collider>
+    {
+        public new List<ReorderableListCollider> items;
+        public MultiArrayCollider(Collider[][] array)
+        {
+            this.items = new List<ReorderableListCollider>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListCollider(array[i]));
+        }
+        public MultiArrayCollider(ReorderableList<Collider>[] array)
+        {
+            this.items = new List<ReorderableListCollider>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListCollider(array[i].ToArray()));
+        }
+        public MultiArrayCollider(ReorderableListCollider[] array)
+        {
+            this.items = new List<ReorderableListCollider>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayCollider(List<ReorderableList<Collider>> list)
+        {
+            this.items = new List<ReorderableListCollider>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListCollider(list[i].ToArray()));
+        }
+        public MultiArrayCollider(List<ReorderableListCollider> list) { this.items = list; }
+        public override Collider GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override Collider GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
+    [Serializable]
+    public class MultiArrayCollider2D : MultiArrayExtension<Collider2D>
+    {
+        public new List<ReorderableListCollider2D> items;
+        public MultiArrayCollider2D(Collider2D[][] array)
+        {
+            this.items = new List<ReorderableListCollider2D>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListCollider2D(array[i]));
+        }
+        public MultiArrayCollider2D(ReorderableList<Collider2D>[] array)
+        {
+            this.items = new List<ReorderableListCollider2D>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListCollider2D(array[i].ToArray()));
+        }
+        public MultiArrayCollider2D(ReorderableListCollider2D[] array)
+        {
+            this.items = new List<ReorderableListCollider2D>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayCollider2D(List<ReorderableList<Collider2D>> list)
+        {
+            this.items = new List<ReorderableListCollider2D>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListCollider2D(list[i].ToArray()));
+        }
+        public MultiArrayCollider2D(List<ReorderableListCollider2D> list) { this.items = list; }
+        public override Collider2D GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override Collider2D GetItem(int index1, int index2)
         {
             try
             {

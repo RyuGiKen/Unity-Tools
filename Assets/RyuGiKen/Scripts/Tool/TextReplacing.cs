@@ -10,12 +10,17 @@ using UnityEditor;
 #endif
 namespace RyuGiKen.Tools
 {
+    /// <summary>
+    /// 文本批处理
+    /// </summary>
     [DisallowMultipleComponent]
     //[RequireComponent(typeof(Text))]
-    public class TextReplaceSpacing : MonoBehaviour
+    public class TextReplacing : MonoBehaviour
     {
         public const string ChineseSpacing = "\u3000";
         public Text m_Text;
+        public string from;
+        public string to;
         [TextArea(1, 30)] public string TempString;
         void Awake()
         {
@@ -30,8 +35,8 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(TextReplaceSpacing))]
-    public class TextReplaceSpacingEditor : Editor
+    [CustomEditor(typeof(TextReplacing))]
+    public class TextReplacingEditor : Editor
     {
         SerializedProperty TempString;
         public override void OnInspectorGUI()
@@ -45,7 +50,7 @@ namespace RyuGiKenEditor.Tools
                 case SystemLanguage.ChineseTraditional:
                     Names[0] = "中文空格";
                     Names[1] = "英文空格";
-                    Names[2] = "全部{0}替换成{1}";
+                    Names[2] = "全部 {0} 替换成 {1}";
                     Names[3] = "移除\\n";
                     Names[4] = "转换为大写";
                     Names[5] = "转换为小写";
@@ -67,23 +72,35 @@ namespace RyuGiKenEditor.Tools
                     Names[9] = "Convert to Simplified";
                     break;
             }
-            EditorGUILayout.TextField(Names[0], TextReplaceSpacing.ChineseSpacing);
+            EditorGUILayout.TextField(Names[0], TextReplacing.ChineseSpacing);
             EditorGUILayout.TextField(Names[1], " ");
             TempString = serializedObject.FindProperty("TempString");
-            Text m_Text = (target as TextReplaceSpacing).m_Text;
+            Text m_Text = (target as TextReplacing).m_Text;
             if (m_Text)
             {
                 TempString.stringValue = m_Text.text;
             }
             string temp = TempString.stringValue;
+            string from = (target as TextReplacing).from;
+            string to = (target as TextReplacing).to;
+            if (GUILayout.Button(string.Format(Names[2], "from", "to")) && string.IsNullOrEmpty(from))
+            {
+                temp = temp.Replace(from, to);
+                SetText(m_Text, temp);
+            }
+            if (GUILayout.Button(string.Format(Names[2], "to", "from")) && string.IsNullOrEmpty(to))
+            {
+                temp = temp.Replace(to, from);
+                SetText(m_Text, temp);
+            }
             if (GUILayout.Button(string.Format(Names[2], Names[1], Names[0])))//替换为中文空格
             {
-                temp = temp.Replace(" ", TextReplaceSpacing.ChineseSpacing);
+                temp = temp.Replace(" ", TextReplacing.ChineseSpacing);
                 SetText(m_Text, temp);
             }
             if (GUILayout.Button(string.Format(Names[2], Names[0], Names[1])))//替换为英文空格
             {
-                temp = temp.Replace(TextReplaceSpacing.ChineseSpacing, " ");
+                temp = temp.Replace(TextReplacing.ChineseSpacing, " ");
                 SetText(m_Text, temp);
             }
             if (GUILayout.Button(string.Format(Names[2], @"\r", @"\n")))//\r替换为\n
