@@ -8621,6 +8621,36 @@ namespace RyuGiKen
         }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 获取相对画布坐标的矩形区域
+        /// </summary>
+        /// <param name="rectTransform"></param>
+        /// <returns></returns>
+        public static Rect GetRectInCanvas(RectTransform rectTransform)
+        {
+            Vector2 p = Vector2.zero;
+            p.x = rectTransform.position.x - rectTransform.pivot.x * rectTransform.rect.width;
+            p.y = rectTransform.position.y - rectTransform.pivot.y * rectTransform.rect.height;
+            return new Rect(p, rectTransform.rect.size);
+        }
+        /// <summary>
+        /// 获取矩形区域内的随机点（RectTransform.rect需要先换算）
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <returns></returns>
+        public static Vector2 GetRandomPointInRect(Rect rect)
+        {
+            return ValueAdjust.RandomRectPointInRange(new Vector2(rect.xMin, rect.xMax), new Vector2(rect.yMin, rect.yMax));
+        }
+        /// <summary>
+        /// 获取矩形区域内的随机点
+        /// </summary>
+        /// <param name="rectTransform"></param>
+        /// <returns></returns>
+        public static Vector2 GetRandomPointInRect(RectTransform rectTransform)
+        {
+            return GetRandomPointInRect(GetRectInCanvas(rectTransform));
+        }
+        /// <summary>
         /// 平滑处理
         /// </summary>
         /// <param name="line">线段</param>
