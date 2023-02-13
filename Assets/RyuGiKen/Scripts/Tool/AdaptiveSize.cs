@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -13,7 +14,13 @@ namespace RyuGiKen.Tools
     {
         public enum Mode
         {
+            /// <summary>
+            /// ÍâÇÐ
+            /// </summary>
             Min,
+            /// <summary>
+            /// ÄÚÇÐ
+            /// </summary>
             Max
         }
         public Mode mode = Mode.Min;
@@ -34,14 +41,7 @@ namespace RyuGiKen.Tools
                     if (float.IsNaN(rectTransform.sizeDelta.x) || float.IsNaN(rectTransform.sizeDelta.y) || rectTransform.sizeDelta.x <= 0 || rectTransform.sizeDelta.y <= 0)
                         rectTransform.sizeDelta = NormalSize;
                 }
-                float ThisRatio = NormalSize.x / NormalSize.y;
-                float ParentRatio = parent.rect.size.x / parent.rect.size.y;
-                Vector2 rect = Vector2.zero;
-                if ((mode == Mode.Min && ThisRatio > ParentRatio) || (mode == Mode.Max && ThisRatio < ParentRatio))
-                    rect = NormalSize * parent.rect.size.y / NormalSize.y;
-                else
-                    rect = NormalSize * parent.rect.size.x / NormalSize.x;
-
+                Vector2 rect = ValueAdjust.ProportionalScaling(NormalSize, parent.rect.size, mode == Mode.Min);
                 rectTransform.sizeDelta = new Vector2(rect.x.Clamp(1), rect.y.Clamp(1));
             }
         }

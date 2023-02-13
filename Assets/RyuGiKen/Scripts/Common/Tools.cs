@@ -2245,6 +2245,7 @@ namespace RyuGiKen
         /// </summary>
         CentreAndEdge = 4
     }
+#if UNITY_EDITOR || UNITY_STANDALONE
     /// <summary>
     /// 范围
     /// </summary>
@@ -2267,9 +2268,7 @@ namespace RyuGiKen
         /// <summary>
         /// 范围
         /// </summary>
-#if UNITY_EDITOR || UNITY_STANDALONE
         [SerializeField]
-#endif
         private Vector2 range;
         /// <summary>
         /// 范围
@@ -2364,9 +2363,7 @@ namespace RyuGiKen
         public static bool operator ==(ValueRange lhs, ValueRange rhs) { return lhs.range == rhs.range; }
         public static bool operator !=(ValueRange lhs, Vector2 rhs) { return !(lhs == rhs); }
         public static bool operator !=(ValueRange lhs, ValueRange rhs) { return !(lhs == rhs); }
-#if UNITY_EDITOR || UNITY_STANDALONE
         public static implicit operator ValueRange(Vector2Int value) { return new ValueRange(value); }
-#endif
     }
     /// <summary>
     /// 限位值
@@ -2374,16 +2371,12 @@ namespace RyuGiKen
     [Serializable]
     public struct ValueInRange
     {
-#if UNITY_EDITOR || UNITY_STANDALONE
         [SerializeField]
-#endif
         private float value;
         /// <summary>
         /// 范围
         /// </summary>
-#if UNITY_EDITOR || UNITY_STANDALONE
         [SerializeField]
-#endif
         private Vector2 range;
         /// <summary>
         /// 锁定范围
@@ -2691,6 +2684,7 @@ namespace RyuGiKen
         public static bool operator !=(BiaxValue lhs, Vector2 rhs) { return !(lhs == rhs); }
         public static bool operator !=(BiaxValue lhs, BiaxValue rhs) { return !(lhs == rhs); }
     }
+#endif
     public enum RotationAxis
     {
         XYZ,
@@ -2741,6 +2735,7 @@ namespace RyuGiKen
                 return string.Concat(bytes, " Bytes");
             }
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 获取范围内点
         /// </summary>
@@ -2785,6 +2780,7 @@ namespace RyuGiKen
         {
             return GetPoint(bounds, percent.x, percent.y, percent.z);
         }
+#endif
         /// <summary>
         /// 转速转角速度
         /// </summary>
@@ -4960,6 +4956,7 @@ namespace RyuGiKen
             }
             return str;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 打印数组元素
         /// </summary>
@@ -4985,6 +4982,7 @@ namespace RyuGiKen
             }
             return str;
         }
+#endif
         /// <summary>
         /// 打印数组元素
         /// </summary>
@@ -6221,6 +6219,7 @@ namespace RyuGiKen
         {
             return (float)Math.Sqrt(Math.Abs((X + b) / k));
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 获取抛物线位置
         /// </summary>
@@ -6275,6 +6274,7 @@ namespace RyuGiKen
             float DownTime = Mathf.Sqrt(Length * 2f / Physics.gravity.y.Abs());
             return UpTime + DownTime;
         }
+#endif
         /// <summary>
         /// 是否非数
         /// </summary>
@@ -7369,6 +7369,7 @@ namespace RyuGiKen
                 result = value;
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 限位。
         /// </summary>
@@ -7381,6 +7382,7 @@ namespace RyuGiKen
                 return value;
             return Clamp(value, range.MinValue, range.MaxValue);
         }
+#endif
         /// <summary>
         /// 限位。
         /// </summary>
@@ -7831,6 +7833,7 @@ namespace RyuGiKen
             return result;
         }
 #endif
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 找出最大最小值
         /// </summary>
@@ -7849,7 +7852,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 找出最大最小值
         /// </summary>
@@ -7888,6 +7890,7 @@ namespace RyuGiKen
             return result;
         }
 #endif
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 找出最大最小值
         /// </summary>
@@ -7906,6 +7909,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#endif
         /// <summary>
         /// 判定是否在范围内
         /// </summary>
@@ -7921,12 +7925,12 @@ namespace RyuGiKen
             }
             return CurrentValue >= MinValue && CurrentValue <= MaxValue;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 判定是否在范围内
         /// </summary>
         /// <param name="CurrentValue">当前值</param>
-        /// <param name="MinValue">最小值</param>
-        /// <param name="MaxValue">最大值</param>
+        /// <param name="Range"></param>
         /// <returns></returns>
         public static bool InRange(this float CurrentValue, ValueRange Range)
         {
@@ -7934,6 +7938,7 @@ namespace RyuGiKen
                 return false;
             return CurrentValue >= Range.MinValue && CurrentValue <= Range.MaxValue;
         }
+#endif
         /// <summary>
         /// 判定是否在范围内
         /// </summary>
@@ -8043,6 +8048,24 @@ namespace RyuGiKen
                 return false;
         }
 #if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 等比缩放
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="range"></param>
+        /// <param name="min">true外切，false内切</param>
+        /// <returns></returns>
+        public static Vector2 ProportionalScaling(Vector2 value, Vector2 range, bool min = false)
+        {
+            float[] Ratio = new float[] { value.x / value.y, range.x / range.y };
+            Vector2 result = Vector2.zero;
+
+            if ((min && Ratio[0] > Ratio[1]) || (!min && Ratio[0] < Ratio[1]))
+                result = value * range.y / value.y;
+            else
+                result = value * range.x / value.x;
+            return result;
+        }
         /// <summary>
         /// 点到直线距离
         /// </summary>
@@ -8288,6 +8311,7 @@ namespace RyuGiKen
             }
             return numAdjusted;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 调整循环范围(当前值，最小值，最大值，循环周期)
         /// </summary>
@@ -8315,16 +8339,15 @@ namespace RyuGiKen
         {
             if (num.IsNaN())
                 return float.NaN;
-#if UNITY_EDITOR || UNITY_STANDALONE
             if (range == null)
                 return num;
-#endif
             else
             {
                 FindMinAndMax(range.x, range.y, out float min, out float max);
                 return SetRange(num, min, max, max - min);
             }
         }
+#endif
         /// <summary>
         /// 反循环
         /// </summary>
@@ -8369,6 +8392,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 反循环
         /// </summary>
@@ -8382,6 +8406,7 @@ namespace RyuGiKen
                 return curValue;
             return UnLoop(curValue, lastValue, Range.MinValue, Range.MaxValue);
         }
+#endif
         /// <summary>
         /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
         /// </summary>
@@ -9199,6 +9224,7 @@ namespace RyuGiKen
                 return double.NaN;
             return list.ToArray().Sum(startIndex, endIndex);
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
@@ -9222,6 +9248,7 @@ namespace RyuGiKen
         {
             return ToPercent01(value, range, n, limit) * 2 - 1;
         }
+#endif
         /// <summary>
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
@@ -9248,6 +9275,7 @@ namespace RyuGiKen
         {
             return ToPercent01(value, min, max, n, limit) * 2 - 1;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
         /// </summary>
@@ -9279,6 +9307,7 @@ namespace RyuGiKen
                 return 0;
             return ToPercent01(value, range.MinValue, range.MaxValue, n, limit);
         }
+#endif
         /// <summary>
         /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
         /// </summary>
@@ -9383,6 +9412,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 输出在范围内的等比变化数组
         /// </summary>
@@ -9438,6 +9468,7 @@ namespace RyuGiKen
                 return float.NaN;
             return MappingRange(value, range, OutputRange.MinValue, OutputRange.MaxValue, n, limit);
         }
+#endif
         /// <summary>
         /// 映射
         /// </summary>
@@ -9692,6 +9723,7 @@ namespace RyuGiKen
                     return MappingRange(value, middle, max, OutputMiddle, OutputMax, n, limit);
             }
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 不对称范围映射
         /// </summary>
@@ -9736,6 +9768,7 @@ namespace RyuGiKen
         {
             return MappingAsymmetryRange(value, min, middle, max, OutputRange.MinValue, OutputRange.MiddleValue, OutputRange.MaxValue, n, limit);
         }
+#endif
         /// <summary>
         /// 不对称范围映射
         /// </summary>
