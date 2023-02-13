@@ -36,7 +36,7 @@ namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
     [CustomEditor(typeof(TextReplacing))]
-    public class TextReplacingEditor : Editor
+    public class TextReplaceSpacingEditor : Editor
     {
         SerializedProperty TempString;
         public override void OnInspectorGUI()

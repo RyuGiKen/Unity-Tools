@@ -14,7 +14,7 @@ namespace RyuGiKen.Tools
     public class AutoSetTextSpacing : MonoBehaviour
     {
         public Text m_Text;
-        public ValueRange lineSpacingRange = new ValueRange(1, 2);
+        //public ValueRange lineSpacingRange = new ValueRange(1, 2);
         void Awake()
         {
             m_Text = this.GetComponent<Text>();
@@ -25,7 +25,7 @@ namespace RyuGiKen.Tools
         }
         void LateUpdate()
         {
-            AdjustSpacing(m_Text, new ValueRange(1.2f, 2f), lineSpacingRange);
+            AdjustSpacing(m_Text, new ValueRange(1.2f, 2f));
         }
         /// <summary>
         /// 自动间隔
@@ -33,15 +33,14 @@ namespace RyuGiKen.Tools
         /// <param name="text"></param>
         public static void AdjustSpacing(Text text)
         {
-            AdjustSpacing(text, new ValueRange(1.2f, 2f), new ValueRange(1, 2));
+            AdjustSpacing(text, new ValueRange(1.2f, 2f));
         }
         /// <summary>
         /// 自动间隔
         /// </summary>
         /// <param name="text"></param>
         /// <param name="preferredHeightRange"></param>
-        /// <param name="lineSpacingRange"></param>
-        public static void AdjustSpacing(Text text, ValueRange preferredHeightRange, ValueRange lineSpacingRange)
+        public static void AdjustSpacing(Text text, ValueRange preferredHeightRange)
         {
             if (text)
             {
@@ -51,7 +50,9 @@ namespace RyuGiKen.Tools
                     return;
                 }
                 float preferredHeight = text.GetTextPreferredHeightForceLineSpacing1();
-                text.lineSpacing = ValueAdjust.MappingRange(text.rectTransform.rect.height, preferredHeight * preferredHeightRange.Range, preferredHeightRange).Round(2);
+                float lineSpacing = ValueAdjust.MappingRange(text.rectTransform.rect.height, preferredHeight * preferredHeightRange.Range, preferredHeightRange).Round(2);
+                if (!Mathf.Approximately(text.lineSpacing, lineSpacing))
+                    text.lineSpacing = lineSpacing;
             }
         }
     }
