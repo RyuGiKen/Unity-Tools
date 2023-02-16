@@ -182,16 +182,16 @@ namespace RyuGiKen.Tools
                 if (RecordData != null && RecordData.Count > 0)
                 {
                     string temp = RecordData[RecordData.Count - 1].ToString();
-                    ValueText.text = showCurValue + temp;
+                    ValueText.SetText(showCurValue + temp);
                     int pointIndex = temp.IndexOf('.');
                     if (pointIndex >= 0)
                     {
-                        ValueText.text = showCurValue + temp.Substring(0, (pointIndex + 4).Clamp(0, temp.Length));
+                        ValueText.SetText(showCurValue + temp.Substring(0, (pointIndex + 4).Clamp(0, temp.Length)));
                     }
                 }
                 else
                 {
-                    ValueText.text = "";
+                    ValueText.SetText("");
                 }
             }
         }

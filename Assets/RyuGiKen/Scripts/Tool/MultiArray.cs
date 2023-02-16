@@ -2731,6 +2731,68 @@ namespace RyuGiKen
             }
         }
     }
+    [Serializable]
+    public class MultiArrayValueWithRange : MultiArrayExtension<ValueWithRange>
+    {
+        public new List<ReorderableListValueWithRange> items;
+        public MultiArrayValueWithRange(ValueWithRange[][] array)
+        {
+            this.items = new List<ReorderableListValueWithRange>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListValueWithRange(array[i]));
+        }
+        public MultiArrayValueWithRange(ReorderableList<ValueWithRange>[] array)
+        {
+            this.items = new List<ReorderableListValueWithRange>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(new ReorderableListValueWithRange(array[i].ToArray()));
+        }
+        public MultiArrayValueWithRange(ReorderableListValueWithRange[] array)
+        {
+            this.items = new List<ReorderableListValueWithRange>();
+            if (array != null)
+                for (int i = 0; i < array.Length; i++)
+                    items.Add(array[i]);
+        }
+        public MultiArrayValueWithRange(List<ReorderableList<ValueWithRange>> list)
+        {
+            this.items = new List<ReorderableListValueWithRange>();
+            if (list != null)
+                for (int i = 0; i < list.Count; i++)
+                    items.Add(new ReorderableListValueWithRange(list[i].ToArray()));
+        }
+        public MultiArrayValueWithRange(List<ReorderableListValueWithRange> list) { this.items = list; }
+        public override ValueWithRange GetRandomOne(int index1)
+        {
+            return items[index1].items.GetRandomItem();
+        }
+        public override ValueWithRange GetItem(int index1, int index2)
+        {
+            try
+            {
+                return items[index1].items[index2];
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public override int Length
+        {
+            get
+            {
+                int result = 0;
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i])
+                        result += items[i].Count;
+                }
+                return result;
+            }
+        }
+    }
 }
 namespace RyuGiKenEditor
 {

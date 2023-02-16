@@ -17,7 +17,8 @@ namespace RyuGiKen.Tools
         //public ValueRange lineSpacingRange = new ValueRange(1, 2);
         void Awake()
         {
-            m_Text = this.GetComponent<Text>();
+            if (!m_Text)
+                m_Text = this.GetComponent<Text>();
         }
         void Reset()
         {
@@ -44,15 +45,18 @@ namespace RyuGiKen.Tools
         {
             if (text)
             {
+                float result = 1;
                 if (text.cachedTextGenerator.lineCount <= 1)
                 {
-                    text.lineSpacing = 1;
-                    return;
+                    result = 1;
                 }
-                float preferredHeight = text.GetTextPreferredHeightForceLineSpacing1();
-                float lineSpacing = ValueAdjust.MappingRange(text.rectTransform.rect.height, preferredHeight * preferredHeightRange.Range, preferredHeightRange).Round(2);
-                if (!Mathf.Approximately(text.lineSpacing, lineSpacing))
-                    text.lineSpacing = lineSpacing;
+                else
+                {
+                    float preferredHeight = text.GetTextPreferredHeightForceLineSpacing1();
+                    result = ValueAdjust.MappingRange(text.rectTransform.rect.height, preferredHeight * preferredHeightRange.Range, preferredHeightRange).Round(2);
+                }
+                if (!Mathf.Approximately(text.lineSpacing, result))
+                    text.lineSpacing = result;
             }
         }
     }

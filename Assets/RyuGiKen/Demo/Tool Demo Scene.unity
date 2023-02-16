@@ -10032,10 +10032,13 @@ MonoBehaviour:
   DataImages: []
   RecordData: []
   MaxRecord: 1
-  DataRange: {x: 0, y: 90}
+  DataRange:
+    range: {x: 0, y: 120}
   RangeText:
   - {fileID: 2124649153}
   - {fileID: 1285266146}
+  ValueText: {fileID: 0}
+  showCurValue: 
   ReferenceValue:
   - 0
   - 30
@@ -10262,6 +10265,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 421555103}
   targetScale: {x: 0, y: 0, z: 0}
+  X: 1
+  Y: 1
+  Z: 1
   space: 2
   follower:
   - {fileID: 1929125799}

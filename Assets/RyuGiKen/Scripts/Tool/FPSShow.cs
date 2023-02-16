@@ -339,7 +339,7 @@ namespace RyuGiKenEditor
                     autoAdjustQualityLevelTime.intValue = EditorGUILayout.DelayedIntField(Name[7], autoAdjustQualityLevelTime.intValue.Clamp(0));
                     SerializedProperty range = adjustFPSRange.FindPropertyRelative("range");
                     Vector2 temp = EditorGUILayout.Vector2Field(Name[8], range.vector2Value).Clamp(Vector2.one, Vector2.one * 600);
-                    range.vector2Value = new Vector2Int(temp.x.ToInteger(), temp.y.ToInteger());
+                    range.vector2Value = temp.ToInteger();
                     EditorGUILayout.Slider(FPSShow.autoAdjustQualityLevelTimer.Abs(), 0, fps.autoAdjustQualityLevelTime);
                 }
             }

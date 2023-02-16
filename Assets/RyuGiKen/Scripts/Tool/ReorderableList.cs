@@ -434,6 +434,13 @@ namespace RyuGiKen
         public ReorderableListValueInRange(ValueInRange[] array) { this.items = array != null ? array.ToList() : new List<ValueInRange>(); }
         public ReorderableListValueInRange(List<ValueInRange> list) { this.items = list; }
     }
+    [System.Serializable]
+    public class ReorderableListValueWithRange : ReorderableList<ValueWithRange>
+    {
+        public ReorderableListValueWithRange() { this.items = new List<ValueWithRange>(); }
+        public ReorderableListValueWithRange(ValueWithRange[] array) { this.items = array != null ? array.ToList() : new List<ValueWithRange>(); }
+        public ReorderableListValueWithRange(List<ValueWithRange> list) { this.items = list; }
+    }
 }
 namespace RyuGiKenEditor
 {

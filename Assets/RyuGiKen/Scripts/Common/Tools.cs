@@ -1200,6 +1200,15 @@ namespace RyuGiKen
     /// </summary>
     public static partial class ObjectAdjust
     {
+        /// <summary>
+        /// 检测线程状态
+        /// </summary>
+        /// <param name="thread"></param>
+        /// <returns></returns>
+        public static bool CheckThreadAlive(this Thread thread)
+        {
+            return thread != null && thread.IsAlive && (thread.ThreadState.HasFlag(ThreadState.Running) || thread.ThreadState.HasFlag(ThreadState.WaitSleepJoin));
+        }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 获取行间隔为1时的preferredHeight
@@ -1359,6 +1368,39 @@ namespace RyuGiKen
             if (!text)
                 return;
             text.text = str;
+        }
+        /// <summary>
+        /// 设置文本
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="value"></param>
+        public static void SetText(this Text text, uint value)
+        {
+            if (!text)
+                return;
+            text.text = value.ToString();
+        }
+        /// <summary>
+        /// 设置文本
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="value"></param>
+        public static void SetText(this Text text, long value)
+        {
+            if (!text)
+                return;
+            text.text = value.ToString();
+        }
+        /// <summary>
+        /// 设置文本
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="value"></param>
+        public static void SetText(this Text text, int value)
+        {
+            if (!text)
+                return;
+            text.text = value.ToString();
         }
         /// <summary>
         /// 设置文本
@@ -2459,23 +2501,34 @@ namespace RyuGiKen
         public ValueInRange(float Value, float min, float max, bool lockRange = false)
         {
             range = new Vector2();
-            LockRange = lockRange;
+            LockRange = false;
             value = Value;
             SetRange(min, max);
+            LockRange = lockRange;
         }
         public ValueInRange(float Value, Vector2 m_Range, bool lockRange = false)
         {
             value = Value;
             range = new Vector2();
-            LockRange = lockRange;
+            LockRange = false;
             SetRange(m_Range);
+            LockRange = lockRange;
         }
         public ValueInRange(float Value, ValueRange m_Range, bool lockRange = false)
         {
             value = Value;
             range = new Vector2();
-            LockRange = lockRange;
+            LockRange = false;
             SetRange(m_Range);
+            LockRange = lockRange;
+        }
+        public ValueInRange(ValueWithRange Value)
+        {
+            value = Value.Value;
+            range = new Vector2();
+            LockRange = false;
+            SetRange(Value.Range);
+            LockRange = Value.LockRange;
         }
         public void SetRange(Vector2 range)
         {
@@ -2519,6 +2572,10 @@ namespace RyuGiKen
             {
                 return Equals((ValueInRange)other);
             }
+            if (other is ValueWithRange)
+            {
+                return Equals((ValueWithRange)other);
+            }
             if (other is float)
             {
                 return Equals((float)other);
@@ -2529,9 +2586,13 @@ namespace RyuGiKen
         {
             return value == other;
         }
+        public bool Equals(ValueWithRange other)
+        {
+            return value == other.Value && other.Range == range;
+        }
         public bool Equals(ValueInRange other)
         {
-            return value == other.value && range == other.range;
+            return value == other.value && other.range == range;
         }
         //public static implicit operator ValueInRange(float value) { return new ValueInRange(value); }
         //public static implicit operator ValueInRange(double value) { return new ValueInRange(value.ToFloat()); }
@@ -2541,6 +2602,7 @@ namespace RyuGiKen
         //public static implicit operator ValueInRange(short value) { return new ValueInRange(value); }
         //public static implicit operator ValueInRange(long value) { return new ValueInRange(value); }
 
+        public static implicit operator ValueWithRange(ValueInRange value) { return new ValueWithRange(value); }
         public static implicit operator float(ValueInRange value) { return value != null ? value.Value : 0; }
         public static implicit operator double(ValueInRange value) { return value != null ? value.Value : 0; }
         public static implicit operator decimal(ValueInRange value) { return value != null ? value.Value.ToDecimal() : 0; }
@@ -2573,6 +2635,205 @@ namespace RyuGiKen
         public static bool operator !=(ValueInRange lhs, ValueInRange rhs) { return !(lhs == rhs); }
     }
     /// <summary>
+    /// 带范围值
+    /// </summary>
+    [Serializable]
+    public struct ValueWithRange
+    {
+        [SerializeField]
+        private float value;
+        /// <summary>
+        /// 范围
+        /// </summary>
+        [SerializeField]
+        private ValueRange range;
+        /// <summary>
+        /// 锁定范围
+        /// </summary>
+        public bool LockRange;
+        /// <summary>
+        /// 范围
+        /// </summary>
+        public ValueRange Range
+        {
+            set { SetRange(value); }
+            get { return range; }
+        }
+        public float Value
+        {
+            set { this.value = value; }
+            get { return value; }
+        }
+        /// <summary>
+        /// 最小值
+        /// </summary>
+        public float MinValue
+        {
+            get { return Range.MinValue; }
+        }
+        /// <summary>
+        /// 中间值
+        /// </summary>
+        public float MiddleValue
+        {
+            get { return Range.MiddleValue; }
+        }
+        /// <summary>
+        /// 最大值
+        /// </summary>
+        public float MaxValue
+        {
+            get { return Range.MaxValue; }
+        }
+        /*public ValueWithRange()
+        {
+            value = 0;
+            range = new Vector2(float.NaN, float.NaN);
+            LockRange = false;
+        }*/
+        public ValueWithRange(float value)
+        {
+            this.value = value;
+            range = new Vector2(float.NaN, float.NaN);
+            LockRange = false;
+        }
+        public ValueWithRange(float Value, float min, float max, bool lockRange = false)
+        {
+            range = new Vector2();
+            LockRange = false;
+            value = Value;
+            SetRange(min, max);
+            LockRange = lockRange;
+        }
+        public ValueWithRange(float Value, Vector2 m_Range, bool lockRange = false)
+        {
+            value = Value;
+            range = new Vector2();
+            LockRange = false;
+            SetRange(m_Range);
+            LockRange = lockRange;
+        }
+        public ValueWithRange(float Value, ValueRange m_Range, bool lockRange = false)
+        {
+            value = Value;
+            range = new Vector2();
+            LockRange = false;
+            SetRange(m_Range);
+            LockRange = lockRange;
+        }
+        public ValueWithRange(ValueInRange Value)
+        {
+            value = Value.Value;
+            range = new Vector2();
+            LockRange = false;
+            SetRange(Value.Range);
+            LockRange = Value.LockRange;
+        }
+        public void SetRange(Vector2 range)
+        {
+            if (!LockRange)
+                this.range.SetRange(ValueAdjust.FindMinAndMax(range.x, range.y));
+        }
+        public void SetRange(float min, float max)
+        {
+            if (!LockRange)
+                this.range.SetRange(ValueAdjust.FindMinAndMax(min, max));
+        }
+        public override string ToString()
+        {
+            return ToString(true);
+        }
+        public string ToString(string format)
+        {
+            if (bool.TryParse(format, out bool includeRange))
+                return ToString(includeRange);
+            return ToString(true, format);
+        }
+        public string ToString(bool includeRange)
+        {
+            return Value.ToString() + (includeRange ? ("：" + Range.ToString()) : "");
+        }
+        public string ToString(bool includeRange, string format)
+        {
+            return Value.ToString(format) + (includeRange ? ("：" + Range.ToString(format)) : "");
+        }
+        public string ToString(string format, bool includeRange)
+        {
+            return Value.ToString(format) + (includeRange ? Range.ToString(format) : "");
+        }
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+        public override bool Equals(object other)
+        {
+            if (other is ValueWithRange)
+            {
+                return Equals((ValueWithRange)other);
+            }
+            if (other is ValueInRange)
+            {
+                return Equals((ValueInRange)other);
+            }
+            if (other is float)
+            {
+                return Equals((float)other);
+            }
+            return false;
+        }
+        public bool Equals(float other)
+        {
+            return value == other;
+        }
+        public bool Equals(ValueWithRange other)
+        {
+            return value == other.value && range == other.range;
+        }
+        public bool Equals(ValueInRange other)
+        {
+            return value == other.Value && range == other.Range;
+        }
+        //public static implicit operator ValueWithRange(float value) { return new ValueWithRange(value); }
+        //public static implicit operator ValueWithRange(double value) { return new ValueWithRange(value.ToFloat()); }
+        //public static implicit operator ValueWithRange(decimal value) { return new ValueWithRange(value.ToFloat()); }
+        //public static implicit operator ValueWithRange(int value) { return new ValueWithRange(value); }
+        //public static implicit operator ValueWithRange(uint value) { return new ValueWithRange(value); }
+        //public static implicit operator ValueWithRange(short value) { return new ValueWithRange(value); }
+        //public static implicit operator ValueWithRange(long value) { return new ValueWithRange(value); }
+
+        public static implicit operator ValueInRange(ValueWithRange value) { return new ValueInRange(value); }
+        public static implicit operator float(ValueWithRange value) { return value != null ? value.Value : 0; }
+        public static implicit operator double(ValueWithRange value) { return value != null ? value.Value : 0; }
+        public static implicit operator decimal(ValueWithRange value) { return value != null ? value.Value.ToDecimal() : 0; }
+        //public static implicit operator int(ValueWithRange value) { return value.Value.ToInteger(); }
+        //public static implicit operator uint(ValueWithRange value) { return value.Value.ToUInteger(); }
+        //public static implicit operator short(ValueWithRange value) { return (short)value.Value; }
+        //public static implicit operator long(ValueWithRange value) { return value.Value.ToInteger64(); }
+
+        public static float operator +(ValueWithRange a, ValueWithRange b) { return a.Value + b.Value; }
+        public static float operator -(ValueWithRange a, ValueWithRange b) { return a.Value - b.Value; }
+        public static float operator *(ValueWithRange a, ValueWithRange b) { return a.Value * b.Value; }
+        public static float operator /(ValueWithRange a, ValueWithRange b) { return a.Value / b.Value; }
+        public static float operator +(ValueWithRange a, int b) { return a.Value + b; }
+        public static float operator -(ValueWithRange a, int b) { return a.Value - b; }
+        public static float operator *(ValueWithRange a, int b) { return a.Value * b; }
+        public static float operator /(ValueWithRange a, int b) { return a.Value / b; }
+        public static float operator +(ValueWithRange a, float b) { return a.Value + b; }
+        public static float operator -(ValueWithRange a, float b) { return a.Value - b; }
+        public static float operator *(ValueWithRange a, float b) { return a.Value * b; }
+        public static float operator /(ValueWithRange a, float b) { return a.Value / b; }
+        public static double operator +(ValueWithRange a, double b) { return a.Value + b; }
+        public static double operator -(ValueWithRange a, double b) { return a.Value - b; }
+        public static double operator *(ValueWithRange a, double b) { return a.Value * b; }
+        public static double operator /(ValueWithRange a, double b) { return a.Value / b; }
+        public static decimal operator +(ValueWithRange a, decimal b) { return a.Value.ToDecimal() + b; }
+        public static decimal operator -(ValueWithRange a, decimal b) { return a.Value.ToDecimal() - b; }
+        public static bool operator ==(ValueWithRange lhs, float rhs) { return lhs.value == rhs; }
+        public static bool operator ==(ValueWithRange lhs, ValueWithRange rhs) { return lhs.value == rhs.value; }
+        public static bool operator !=(ValueWithRange lhs, float rhs) { return !(lhs.value == rhs); }
+        public static bool operator !=(ValueWithRange lhs, ValueWithRange rhs) { return !(lhs == rhs); }
+    }
+    /// <summary>
     /// 双轴值(Vector2限位值)
     /// </summary>
     [Serializable]
@@ -2591,11 +2852,11 @@ namespace RyuGiKen
         }
         public ValueInRange X
         {
-            get { return new ValueInRange(value.x, -1, 1); }
+            get { return new ValueInRange(value.x, -1, 1, true); }
         }
         public ValueInRange Y
         {
-            get { return new ValueInRange(value.y, -1, 1); }
+            get { return new ValueInRange(value.y, -1, 1, true); }
         }
         public float x
         {
@@ -4982,6 +5243,31 @@ namespace RyuGiKen
             }
             return str;
         }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="includeRange">包含范围</param>
+        /// <param name="newline">换行</param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static string PrintArray(this ValueWithRange[] array, bool includeRange, bool newline = false, string format = null)
+        {
+            if (array == null || array.Length < 1)
+                return "";
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                str += "  [" + i + "] ";
+                if (array[i] != null)
+                {
+                    str += array[i].ToString(format, includeRange);
+                }
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
 #endif
         /// <summary>
         /// 打印数组元素
@@ -6804,6 +7090,26 @@ namespace RyuGiKen
         {
             return (int)Round(num);
         }
+#if UNITY_EDITOR || UNITY_STANDALONE
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector2Int ToInteger(this Vector2 value)
+        {
+            return new Vector2Int(value.x.ToInteger(), value.y.ToInteger());
+        }
+        /// <summary>
+        /// 转整数
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3Int ToInteger(this Vector3 value)
+        {
+            return new Vector3Int(value.x.ToInteger(), value.y.ToInteger(), value.z.ToInteger());
+        }
+#endif
         /// <summary>
         /// 字符串转整数，失败为0
         /// </summary>
@@ -9240,6 +9546,17 @@ namespace RyuGiKen
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
         /// <param name="value">参数</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float ToPercentPlusMinus01(ValueWithRange value, float n = 1, bool limit = true)
+        {
+            return ToPercent01(value, n, limit) * 2 - 1;
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[-1，1]
+        /// </summary>
+        /// <param name="value">参数</param>
         /// <param name="range">范围</param>
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
@@ -9288,6 +9605,21 @@ namespace RyuGiKen
             if (value == null || float.IsNaN(value) || float.IsNaN(value.MinValue) || float.IsNaN(value.MaxValue))
                 return float.NaN;
             else if (value.Length == 0)
+                return 0;
+            return ToPercent01(value, value.MinValue, value.MaxValue, n, limit);
+        }
+        /// <summary>
+        /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns>[0，1]</returns>
+        public static float ToPercent01(this ValueWithRange value, float n = 1, bool limit = true)
+        {
+            if (value == null || float.IsNaN(value) || float.IsNaN(value.MinValue) || float.IsNaN(value.MaxValue))
+                return float.NaN;
+            else if (value.Range.Length == 0)
                 return 0;
             return ToPercent01(value, value.MinValue, value.MaxValue, n, limit);
         }
@@ -9449,6 +9781,20 @@ namespace RyuGiKen
         /// <param name="limit">限制范围</param>
         /// <returns></returns>
         public static float MappingRange(ValueInRange value, ValueRange OutputRange, int n = 1, bool limit = true)
+        {
+            if (value == null || OutputRange == null)
+                return float.NaN;
+            return MappingRange(value, value.Range, OutputRange.Range, n, limit);
+        }
+        /// <summary>
+        /// 映射
+        /// </summary>
+        /// <param name="value">参数，范围</param>
+        /// <param name="OutputRange">输出范围</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float MappingRange(ValueWithRange value, ValueRange OutputRange, int n = 1, bool limit = true)
         {
             if (value == null || OutputRange == null)
                 return float.NaN;
@@ -9750,6 +10096,20 @@ namespace RyuGiKen
         /// <param name="limit">限制范围</param>
         /// <returns></returns>
         public static float MappingAsymmetryRange(ValueInRange value, float OutputMin, float OutputMiddle, float OutputMax, int n = 1, bool limit = true)
+        {
+            return MappingAsymmetryRange(value, value.MinValue, value.MiddleValue, value.MaxValue, OutputMin, OutputMiddle, OutputMax, n, limit);
+        }
+        /// <summary>
+        /// 不对称范围映射
+        /// </summary>
+        /// <param name="value">参数</param>
+        /// <param name="OutputMin">输出最小值</param>
+        /// <param name="OutputMiddle">输出中间值</param>
+        /// <param name="OutputMax">输出最大值</param>
+        /// <param name="n">n大于等于0为递增，n小于0为递减</param>
+        /// <param name="limit">限制范围</param>
+        /// <returns></returns>
+        public static float MappingAsymmetryRange(ValueWithRange value, float OutputMin, float OutputMiddle, float OutputMax, int n = 1, bool limit = true)
         {
             return MappingAsymmetryRange(value, value.MinValue, value.MiddleValue, value.MaxValue, OutputMin, OutputMiddle, OutputMax, n, limit);
         }
@@ -11084,6 +11444,37 @@ namespace RyuGiKenEditor
             if (!lockRange)
                 property.FindPropertyRelative("range").vector2Value = ValueAdjust.FindMinAndMax(range.x, range.y);
             property.FindPropertyRelative("value").floatValue = value.Clamp(property.FindPropertyRelative("range").vector2Value);
+            EditorGUI.indentLevel = indent;
+        }
+    }
+    [CustomPropertyDrawer(typeof(ValueWithRange))]
+    public class ValueWithRangePropertyDrawer : PropertyDrawer
+    {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return base.GetPropertyHeight(property, label);
+        }
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            //base.OnGUI(position, property, label);
+
+            position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+
+            float width = (position.width - 50f) / 3f;
+            Rect valueRect = new Rect(position.x, position.y, width, position.height);
+            Rect rangeRect = new Rect(valueRect.x + valueRect.width + 40, position.y, width * 2, position.height);
+            Rect lockRect = new Rect(valueRect.x + valueRect.width + 10, position.y, 30, position.height);
+
+            float value = EditorGUI.DelayedFloatField(valueRect, property.FindPropertyRelative("value").floatValue);
+            bool lockRange = property.FindPropertyRelative("LockRange").boolValue;
+            property.FindPropertyRelative("LockRange").boolValue = EditorGUI.Toggle(lockRect, lockRange);
+            Vector2 range = EditorGUI.Vector2Field(rangeRect, GUIContent.none, property.FindPropertyRelative("range").FindPropertyRelative("range").vector2Value);
+            if (!lockRange)
+                property.FindPropertyRelative("range").FindPropertyRelative("range").vector2Value = ValueAdjust.FindMinAndMax(range.x, range.y);
+            property.FindPropertyRelative("value").floatValue = value;//.Clamp(property.FindPropertyRelative("range").FindPropertyRelative("range").vector2Value);
             EditorGUI.indentLevel = indent;
         }
     }
