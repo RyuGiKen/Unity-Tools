@@ -61,13 +61,15 @@ namespace RyuGiKen.Tools
 		}
 
 		public string versionNumber = "b1.0.0";
-		void Awake()
+        public static string BuildTime = "";
+        void Awake()
 		{
 			if (Application.isPlaying)
 			{
-				//UpdateVersionNumber();
-			}
-		}
+                //UpdateVersionNumber();
+            }
+            BuildTime = GetFile.LoadXmlData("BuildDate", Application.dataPath + "/BuildData.xml", "Root", true);
+        }
 		private void LateUpdate()
 		{
 			if (versionNumber != Application.version || this.GetComponent<Text>().text != Application.version)
@@ -76,18 +78,18 @@ namespace RyuGiKen.Tools
 		[ContextMenu("更新版本号赋值")]
 		void UpdateVersionNumber()
 		{
+#if DEVELOPMENT_BUILD
+            this.GetComponent<Text>().text = GetProgramVersion(true, out versionNumber);
+#else
 			versionNumber = SetVersionNumber(Application.version);
-#if UNITY_EDITOR && false
-			if (UnityEditor.PlayerSettings.bundleVersion != versionNumber)
-				UnityEditor.PlayerSettings.bundleVersion = versionNumber;
-#endif
 			this.GetComponent<Text>().text = versionNumber;
+#endif
 		}
-		/// <summary>
-		/// 版本号赋值，格式限制
-		/// </summary>
-		/// <param name="number"></param>
-		public static string SetVersionNumber(string number)
+        /// <summary>
+        /// 版本号赋值，格式限制
+        /// </summary>
+        /// <param name="number"></param>
+        public static string SetVersionNumber(string number)
 		{
 			string versionNumber;
 			if (string.IsNullOrWhiteSpace(number))
@@ -203,19 +205,28 @@ namespace RyuGiKen.Tools
 		{
 			return Application.productName;
 		}
-		/// <summary>
-		/// 获取程序发布版本号
-		/// </summary>
-		/// <returns></returns>
-		public static string GetProgramVersion()
-		{
-			return Version.SetVersionNumber(Application.version);
-		}
-		/// <summary>
-		/// 获取程序名称，发布版本号
-		/// </summary>
-		/// <returns></returns>
-		public static string GetProgramNameVersion()
+        /// <summary>
+        /// 获取程序发布版本号
+        /// </summary>
+        /// <returns></returns>
+        public static string GetProgramVersion(bool includeBuildTime = false)
+        {
+            return GetProgramVersion(includeBuildTime, out string version);
+        }
+        /// <summary>
+        /// 获取程序发布版本号
+        /// </summary>
+        /// <returns></returns>
+        public static string GetProgramVersion(bool includeBuildTime, out string version)
+        {
+            version = SetVersionNumber(Application.version);
+            return version + (includeBuildTime && !string.IsNullOrWhiteSpace(BuildTime) ? ("_" + BuildTime) : "");
+        }
+        /// <summary>
+        /// 获取程序名称，发布版本号
+        /// </summary>
+        /// <returns></returns>
+        public static string GetProgramNameVersion()
 		{
 			string Info = "";
 			Info += GetProgramName();

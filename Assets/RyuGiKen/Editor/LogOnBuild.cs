@@ -7,39 +7,40 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-/// <summary>
-/// 构建时生成Version文本，自动删除
-/// </summary>
-public class LogOnBuild : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+using RyuGiKen;
+namespace RyuGiKenEditor.Tools
 {
-	public int callbackOrder { get; private set; }
-	private DateTime m_startTime;
-	private string VersionFileFullName;
-	public void OnPreprocessBuild(BuildReport report)
-	{
-		m_startTime = DateTime.Now;
-		if (!Directory.Exists(Application.streamingAssetsPath))
-			Directory.CreateDirectory(Application.streamingAssetsPath);
-		VersionFileFullName = Application.streamingAssetsPath + "/" + "Version.txt";
-		//File.Create(VersionFileFullName);
-		FileStream file = new FileStream(VersionFileFullName, FileMode.OpenOrCreate);
-		file.Close();
+    /// <summary>
+    /// 构建时生成Version文本
+    /// </summary>
+    public class LogOnBuild : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+    {
+        public int callbackOrder { get; private set; }
+        private DateTime m_startTime;
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            m_startTime = DateTime.Now;
+        }
+        public void OnPostprocessBuild(BuildReport report)
+        {
+            var endTime = DateTime.Now;
+            var deltaTime = endTime - m_startTime;
+            Debug.LogFormat("构建耗时：{0}:{1}:{2}", deltaTime.Hours.ToString("D2"), deltaTime.Minutes.ToString("D2"), deltaTime.Seconds.ToString("D2"));
 
-		File.WriteAllText(VersionFileFullName, RyuGiKen.Tools.Version.LogVersionDate(), Encoding.UTF8);
-	}
-	public void OnPostprocessBuild(BuildReport report)
-	{
-		try
-		{
-			var endTime = DateTime.Now;
-			var deltaTime = endTime - m_startTime;
-			var hours = deltaTime.Hours.ToString("00");
-			var minutes = deltaTime.Minutes.ToString("00");
-			var seconds = deltaTime.Seconds.ToString("00");
-			Debug.LogFormat("构建耗时：{0}:{1}:{2}", hours, minutes, seconds);
-			File.Delete(VersionFileFullName);
-			File.Delete(VersionFileFullName + ".meta");
-		}
-		catch { }
-	}
+            FileInfo outputExe = new FileInfo(report.summary.outputPath);
+            string xmlPath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data\\BuildData.xml";
+            GetFile.CreateXmlFile(xmlPath, "Root",
+                GetFile.CreateXElement("BuildDate", report.summary.buildEndedAt.ToLocalTime().ToString("yyyy_MM_dd")),
+                GetFile.CreateXElement("BuildTime", report.summary.buildEndedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")),
+                GetFile.CreateXElement("BuildUnityVersion", RyuGiKen.Tools.Version.GetProgramUnityVersion())
+            );
+            string VersionFilePath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data\\StreamingAssets";
+            if (!Directory.Exists(VersionFilePath))
+                Directory.CreateDirectory(VersionFilePath);
+            VersionFilePath += "\\Version.txt";
+            FileStream file = new FileStream(VersionFilePath, FileMode.OpenOrCreate);
+            file.Close();
+            File.WriteAllText(VersionFilePath, RyuGiKen.Tools.Version.LogVersionDate(), Encoding.UTF8);
+        }
+    }
 }
