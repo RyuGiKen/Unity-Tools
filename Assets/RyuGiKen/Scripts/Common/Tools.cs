@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -10,6 +11,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 #if UNITY_EDITOR || UNITY_STANDALONE
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,6 +38,336 @@ namespace RyuGiKen
     /// </summary>
     public static partial class GetFile
     {
+        /// <summary>
+        /// 创建配置文件
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="RootNodeName">根节点</param>
+        public static XElement CreateXmlFile(string path, string RootNodeName = "Root")
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+
+            XDocument doc = new XDocument(CreateXElement(RootNodeName, ""));
+            SaveXmlFile(path, doc);
+            return doc.Root;
+        }
+        /// <summary>
+        /// 创建配置文件
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="RootNodeName">根节点</param>
+        public static XElement CreateXmlFile(string path, string RootNodeName = "Root", params XElement[] nodes)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+
+            XDocument doc = new XDocument(CreateXElement(RootNodeName, nodes));
+            SaveXmlFile(path, doc);
+            return doc.Root;
+        }
+        /// <summary>
+        /// 保存配置文件
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static void SaveXmlFile(string path, XElement data)
+        {
+            if (string.IsNullOrWhiteSpace(path) || data == null)
+                return;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+
+            foreach (XElement xe2 in data.Descendants())
+            {
+                if (xe2.Descendants().Count() < 1 && string.IsNullOrWhiteSpace(xe2.Value))
+                    xe2.Value = "";
+            }
+            data.Save(path);
+        }
+        /// <summary>
+        /// 保存配置文件
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static void SaveXmlFile(string path, XDocument data)
+        {
+            if (string.IsNullOrWhiteSpace(path) || data == null)
+                return;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+
+            foreach (XElement xe2 in data.Descendants())
+            {
+                if (xe2.Descendants().Count() < 1 && string.IsNullOrWhiteSpace(xe2.Value))
+                    xe2.Value = "";
+            }
+            data.Save(path);
+        }
+        /// <summary>
+        /// 创建Xml节点
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="nodes"></param>
+        /// <returns></returns>
+        public static XElement CreateXElement(XName name, params XElement[] nodes)
+        {
+            return new XElement(name, nodes);
+        }
+        /// <summary>
+        /// 创建Xml节点
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static XElement CreateXElement(XName name, XAttribute attribute, string value = "")
+        {
+            return new XElement(name, attribute, value);
+        }
+        /// <summary>
+        /// 创建Xml节点
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="attribute"></param>
+        /// <param name="nodes"></param>
+        /// <returns></returns>
+        public static XElement CreateXElement(XName name, XAttribute attribute, params XElement[] nodes)
+        {
+            return new XElement(name, attribute, nodes);
+        }
+        /// <summary>
+        /// 创建Xml节点
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        public static XElement CreateXElement(XName name, string value = "", params XAttribute[] attribute)
+        {
+            //if (attribute.CheckArrayLength(1))
+                return new XElement(name, attribute, value);
+            //else
+            //    return new XElement(name, value);
+        }
+        /// <summary>
+        /// 创建Xml节点
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static XElement CreateXElement(XName name, XAttribute[] attribute, string value = "")
+        {
+            return new XElement(name, attribute, value);
+        }
+        /// <summary>
+        /// 创建Xml节点
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="attribute"></param>
+        /// <param name="nodes"></param>
+        /// <returns></returns>
+        public static XElement CreateXElement(XName name, XAttribute[] attribute, params XElement[] nodes)
+        {
+            return new XElement(name, attribute, nodes);
+        }
+        /// <summary>
+        /// 修改Xml节点属性
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="replaceAll"></param>
+        public static void ModifyXmlDataAttribute(string path, XName NodeName, XName name, string value, bool replaceAll = true)
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()))
+                return;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+            XElement xe = File.Exists(path) ? XElement.Load(path) : CreateXmlFile(path);
+            if (xe.Descendants(NodeName).Count() < 1)
+            {
+                xe.Add(CreateXElement(NodeName, new XAttribute(name, value)));
+            }
+            else
+            {
+                foreach (XElement xe2 in xe.Descendants(NodeName))
+                {
+                    if (xe2.Attribute(name) != null)
+                    {
+                        xe2.Attribute(name).Value = value;
+                    }
+                    else
+                    {
+                        xe2.Add(new XAttribute(name, value));
+                    }
+                    if (!replaceAll)
+                        break;
+                }
+            }
+            SaveXmlFile(path, xe);
+        }
+        /// <summary>
+        /// 修改Xml节点属性
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="replaceAll"></param>
+        /// <param name="attribute"></param>
+        public static void ModifyXmlDataAttribute(string path, XName name, bool replaceAll = true, params XAttribute[] attribute)
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()) || !attribute.CheckArrayLength(1))
+                return;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+            XElement xe = File.Exists(path) ? XElement.Load(path) : CreateXmlFile(path);
+            if (xe.Descendants(name).Count() < 1)
+            {
+                xe.Add(CreateXElement(name, attribute));
+            }
+            else
+            {
+                foreach (XElement xe2 in xe.Descendants(name))
+                {
+                    foreach (XAttribute xa in attribute)
+                    {
+                        if (xe2.Attribute(xa.Name) != null)
+                        {
+                            xe2.Attribute(xa.Name).Value = xa.Value;
+                        }
+                        else
+                        {
+                            xe2.Add(xa);
+                        }
+                    }
+                    if (!replaceAll)
+                        break;
+                }
+            }
+            SaveXmlFile(path, xe);
+        }
+        /// <summary>
+        /// 修改Xml节点属性
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="replaceAll"></param>
+        public static void ModifyXmlData(string path, XName name, string value, bool replaceAll = true)
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()))
+                return;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+            XElement xe = File.Exists(path) ? XElement.Load(path) : CreateXmlFile(path);
+            if (xe.Descendants(name).Count() < 1)
+            {
+                xe.Add(CreateXElement(name, value));
+            }
+            else
+            {
+                foreach (XElement xe2 in xe.Descendants(name))
+                {
+                    xe2.Value = value;
+                    if (!replaceAll)
+                        break;
+                }
+            }
+            SaveXmlFile(path, xe);
+        }
+        /// <summary>
+        /// 修改Xml节点属性
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="replace"></param>
+        /// <param name="replaceAll"></param>
+        public static void ModifyXmlData(string path, XName name, XElement replace, bool replaceAll = true)
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()) || replace == null)
+                return;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+            XElement xe = File.Exists(path) ? XElement.Load(path) : CreateXmlFile(path);
+            if (xe.Descendants(name).Count() < 1)
+            {
+                xe.Add(replace);
+            }
+            else
+            {
+                foreach (XElement xe2 in xe.Descendants(name))
+                {
+                    xe2.ReplaceAll(replace);
+                    if (!replaceAll)
+                        break;
+                }
+            }
+            SaveXmlFile(path, xe);
+        }
+        /// <summary>
+        /// 插入Xml节点
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="data"></param>
+        public static void InsertToXmlData(string path, XElement data)
+        {
+            if (string.IsNullOrWhiteSpace(path) || data == null)
+                return;
+            path = ValueAdjust.CheckFilePath(path, "xml", true);
+            XElement xe = File.Exists(path) ? XElement.Load(path) : CreateXmlFile(path);
+            xe.Add(data);
+            SaveXmlFile(path, xe);
+        }
+        /// <summary>
+        /// 插入Xml节点
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="nodes"></param>
+        public static void InsertToXmlData(string path, XName name, params XElement[] nodes)
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()))
+                return;
+            InsertToXmlData(path, CreateXElement(name, nodes));
+        }
+        /// <summary>
+        /// 插入Xml节点
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        public static void InsertToXmlData(string path, XName name, XAttribute attribute, string value = "")
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()))
+                return;
+            InsertToXmlData(path, CreateXElement(name, attribute, value));
+        }
+        /// <summary>
+        /// 插入Xml节点
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="attribute"></param>
+        /// <param name="nodes"></param>
+        public static void InsertToXmlData(string path, XName name, XAttribute attribute, params XElement[] nodes)
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()))
+                return;
+            InsertToXmlData(path, CreateXElement(name, attribute, nodes));
+        }
+        /// <summary>
+        /// 插入Xml节点
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="attribute"></param>
+        /// <param name="nodes"></param>
+        public static void InsertToXmlData(string path, XName name, XAttribute[] attribute, params XElement[] nodes)
+        {
+            if (string.IsNullOrWhiteSpace(path) || name == null || string.IsNullOrWhiteSpace(name.ToString()))
+                return;
+            InsertToXmlData(path, CreateXElement(name, attribute, nodes));
+        }
         /// <summary>
         /// 读取配置参数
         /// </summary>
