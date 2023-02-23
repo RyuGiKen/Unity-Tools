@@ -9287,13 +9287,25 @@ namespace RyuGiKen
         /// 获取相对画布坐标的矩形区域
         /// </summary>
         /// <param name="rectTransform"></param>
+        /// <param name="canvasScale"></param>
         /// <returns></returns>
-        public static Rect GetRectInCanvas(RectTransform rectTransform)
+        public static Rect GetRectInCanvas(this RectTransform rectTransform, Vector2 canvasScale)
         {
             Vector2 p = Vector2.zero;
-            p.x = rectTransform.position.x - rectTransform.pivot.x * rectTransform.rect.width;
-            p.y = rectTransform.position.y - rectTransform.pivot.y * rectTransform.rect.height;
-            return new Rect(p, rectTransform.rect.size);
+            p.x = rectTransform.position.x - rectTransform.pivot.x * rectTransform.rect.width * canvasScale.x;
+            p.y = rectTransform.position.y - rectTransform.pivot.y * rectTransform.rect.height * canvasScale.y;
+            return new Rect(p, rectTransform.rect.size * canvasScale);
+        }
+        /// <summary>
+        /// 获取世界坐标的矩形区域
+        /// </summary>
+        /// <param name="rectTransform"></param>
+        /// <returns></returns>
+        public static Rect GetRectOnWorld(this RectTransform rectTransform)
+        {
+            Vector3[] v = new Vector3[4];
+            rectTransform.GetWorldCorners(v);
+            return Rect.MinMaxRect(v[0].x, v[0].y, v[2].x, v[2].y);
         }
         /// <summary>
         /// 获取矩形区域内的随机点（RectTransform.rect需要先换算）
@@ -9311,7 +9323,17 @@ namespace RyuGiKen
         /// <returns></returns>
         public static Vector2 GetRandomPointInRect(RectTransform rectTransform)
         {
-            return GetRandomPointInRect(GetRectInCanvas(rectTransform));
+            return GetRandomPointInRect(rectTransform.GetRectOnWorld());
+        }
+        /// <summary>
+        /// 获取矩形区域内的随机点
+        /// </summary>
+        /// <param name="rectTransform"></param>
+        /// <param name="canvasScale"></param>
+        /// <returns></returns>
+        public static Vector2 GetRandomPointInRect(RectTransform rectTransform, Vector2 canvasScale)
+        {
+            return GetRandomPointInRect(rectTransform.GetRectInCanvas(canvasScale));
         }
         /// <summary>
         /// 平滑处理
