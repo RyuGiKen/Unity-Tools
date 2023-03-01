@@ -435,7 +435,7 @@ namespace RyuGiKenEditor.Localization
         protected static int LanguageCount = 2;
         protected void OnEnable()
         {
-            LanguageCount = ValueAdjust.GetEnumLength(typeof(GamesLanguage)) - 1;
+            LanguageCount = ValueAdjust.GetEnumLength(typeof(GamesLanguage));
         }
         protected virtual string[] GetNames()
         {
@@ -497,10 +497,23 @@ namespace RyuGiKenEditor.Localization
                     for (int i = 0; i < property.arraySize; i++)
                     {
                         SerializedProperty language = property.GetArrayElementAtIndex(i).FindPropertyRelative("language");
-                        //LanguageCount = language.enumDisplayNames.Length - 1;
-                        language.enumValueIndex = i.Clamp(0, LanguageCount) + 1;
+                        if (i == LanguageCount - 1)
+                        {
+                            language.enumValueIndex = 0;
+                            ClearItem(property.GetArrayElementAtIndex(i));
+                        }
+                        else
+                            language.enumValueIndex = i.Clamp(0, LanguageCount) + 1;
                     }
                 }
+            }
+        }
+        protected virtual void ClearItem(SerializedProperty item)
+        {
+            if (item != null && item.type == nameof(LocalizationStringItem))
+            {
+                //item.FindPropertyRelative("multiLineString").boolValue = false;
+                item.FindPropertyRelative("str").stringValue = "";
             }
         }
         /// <summary>

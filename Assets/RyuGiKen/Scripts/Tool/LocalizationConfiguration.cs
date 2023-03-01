@@ -497,6 +497,19 @@ namespace RyuGiKenEditor.Localization
                     }
                 }
         }
+        protected override void ClearItem(SerializedProperty item)
+        {
+            if (item != null && item.type == nameof(LocalizationItem))
+            {
+                item.FindPropertyRelative("type").enumValueIndex = 0;
+                //item.FindPropertyRelative("multiLineString").boolValue = false;
+                item.FindPropertyRelative("str").stringValue = "";
+                item.FindPropertyRelative("audioClip").objectReferenceValue = null;
+                item.FindPropertyRelative("sprite").objectReferenceValue = null;
+                item.FindPropertyRelative("texture").objectReferenceValue = null;
+                item.FindPropertyRelative("otherObject").objectReferenceValue = null;
+            }
+        }
         protected override void Clear(bool all)
         {
             for (int i = 0; i < Items.Length; i++)

@@ -2617,7 +2617,15 @@ namespace RyuGiKen
         /// <summary>
         /// 集中中心与边缘
         /// </summary>
-        CentreAndEdge = 4
+        CentreAndEdge = 4,
+        /// <summary>
+        /// 偏小
+        /// </summary>
+        Left = 5,
+        /// <summary>
+        /// 偏大
+        /// </summary>
+        Right = 6
     }
 #if UNITY_EDITOR || UNITY_STANDALONE
     /// <summary>
@@ -9167,9 +9175,11 @@ namespace RyuGiKen
                     dis = (Random.Range(0, size) + Random.Range(0, size)) * 0.5f;
                     break;
                 case IntersperseMode.Centre:
+                case IntersperseMode.Left:
                     dis = Random.Range(0, 1f) * Random.Range(0, 1f) * size;
                     break;
                 case IntersperseMode.Edge:
+                case IntersperseMode.Right:
                     dis = (1 - Random.Range(0, 1f) * Random.Range(0, 1f)) * size;
                     break;
                 case IntersperseMode.CentreAndEdge:
@@ -9209,7 +9219,9 @@ namespace RyuGiKen
         /// <summary>
         /// 范围内随机取值
         /// </summary>
-        /// <param name="Range"></param>
+        /// <param name="Min"></param>
+        /// <param name="Max"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
         public static float RandomValueInRange(float Min, float Max, IntersperseMode type = IntersperseMode.Average)
         {
@@ -9229,7 +9241,7 @@ namespace RyuGiKen
                     result = Random.Range(min, max);
                     break;
                 case IntersperseMode.NotCentreAndEdge:
-                    result = ValueAdjust.PolarToRect(RandomBoolean() ? 0 : 180, (Random.Range(0, dis * 0.5f) + Random.Range(0, dis * 0.5f)) * 0.5f).x;
+                    result = PolarToRect(RandomBoolean() ? 0 : 180, (Random.Range(0, dis * 0.5f) + Random.Range(0, dis * 0.5f)) * 0.5f).x;
                     break;
                 case IntersperseMode.Centre:
                     result = Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f * (RandomBoolean() ? 1 : -1) + middle;
@@ -9250,6 +9262,12 @@ namespace RyuGiKen
                         else
                             result = max - Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f;
                     }
+                    break;
+                case IntersperseMode.Left:
+                    result = Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f + min;
+                    break;
+                case IntersperseMode.Right:
+                    result = max - Random.Range(0, 1f) * Random.Range(0, 1f) * dis * 0.5f;
                     break;
             }
             return result;
