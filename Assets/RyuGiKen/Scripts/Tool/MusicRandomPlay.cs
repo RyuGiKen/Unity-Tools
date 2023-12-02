@@ -112,7 +112,7 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(MusicRandomPlay))]
+    [CustomEditor(typeof(MusicRandomPlay), true)]
     [CanEditMultipleObjects]
     public class MusicRandomPlayEditor : Editor
     {

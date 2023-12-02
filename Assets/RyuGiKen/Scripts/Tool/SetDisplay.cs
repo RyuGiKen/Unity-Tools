@@ -1,11 +1,10 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using WindowsAPI;
 using System.Threading;
-
+using UnityEngine;
+using WindowsAPI;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -102,12 +101,13 @@ namespace RyuGiKen.Tools
         }
         void Start()
         {
-            DebugL.Log(" displays(显示器数)： " + Display.displays.Length + " \r\n");
+            string str = "displays(显示器数)： " + Display.displays.Length;
+            DebugL.Log(str);
 
             string xmlData = GetFile.LoadXmlData(new string[] { "UseSecondScreen", "SecondScreen" }, Application.streamingAssetsPath + "/Setting.xml", "Data", true);
             if (!string.IsNullOrWhiteSpace(xmlData))
             {
-                useSecondScreen = xmlData.ContainIgnoreCase("True") || xmlData == "1";
+                useSecondScreen = xmlData.ToBoolean();
             }
 #if UNITY_STANDALONE_WIN
             //HWndIntPtr = (IntPtr)WindowsAPI.User32.FindWindow(null, Application.productName);//工程名，非进程名。非英文会因为编码格式问题找不到窗口。可能误判同名窗口。
@@ -143,7 +143,7 @@ namespace RyuGiKen.Tools
             state.WindowPosY = 0;
             ErrorRange = Mathf.Clamp(ErrorRange, 2, Mathf.Min(Display.displays[0].systemWidth, Display.displays[0].systemHeight, Display.displays[1].systemWidth, Display.displays[1].systemHeight) - 5);
             TestMousePos[0] = new Vector2Int(Display.displays[0].systemWidth + Display.displays[1].systemWidth / 2, Display.displays[1].systemHeight / 2);
-            TestMousePos[1] = new Vector2Int(-Display.displays[1].systemWidth, Display.displays[1].systemHeight / 2);
+            TestMousePos[1] = new Vector2Int(-Display.displays[1].systemWidth / 2, Display.displays[1].systemHeight / 2);
             TestMousePos[2] = new Vector2Int(Display.displays[0].systemWidth / 2, -Display.displays[1].systemHeight / 2);
             TestMousePos[3] = new Vector2Int(Display.displays[0].systemWidth / 2, Display.displays[0].systemHeight + Display.displays[1].systemHeight / 2);
             User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
@@ -171,6 +171,48 @@ namespace RyuGiKen.Tools
                 ScreenAxis = axis;
                 OnScreenAxisChange();
             }
+            ChangeResolutionForTest();
+        }
+        /// <summary>
+        /// 测试用调整分辨率
+        /// </summary>
+        public static void ChangeResolutionForTest()
+        {
+            if (Input.GetKeyDown(KeyCode.F6))
+            {
+                if (Display.main.systemWidth >= 1920 && Display.main.systemHeight >= 1080)
+                    Screen.SetResolution(1920, 1080, true);
+                else
+                    Screen.SetResolution(Display.main.systemWidth, Display.main.systemHeight, true);
+            }
+            else if (Input.GetKeyDown(KeyCode.F10))
+            {
+                Screen.fullScreen = false;
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha0))
+            {
+                SetResolution(1);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha9))
+            {
+                SetResolution(0.9f);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha8))
+            {
+                SetResolution(0.8f);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha7))
+            {
+                SetResolution(0.7f);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha6))
+            {
+                SetResolution(0.6f);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
+                SetResolution(0.5f);
+            }
         }
         void SetOverrideMousePos(float X, float Y, bool Override)
         {
@@ -189,7 +231,7 @@ namespace RyuGiKen.Tools
         {
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[0].x, ErrorRange);
-            string info = "Target：" + TestMousePos[0] + " Mouse：" + mousePosition + " 副屏在主屏右方：" + result + " \r\n";
+            string info = "Target：" + TestMousePos[0] + " Mouse：" + mousePosition + " 副屏在主屏右方：" + result;
             DebugL.Log(info);
             SetOverrideMousePos(TestMousePos[1].x, TestMousePos[1].y, true);
             if (result)
@@ -204,7 +246,7 @@ namespace RyuGiKen.Tools
         {
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.x, TestMousePos[1].x, ErrorRange);
-            string info = "Target：" + TestMousePos[1] + " Mouse：" + mousePosition + " 副屏在主屏左方：" + result + " \r\n";
+            string info = "Target：" + TestMousePos[1] + " Mouse：" + mousePosition + " 副屏在主屏左方：" + result;
             DebugL.Log(info);
             SetOverrideMousePos(TestMousePos[2].x, TestMousePos[2].y, true);
             if (result)
@@ -219,7 +261,7 @@ namespace RyuGiKen.Tools
         {
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.y, TestMousePos[2].y, ErrorRange);
-            string info = "Target：" + TestMousePos[2] + " Mouse：" + mousePosition + " 副屏在主屏上方：" + result + " \r\n";
+            string info = "Target：" + TestMousePos[2] + " Mouse：" + mousePosition + " 副屏在主屏上方：" + result;
             DebugL.Log(info);
             SetOverrideMousePos(TestMousePos[3].x, TestMousePos[3].y, true);
             if (result)
@@ -234,7 +276,7 @@ namespace RyuGiKen.Tools
         {
             Vector2 mousePosition = GetMousePosition();
             bool result = ValueAdjust.JudgeRange(mousePosition.y, TestMousePos[3].y, ErrorRange);
-            string info = "Target：" + TestMousePos[3] + " Mouse：" + mousePosition + " 副屏在主屏下方：" + result + " \r\n";
+            string info = "Target：" + TestMousePos[3] + " Mouse：" + mousePosition + " 副屏在主屏下方：" + result;
             DebugL.Log(info);
             if (result)
                 SetPosition(0, 1);//下
@@ -336,6 +378,38 @@ namespace RyuGiKen.Tools
             return (!bResult && Marshal.GetLastWin32Error() == 0) ? ptrWnd : IntPtr.Zero;
         }
         /// <summary>
+        /// 切换屏幕模式
+        /// <para>1仅电脑屏幕</para>
+        /// <para>2复制屏</para>
+        /// <para>3扩展屏</para>
+        /// <para>4仅第二屏幕</para>
+        /// </summary>
+        public static void DisplaySwitch(int mode)
+        {
+#if UNITY_STANDALONE_WIN
+            string arguments = null;
+            switch (mode)
+            {
+                case 1:
+                    arguments = "/internal";
+                    break;
+                case 2:
+                    arguments = "/clone";
+                    break;
+                case 3:
+                    arguments = "/extend";
+                    break;
+                case 4:
+                    arguments = "/external";
+                    break;
+            }
+            if (string.IsNullOrEmpty(arguments))
+                Process.Start("C:\\Windows\\System32\\DisplaySwitch.exe", arguments);
+            else
+                User32.SetScreenMode(mode);
+#endif
+        }
+        /// <summary>
         /// 按比例缩放分辨率
         /// </summary>
         /// <param name="percent">比例</param>
@@ -355,11 +429,77 @@ namespace RyuGiKen.Tools
             Screen.SetResolution(resolution.x, resolution.y, fullscreen);
         }
         /// <summary>
+        /// 从宽度设置分辨率（例如720i）
+        /// </summary>
+        /// <param name="Width"></param>
+        /// <param name="fullscreen"></param>
+        /// <param name="displayIndex"></param>
+        public static void SetResolutionByWidth(float Width, bool fullscreen = true, int displayIndex = -1)
+        {
+            if (displayIndex >= Display.displays.Length)
+                return;
+            if (UseSecondScreen)
+                return;
+            if (displayIndex < 0)
+                displayIndex = (UseSecondScreen ? 1 : 0).Clamp(0, Display.displays.Length - 1);
+            int width = fullscreen ? Display.displays[displayIndex].systemWidth : Screen.width;
+            int height = fullscreen ? Display.displays[displayIndex].systemHeight : Screen.height;
+
+            Vector2Int resolution = GetResolutionByWidth(Width, new Vector2Int(width, height));
+            Screen.SetResolution(resolution.x, resolution.y, fullscreen);
+        }
+        /// <summary>
+        /// 从高度设置分辨率（例如720p）
+        /// </summary>
+        /// <param name="Height"></param>
+        /// <param name="fullscreen"></param>
+        /// <param name="displayIndex"></param>
+        public static void SetResolutionByHeight(float Height, bool fullscreen = true, int displayIndex = -1)
+        {
+            if (displayIndex >= Display.displays.Length)
+                return;
+            if (UseSecondScreen)
+                return;
+            if (displayIndex < 0)
+                displayIndex = (UseSecondScreen ? 1 : 0).Clamp(0, Display.displays.Length - 1);
+            int width = fullscreen ? Display.displays[displayIndex].systemWidth : Screen.width;
+            int height = fullscreen ? Display.displays[displayIndex].systemHeight : Screen.height;
+
+            Vector2Int resolution = GetResolutionByHeight(Height, new Vector2Int(width, height));
+            Screen.SetResolution(resolution.x, resolution.y, fullscreen);
+        }
+        /// <summary>
+        /// 从宽度计算分辨率
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="Resolution"></param>
+        /// <returns></returns>
+        public static Vector2Int GetResolutionByWidth(float width, Vector2Int Resolution)
+        {
+            Vector2Int result = Vector2Int.one;
+            result.x = width.ToInteger();
+            result.y = (width * Resolution.y * 1f / Resolution.x).ToInteger();
+            return result;
+        }
+        /// <summary>
+        /// 从高度计算分辨率
+        /// </summary>
+        /// <param name="height"></param>
+        /// <param name="Resolution"></param>
+        /// <returns></returns>
+        public static Vector2Int GetResolutionByHeight(float height, Vector2Int Resolution)
+        {
+            Vector2Int result = Vector2Int.one;
+            result.x = (height * Resolution.x * 1f / Resolution.y).ToInteger();
+            result.y = height.ToInteger();
+            return result;
+        }
+        /// <summary>
         /// 分辨率
         /// </summary>
         public static string GetResolution()
         {
-            return string.Format("{0} x {1} @ {2}Hz", Screen.width, Screen.height, Screen.currentResolution.refreshRate);
+            return DisplayData.GetResolution(true);
         }
         /// <summary>
         /// 判断横竖屏

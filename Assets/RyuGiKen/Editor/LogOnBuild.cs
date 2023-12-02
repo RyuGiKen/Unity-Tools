@@ -25,7 +25,7 @@ namespace RyuGiKenEditor.Tools
         {
             var endTime = DateTime.Now;
             var deltaTime = endTime - m_startTime;
-            Debug.LogFormat("构建耗时：{0}:{1}:{2}", deltaTime.Hours.ToString("D2"), deltaTime.Minutes.ToString("D2"), deltaTime.Seconds.ToString("D2"));
+            Debug.LogFormat("构建耗时：{0}:{1}:{2}:{3}", deltaTime.Hours.ToString("D2"), deltaTime.Minutes.ToString("D2"), deltaTime.Seconds.ToString("D2"), deltaTime.Milliseconds.ToString("D3"));
 
             FileInfo outputExe = new FileInfo(report.summary.outputPath);
             string xmlPath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data\\BuildData.xml";

@@ -36,7 +36,7 @@ namespace RyuGiKen.Tools
             }
             get
             {
-                return LimitValue ? value.Clamp(ValueRange) : value;
+                return (LimitValue ? value.Clamp(m_ValueRange) : value).Round(digit);
             }
         }
         public string OutPut
@@ -49,7 +49,19 @@ namespace RyuGiKen.Tools
         [Space(10)]
         [Tooltip("精度")] public int digit;
         [Tooltip("限制")] public bool LimitValue;
-        [Tooltip("值范围")] public Vector2 ValueRange;
+        [Tooltip("值范围")][SerializeField] Vector2 valueRange;
+        public ValueRange m_ValueRange
+        {
+            set
+            {
+                valueRange = value;
+                UpdateText();
+            }
+            get
+            {
+                return new ValueRange(valueRange);
+            }
+        }
         [Tooltip("调整幅度")] public float AdjustSize = 1;
         [Tooltip("前缀")] public string Prefix;
         [Tooltip("后缀")] public string Postfix;
@@ -98,7 +110,7 @@ namespace RyuGiKen.Tools
         public void ChangeValue()
         {
             float temp = (m_InputField ? m_InputField.text.ToFloat() : m_Value);
-            m_Value = LimitValue ? temp.Clamp(ValueRange) : temp;
+            m_Value = LimitValue ? temp.Clamp(m_ValueRange) : temp;
         }
         /// <summary>
         /// 值减少
@@ -106,7 +118,7 @@ namespace RyuGiKen.Tools
         public void ValueDecrease()
         {
             float adjustSize = AdjustSize.Clamp(0);
-            float minValue = ValueRange.x;
+            float minValue = m_ValueRange.MinValue;
             if (LimitValue)
             {
                 if (value < minValue + adjustSize)
@@ -128,7 +140,7 @@ namespace RyuGiKen.Tools
         public void ValueIncrease()
         {
             float adjustSize = AdjustSize.Clamp(0);
-            float maxValue = ValueRange.y;
+            float maxValue = m_ValueRange.MaxValue;
             if (LimitValue)
             {
                 if (value > maxValue - adjustSize)
@@ -153,7 +165,7 @@ namespace RyuGiKen.Tools
             if (!adjust.IsNaN())
                 if (LimitValue)
                 {
-                    value = (value + adjust).Clamp(ValueRange);
+                    value = (value + adjust).Clamp(m_ValueRange);
                 }
                 else
                 {
@@ -189,7 +201,7 @@ namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(ValueAdjustButton))]
+    [CustomEditor(typeof(ValueAdjustButton), true)]
     public class ValueAdjustButtonEditor : Editor
     {
         bool ShowInspector = false;
@@ -208,7 +220,7 @@ namespace RyuGiKenEditor.Tools
             value = serializedObject.FindProperty("value");
             digit = serializedObject.FindProperty("digit");
             LimitValue = serializedObject.FindProperty("LimitValue");
-            ValueRange = serializedObject.FindProperty("ValueRange");
+            ValueRange = serializedObject.FindProperty("valueRange");
             Prefix = serializedObject.FindProperty("Prefix");
             Postfix = serializedObject.FindProperty("Postfix");
         }
@@ -259,7 +271,7 @@ namespace RyuGiKenEditor.Tools
                 LimitValue.boolValue = EditorGUILayout.ToggleLeft(Name[2], LimitValue.boolValue);
                 if (button.LimitValue)
                 {
-                    value.floatValue = EditorGUILayout.Slider(Name[3], value.floatValue, button.ValueRange.x, button.ValueRange.y);
+                    value.floatValue = EditorGUILayout.Slider(Name[3], value.floatValue, button.m_ValueRange.MinValue, button.m_ValueRange.MaxValue);
                     ValueRange.vector2Value = EditorGUILayout.Vector2Field(Name[4], ValueRange.vector2Value);
                 }
                 else

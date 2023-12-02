@@ -12,6 +12,7 @@ namespace RyuGiKen.Tools
     [RequireComponent(typeof(Text))]
     public class Version : MonoBehaviour
     {
+        //public static Version instance;
         /// <summary>
         /// 版本号位数
         /// </summary>
@@ -19,7 +20,7 @@ namespace RyuGiKen.Tools
         /// <summary>
         /// 版本号样式
         /// </summary>
-        static readonly string[] Style = { "D1", "D1" };
+        protected static readonly string[] Style = { "D1", "D1"};
         /// <summary>
         /// 测试版标识
         /// </summary>
@@ -29,6 +30,8 @@ namespace RyuGiKen.Tools
         /// </summary>
         public const string ReleaseSign = "v";
         public const VersionSignType SignType = VersionSignType.SamePrefixAndOnlyDebugPostfix;
+        public static string BuildDate = "";
+        public static string BuildTime = "";
         /// <summary>
         /// 版本号标识
         /// </summary>
@@ -59,11 +62,8 @@ namespace RyuGiKen.Tools
             /// </summary>
             SamePrefixAndOnlyDebugPostfix,
         }
-
         public string versionNumber = "b1.0.0";
-        public static string BuildDate = "";
-        public static string BuildTime = "";
-        void Awake()
+        protected virtual void Awake()
         {
             if (Application.isPlaying)
             {
@@ -72,13 +72,13 @@ namespace RyuGiKen.Tools
             BuildDate = GetFile.LoadXmlData("BuildDate", Application.dataPath + "/BuildData.xml", "Root", true);
             BuildTime = GetFile.LoadXmlData("BuildTime", Application.dataPath + "/BuildData.xml", "Root", true);
         }
-        private void LateUpdate()
+        protected virtual void LateUpdate()
         {
             if (versionNumber != Application.version || this.GetComponent<Text>().text != Application.version)
                 UpdateVersionNumber();
         }
         [ContextMenu("更新版本号赋值")]
-        void UpdateVersionNumber()
+        protected virtual void UpdateVersionNumber()
         {
 #if DEVELOPMENT_BUILD
             this.GetComponent<Text>().text = GetProgramVersion(true, out versionNumber);
@@ -91,7 +91,18 @@ namespace RyuGiKen.Tools
         /// 版本号赋值，格式限制
         /// </summary>
         /// <param name="number"></param>
+        /// <returns></returns>
         public static string SetVersionNumber(string number)
+        {
+            return SetVersionNumber(number, SignType);
+        }
+        /// <summary>
+        /// 版本号赋值，格式限制
+        /// </summary>
+        /// <param name="number"></param>
+        /// <param name="SignType"></param>
+        /// <returns></returns>
+        public static string SetVersionNumber(string number, VersionSignType SignType, string DebugSign = null, string ReleaseSign = null, int? VersionLength = null)
         {
             string versionNumber;
             if (string.IsNullOrWhiteSpace(number))
@@ -100,20 +111,25 @@ namespace RyuGiKen.Tools
                 versionNumber = number.Trim(' ');//移除空格
             int FirstNum = versionNumber.FindIndexOfNumInString();//找出第一位数字
             int FirstLetterBehindNum = (FirstNum >= 0 ? versionNumber.Remove(0, FirstNum) : versionNumber).FindIndexOfLetterInString();//找出数字部分后第一位字母
-            string type = "";
+            string Prefix = "";
+            string Postfix = "";
+            if (DebugSign == null)
+                DebugSign = Version.DebugSign;
+            if (ReleaseSign == null)
+                ReleaseSign = Version.ReleaseSign;
             switch (SignType)//前缀
             {
                 case VersionSignType.BothPrefix:
-                    type = DebugSign;
+                    Prefix = DebugSign;
                     if (versionNumber.Length > 0)
                     {
                         if ((FirstNum < 0 ? versionNumber : versionNumber.Substring(0, FirstNum)).ContainIgnoreCase(ReleaseSign))
-                            type = ReleaseSign;
+                            Prefix = ReleaseSign;
                     }
                     break;
                 case VersionSignType.SamePrefix:
                 case VersionSignType.SamePrefixAndOnlyDebugPostfix:
-                    type = ReleaseSign;
+                    Prefix = ReleaseSign;
                     break;
             }
             //数字部分
@@ -127,11 +143,12 @@ namespace RyuGiKen.Tools
             else
                 NumPart = versionNumber;
             num = NumPart.Split('.');
-            int[] ver = new int[VersionLength];
+            int versionLength = VersionLength == null ? Style.Length.Clamp(1) : VersionLength.Value;
+            int[] ver = new int[versionLength];
             for (int i = 0; i < num.Length; i++)
             {
                 //Debug.Log(num[i]);
-                if (i < VersionLength)
+                if (i < versionLength)
                     int.TryParse(num[i], out ver[i]);//能转换整数才读取
                 else
                     break;
@@ -140,14 +157,14 @@ namespace RyuGiKen.Tools
             {
                 case VersionSignType.BothPostfix:
                     if (versionNumber.Substring(FirstNum < 0 ? 0 : FirstNum).ContainIgnoreCase(ReleaseSign))
-                        type = ReleaseSign;
+                        Postfix = ReleaseSign;
                     else
-                        type = DebugSign;
+                        Postfix = DebugSign;
                     break;
                 case VersionSignType.OnlyDebugPostfix:
                 case VersionSignType.SamePrefixAndOnlyDebugPostfix:
                     if (FirstLetterBehindNum >= 0)
-                        type = DebugSign;
+                        Postfix = DebugSign;
                     break;
             }
             switch (SignType)//前缀
@@ -155,7 +172,7 @@ namespace RyuGiKen.Tools
                 case VersionSignType.SamePrefix:
                 case VersionSignType.BothPrefix:
                 case VersionSignType.SamePrefixAndOnlyDebugPostfix:
-                    versionNumber = type;
+                    versionNumber = Prefix;
                     break;
                 case VersionSignType.None:
                 case VersionSignType.BothPostfix:
@@ -191,7 +208,7 @@ namespace RyuGiKen.Tools
             {
                 case VersionSignType.OnlyDebugPostfix:
                 case VersionSignType.BothPostfix:
-                    versionNumber += type;
+                    versionNumber += Postfix;
                     break;
                 case VersionSignType.SamePrefixAndOnlyDebugPostfix:
                     versionNumber += DebugSign;
@@ -211,7 +228,15 @@ namespace RyuGiKen.Tools
         /// 获取程序发布版本号
         /// </summary>
         /// <returns></returns>
-        public static string GetProgramVersion(bool includeBuildTime = false)
+        public static string GetProgramVersion()
+        {
+            return SetVersionNumber(Application.version);
+        }
+        /// <summary>
+        /// 获取程序发布版本号
+        /// </summary>
+        /// <returns></returns>
+        public static string GetProgramVersion(bool includeBuildTime)
         {
             return GetProgramVersion(includeBuildTime, out string version);
         }

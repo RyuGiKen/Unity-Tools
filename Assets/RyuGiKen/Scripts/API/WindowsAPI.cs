@@ -1,14 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 namespace WindowsAPI
 {
     /// <summary>
@@ -44,6 +35,67 @@ namespace WindowsAPI
         /// <returns>1确定，2取消，3终止，4重试，5忽略，6是，7否</returns>
         [DllImport("user32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Unicode)]
         public static extern int MessageBox(IntPtr hWnd, string message, string title, uint type = 0);
+        public static class SetDisplay
+        {
+            /// <summary>
+            /// 设置
+            /// </summary>
+            public const uint SDC_APPLY = 0x00000080;
+            /// <summary>
+            /// 仅主屏
+            /// </summary>
+            public const uint SDC_TOPOLOGY_INTERNAL = 0x00000001;
+            /// <summary>
+            /// 克隆
+            /// </summary>
+            public const uint SDC_TOPOLOGY_CLONE = 0x00000002;
+            /// <summary>
+            /// 扩展
+            /// </summary>
+            public const uint SDC_TOPOLOGY_EXTEND = 0x00000004;
+            /// <summary>
+            /// 仅第二屏幕
+            /// </summary>
+            public const uint SDC_TOPOLOGY_EXTERNAL = 0x00000008;
+            /// <summary>
+            /// 测试
+            /// </summary>
+            public const uint SDC_VALIDATE = 0x00000040;
+            public const uint SDC_PATH_PERSIST_IF_REQUIRED = 0x00000800;
+
+            [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+            public static extern long SetDisplayConfig(uint numPathArrayElements, IntPtr pathArray, uint numModeArrayElements, IntPtr modeArray, uint flags);
+        }
+        /// <summary>
+        /// 切换屏幕模式
+        /// <para>1仅电脑屏幕</para>
+        /// <para>2复制屏</para>
+        /// <para>3扩展屏</para>
+        /// <para>4仅第二屏幕</para>
+        /// </summary>
+        /// <returns></returns>
+        public static void SetScreenMode(int type)
+        {
+            uint mode = 0;
+
+            switch (type)
+            {
+                case 1:
+                    mode = SetDisplay.SDC_TOPOLOGY_INTERNAL;
+                    break;
+                case 2:
+                    mode = SetDisplay.SDC_TOPOLOGY_CLONE;
+                    break;
+                case 3:
+                    mode = SetDisplay.SDC_TOPOLOGY_EXTEND;
+                    break;
+                case 4:
+                    mode = SetDisplay.SDC_TOPOLOGY_EXTERNAL;
+                    break;
+            }
+            if (mode > 0 && SetDisplay.SetDisplayConfig(0, IntPtr.Zero, 0, IntPtr.Zero, SetDisplay.SDC_VALIDATE | mode) == 0)
+                SetDisplay.SetDisplayConfig(0, IntPtr.Zero, 0, IntPtr.Zero, SetDisplay.SDC_APPLY | mode | SetDisplay.SDC_PATH_PERSIST_IF_REQUIRED);
+        }
         /// <summary>
         /// 限制屏幕旋转
         /// <para>0不指定</para>
@@ -380,44 +432,5 @@ namespace WindowsAPI
         /// </summary>
         [DllImport("user32.dll")] public static extern int ToAscii(int uVirtKey, int uScanCode, byte[] lpbKeyState, byte[] lpwTransKey, int fuState);
         #endregion
-    }
-    /// <summary>
-    /// 简繁体转换
-    /// </summary>
-    public static class ChineseConverter
-    {
-        internal const int LOCALE_SYSTEM_DEFAULT = 0x0800;
-        internal const int LCMAP_SIMPLIFIED_CHINESE = 0x02000000;
-        internal const int LCMAP_TRADITIONAL_CHINESE = 0x04000000;
-
-        /// <summary> 
-        /// 使用kernel.dll的简繁体转换工具，只要有裝OS就可以使用，不需要导入dll，但只能做逐字转换。
-        /// </summary> 
-        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
-        internal static extern int LCMapString(int Locale, int dwMapFlags, string lpSrcStr, int cchSrc, [Out] string lpDestStr, int cchDest);
-
-        /// <summary> 
-        /// 繁体转简体
-        /// </summary> 
-        /// <param name="str">繁体</param> 
-        /// <returns>简体</returns> 
-        public static string ToSimplified(string str)
-        {
-            string result = new string(' ', str.Length);
-            LCMapString(LOCALE_SYSTEM_DEFAULT, LCMAP_SIMPLIFIED_CHINESE, str, str.Length, result, str.Length);
-            return result;
-        }
-
-        /// <summary> 
-        /// 简体转繁体
-        /// </summary> 
-        /// <param name="str">简体</param> 
-        /// <returns>繁体</returns> 
-        public static string ToTraditional(string str)
-        {
-            string result = new string(' ', str.Length);
-            LCMapString(LOCALE_SYSTEM_DEFAULT, LCMAP_TRADITIONAL_CHINESE, str, str.Length, result, str.Length);
-            return result;
-        }
     }
 }

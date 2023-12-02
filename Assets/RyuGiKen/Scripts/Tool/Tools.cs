@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -23,7 +23,6 @@ using Debug = UnityEngine.Debug;
 using UnityEditor;
 #endif
 using RyuGiKen;
-using WindowsAPI;
 /// <summary>
 /// RyuGiKen's Tools
 /// <para>
@@ -33,6 +32,24 @@ using WindowsAPI;
 namespace RyuGiKen
 {
     public delegate void MyEvent();
+    /// <summary>
+    /// 屏幕信息
+    /// </summary>
+    public static partial class DisplayData
+    {
+        /// <summary>
+        /// 分辨率
+        /// </summary>
+        /// <param name="refreshRate">刷新率</param>
+        /// <returns></returns>
+        public static string GetResolution(bool refreshRate = false)
+        {
+            if (refreshRate)
+                return string.Format("{0} x {1} @ {2}Hz", Screen.width, Screen.height, Screen.currentResolution.refreshRate);
+            else
+                return string.Format("{0} x {1}", Screen.width, Screen.height);
+        }
+    }
     /// <summary>
     /// 获取文件
     /// </summary>
@@ -2384,7 +2401,74 @@ namespace RyuGiKen
                 catch { }
             }
         }
+        /// <summary>
+        /// 由位置查找地形块
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public static Terrain FindTerrainByPosition(Vector3 pos)
+        {
+            Terrain terrain;
+            Vector3 terrainMin = new Vector3();
+            Vector3 terrainMax = new Vector3();
+
+            for (int i = -1; i < Terrain.activeTerrains.Length; i++)
+            {
+                terrain = i < 0 ? Terrain.activeTerrain : Terrain.activeTerrains[i];
+                if (!terrain)
+                    continue;
+                terrainMin = terrain.GetPosition();
+                terrainMax = terrainMin + terrain.terrainData.size;
+                if (pos.x >= terrainMin.x && pos.x <= terrainMax.x)
+                {
+                    if (pos.z >= terrainMin.z && pos.z <= terrainMax.z)
+                    {
+                        return terrain;
+                    }
+                }
+            }
+            return null;
+        }
 #endif
+    }
+    /// <summary>
+    /// 简繁体转换
+    /// </summary>
+    public static class ChineseConverter
+    {
+        internal const int LOCALE_SYSTEM_DEFAULT = 0x0800;
+        internal const int LCMAP_SIMPLIFIED_CHINESE = 0x02000000;
+        internal const int LCMAP_TRADITIONAL_CHINESE = 0x04000000;
+
+        /// <summary> 
+        /// 使用kernel.dll的简繁体转换工具，只要有裝OS就可以使用，不需要导入dll，但只能做逐字转换。
+        /// </summary> 
+        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern int LCMapString(int Locale, int dwMapFlags, string lpSrcStr, int cchSrc, [Out] string lpDestStr, int cchDest);
+
+        /// <summary> 
+        /// 繁体转简体
+        /// </summary> 
+        /// <param name="str">繁体</param> 
+        /// <returns>简体</returns> 
+        public static string ToSimplified(string str)
+        {
+            string result = new string(' ', str.Length);
+            LCMapString(LOCALE_SYSTEM_DEFAULT, LCMAP_SIMPLIFIED_CHINESE, str, str.Length, result, str.Length);
+            return result;
+        }
+
+        /// <summary> 
+        /// 简体转繁体
+        /// </summary> 
+        /// <param name="str">简体</param> 
+        /// <returns>繁体</returns> 
+        public static string ToTraditional(string str)
+        {
+            string result = new string(' ', str.Length);
+            LCMapString(LOCALE_SYSTEM_DEFAULT, LCMAP_TRADITIONAL_CHINESE, str, str.Length, result, str.Length);
+            return result;
+        }
     }
 #if !UNITY_EDITOR && !UNITY_STANDALONE
     public static class Random
@@ -3338,6 +3422,29 @@ namespace RyuGiKen
         }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
+        /// 富文本颜色调整
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public static string GetColoredRichText(this string str, Color color)
+        {
+            Color32 temp = color;
+            string result = string.Format("<color=#{0}{1}{2}>{3}</color>", temp.r.ToString("X2"), temp.g.ToString("X2"), temp.b.ToString("X2"), str.IndexOfAny("<>".ToCharArray()) >= 0 ? str.RemoveRichTextTag() : str);
+            return result;
+        }
+        /// <summary>
+        /// 富文本颜色调整
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static string GetColoredRichText(this string str, string type)
+        {
+            string result = string.Format("<color={0}>{1}</color>", type, str.IndexOfAny("<>".ToCharArray()) >= 0 ? str.RemoveRichTextTag() : str);
+            return result;
+        }
+        /// <summary>
         /// 获取范围内点
         /// </summary>
         /// <param name="bounds"></param>
@@ -3792,6 +3899,31 @@ namespace RyuGiKen
             else if (temp.Length >= 2)
                 return new Vector3(temp[0].ToFloat(), temp[1].ToFloat());
             return Vector3.zero;
+        }
+        /// <summary>
+        /// 转字符串（无空格）
+        /// </summary>
+        /// <returns></returns>
+        public static string ToStringNoSpace(this Vector2 value, string format = null)
+        {
+            return string.Format("({0}，{1})", value.x.ToString(format), value.y.ToString(format));
+        }
+        /// <summary>
+        /// 转字符串（无空格）
+        /// </summary>
+        /// <returns></returns>
+        public static string ToStringNoSpace(this Vector2Int value, string format = null)
+        {
+            return string.Format("({0}，{1})", value.x.ToString(format), value.y.ToString(format));
+        }
+        /// <summary>
+        /// 转字符串（无空格）
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string ToStringNoSpace(this ValueRange value, string format = null)
+        {
+            return string.Format("({0}，{1})", value.MinValue.ToString(format), value.MaxValue.ToString(format));
         }
         /// <summary>
         /// 字符串转转二维坐标
@@ -5557,6 +5689,129 @@ namespace RyuGiKen
             }
             return str;
         }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="format"></param>
+        /// <param name="newline">换行</param>
+        /// <returns></returns>
+        public static string PrintArray(this float[] array, string format = null, bool newline = false)
+        {
+            if (array == null || array.Length < 1)
+                return "";
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                str += "  [" + i + "] ";
+                string temp = "";
+                try
+                {
+                    temp = array[i].ToString(format);
+                }
+                catch
+                {
+                    temp = array[i].ToString();
+                }
+                str += temp;
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="format"></param>
+        /// <param name="newline">换行</param>
+        /// <returns></returns>
+        public static string PrintArray(this float?[] array, string format = null, bool newline = false)
+        {
+            if (array == null || array.Length < 1)
+                return "";
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                str += "  [" + i + "] ";
+                if (array[i] != null)
+                {
+                    string temp = "";
+                    try
+                    {
+                        temp = ((float)array[i]).ToString(format);
+                    }
+                    catch
+                    {
+                        temp = array[i].ToString();
+                    }
+                    str += temp;
+                }
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="format"></param>
+        /// <param name="newline">换行</param>
+        /// <returns></returns>
+        public static string PrintArray(this double[] array, string format = null, bool newline = false)
+        {
+            if (array == null || array.Length < 1)
+                return "";
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                str += "  [" + i + "] ";
+                string temp = "";
+                try
+                {
+                    temp = array[i].ToString(format);
+                }
+                catch
+                {
+                    temp = array[i].ToString();
+                }
+                str += temp;
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
+        /// <summary>
+        /// 打印数组元素
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="format"></param>
+        /// <param name="newline">换行</param>
+        /// <returns></returns>
+        public static string PrintArray(this decimal[] array, string format = null, bool newline = false)
+        {
+            if (array == null || array.Length < 1)
+                return "";
+            string str = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                str += "  [" + i + "] ";
+                string temp = "";
+                try
+                {
+                    temp = array[i].ToString(format);
+                }
+                catch
+                {
+                    temp = array[i].ToString();
+                }
+                str += temp;
+                if (newline)
+                    str += "\n";
+            }
+            return str;
+        }
 #if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 打印数组元素
@@ -6920,6 +7175,19 @@ namespace RyuGiKen
             return double.IsNaN(num);
         }
         /// <summary>
+        /// 字符串转布尔值
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool ToBoolean(this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str))
+                return false;
+            if (str == "1")
+                return true;
+            return (str.ContainIgnoreCase("True") || str.ContainIgnoreCase("Yes")) && !str.ContainIgnoreCase("No") && !str.ContainIgnoreCase("不");
+        }
+        /// <summary>
         /// 字符串转浮点数，失败为0
         /// </summary>
         /// <param name="num"></param>
@@ -7663,7 +7931,6 @@ namespace RyuGiKen
         /// 转整数
         /// </summary>
         /// <param name="num"></param>
-        /// <param name="FailValue">转换失败时的值</param>
         /// <returns></returns>
         public static uint[] ToUInteger(this decimal[] num)
         {
@@ -9910,7 +10177,7 @@ namespace RyuGiKen
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
         /// <returns></returns>
-        public static float ToPercentPlusMinus01(ValueInRange value, float n = 1, bool limit = true)
+        public static float ToPercentPlusMinus01(this ValueInRange value, float n = 1, bool limit = true)
         {
             return ToPercent01(value, n, limit) * 2 - 1;
         }
@@ -9921,7 +10188,7 @@ namespace RyuGiKen
         /// <param name="n">n大于等于0为递增，n小于0为递减</param>
         /// <param name="limit">限制范围</param>
         /// <returns></returns>
-        public static float ToPercentPlusMinus01(ValueWithRange value, float n = 1, bool limit = true)
+        public static float ToPercentPlusMinus01(this ValueWithRange value, float n = 1, bool limit = true)
         {
             return ToPercent01(value, n, limit) * 2 - 1;
         }

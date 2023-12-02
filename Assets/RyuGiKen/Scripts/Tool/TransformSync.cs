@@ -123,7 +123,7 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(TransformSync))]
+    [CustomEditor(typeof(TransformSync), true)]
     public class TransformSyncEditor : Editor
     {
         public override void OnInspectorGUI()

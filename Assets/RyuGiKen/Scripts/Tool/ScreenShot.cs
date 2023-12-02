@@ -104,7 +104,7 @@ namespace RyuGiKen.Tools
         }
     }
 #if UNITY_EDITOR
-    [CustomEditor(typeof(ScreenShot))]
+    [CustomEditor(typeof(ScreenShot), true)]
     public class ScreenShotEditor : Editor
     {
         public override void OnInspectorGUI()

@@ -4,6 +4,7 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
+[Rr]ecordings/
 [Uu]serSettings/
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
@@ -49,3 +50,4 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+/UnityObfuscator-Name_Obfuscate_Map.txt

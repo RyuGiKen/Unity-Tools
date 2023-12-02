@@ -36,8 +36,8 @@ public class Test : MonoBehaviour
         Invoke(nameof(UpdateResolutionInput), 2f);
         SmoothingLines();
 
-        slider.minValue = circleSlider.MinValue = button.ValueRange.x;
-        slider.maxValue = circleSlider.MaxValue = button.ValueRange.y;
+        slider.minValue = circleSlider.MinValue = button.m_ValueRange.MinValue;
+        slider.maxValue = circleSlider.MaxValue = button.m_ValueRange.MaxValue;
         button.m_Value = box.rollSpeed;
     }
     void Update()

@@ -35,7 +35,7 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(TextReplacing))]
+    [CustomEditor(typeof(TextReplacing), true)]
     public class TextReplaceSpacingEditor : Editor
     {
         SerializedProperty TempString;

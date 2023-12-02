@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -129,7 +128,7 @@ namespace WindowsAPI
 #if UNITY_EDITOR
 namespace UnityEditor
 {
-    [CustomEditor(typeof(OpenKey))]
+    [CustomEditor(typeof(OpenKey), true)]
     public class OpenKeyEditor : Editor
     {
         public override void OnInspectorGUI()

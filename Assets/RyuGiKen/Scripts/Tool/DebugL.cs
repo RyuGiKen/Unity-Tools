@@ -4,6 +4,10 @@ using System.Text;
 using System.Threading;
 using System.IO;
 using UnityEngine;
+using RyuGiKen.Tools;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -48,14 +52,14 @@ namespace RyuGiKen.Tools
         }
         protected virtual void LateUpdate()
         {
-            if (Input.GetKeyDown(KeyCode.F5))//切换是否打印日志
+            /*if (Input.GetKeyDown(KeyCode.F5))//切换是否打印日志
             {
                 CanPrint = !CanPrint;
             }
             if (Input.GetKeyDown(KeyCode.F6))//清空日志
             {
                 Clear();
-            }
+            }*/
         }
         protected void Print()
         {
@@ -86,10 +90,9 @@ namespace RyuGiKen.Tools
         {
             if (sw != null)
             {
-                string fileTitle = printTime ? ("[" + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff") + "]") : "";
-                sw.WriteLine(fileTitle);
+                string fileTitle = printTime ? string.Format("[{0}]", System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")) : "";
                 //开始写入
-                sw.WriteLine(str + "\r\n");
+                sw.WriteLine(fileTitle + " " + str + "\r\n");
                 //清空缓冲区
                 sw.Flush();
                 //关闭流
@@ -192,4 +195,20 @@ namespace RyuGiKen.Tools
             }
         }
     }
+}
+namespace RyuGiKenEditor
+{
+#if UNITY_EDITOR
+    [CustomEditor(typeof(DebugL), true)]
+    public class DebugLEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            EditorGUILayout.Toggle("Can Add", DebugL.CanAdd);
+            EditorGUILayout.Toggle("Can Print", DebugL.CanPrint);
+            //serializedObject.ApplyModifiedProperties();
+        }
+    }
+#endif
 }

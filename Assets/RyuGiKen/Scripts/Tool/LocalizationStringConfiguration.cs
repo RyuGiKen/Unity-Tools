@@ -534,7 +534,7 @@ namespace RyuGiKenEditor.Localization
             }
         }
     }
-    [CustomEditor(typeof(LocalizationStringConfiguration))]
+    [CustomEditor(typeof(LocalizationStringConfiguration), true)]
     public class LocalizationStringConfigurationEditor : LocalizationConfigurationBaseEditor
     {
         public override void OnInspectorGUI()

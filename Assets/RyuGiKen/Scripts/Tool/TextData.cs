@@ -28,7 +28,7 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(TextData))]
+    [CustomEditor(typeof(TextData), true)]
     public class TextDataEditor : Editor
     {
         public override void OnInspectorGUI()

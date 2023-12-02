@@ -45,7 +45,7 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(ColorSlider))]
+    [CustomEditor(typeof(ColorSlider), true)]
     public class ColorSliderEditor : SliderEditor
     {
         protected SerializedProperty groups;

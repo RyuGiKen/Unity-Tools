@@ -39,7 +39,7 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(ShowTransfromData))]
+    [CustomEditor(typeof(ShowTransfromData), true)]
     public class ShowTransfromDataEditor : Editor
     {
         public override void OnInspectorGUI()

@@ -46,7 +46,7 @@ namespace RyuGiKen.Tools
 namespace RyuGiKenEditor.Tools
 {
 #if UNITY_EDITOR
-    [CustomEditor(typeof(SetHideFlags))]
+    [CustomEditor(typeof(SetHideFlags), true)]
     public class SetHideFlagsEditor : Editor
     {
         public override void OnInspectorGUI()
