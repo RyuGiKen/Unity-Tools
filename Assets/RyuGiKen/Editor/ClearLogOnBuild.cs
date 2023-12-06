@@ -6,48 +6,52 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
-/// <summary>
-/// 构建时清空日志
-/// </summary>
-public class ClearLogOnBuild : IPreprocessBuildWithReport
+using RyuGiKen;
+namespace RyuGiKenEditor.Tools
 {
-    public int callbackOrder { get; private set; }
-    public void OnPreprocessBuild(BuildReport report)
+    /// <summary>
+    /// 构建时清空日志
+    /// </summary>
+    public class ClearLogOnBuild : IPreprocessBuildWithReport
     {
-        Debug.Log("构建时清空日志");
-        if (!Directory.Exists(Application.streamingAssetsPath))
-            Directory.CreateDirectory(Application.streamingAssetsPath);
-        try
+        public int callbackOrder { get; private set; }
+        public void OnPreprocessBuild(BuildReport report)
         {
-            File.WriteAllText(Application.streamingAssetsPath + "/Log.txt", string.Empty, Encoding.UTF8);
-            string temp = "";
-            for (int i = 9; i > 0; i--)
+            Debug.Log("构建时清空日志");
+            if (!Directory.Exists(Application.streamingAssetsPath))
+                Directory.CreateDirectory(Application.streamingAssetsPath);
+            try
             {
-                string fileName = string.Format("{0}/Log{1}.txt", Application.streamingAssetsPath, i.ToString("D2"));
-                if (File.Exists(fileName))
+                File.WriteAllText(Application.streamingAssetsPath + "/Log.txt", string.Empty, Encoding.UTF8);
+                string temp = "";
+                for (int i = 9; i > 0; i--)
                 {
-                    File.Delete(fileName);
-                    temp += "\n移除 " + fileName;
+                    string fileName = string.Format("{0}/Log{1}.txt", Application.streamingAssetsPath, i.ToString("D2"));
+                    if (File.Exists(fileName))
+                    {
+                        File.Delete(fileName);
+                        temp += "\n移除 " + fileName;
+                    }
                 }
+                if (!string.IsNullOrWhiteSpace(temp))
+                    Debug.Log(temp);
             }
-            if (!string.IsNullOrWhiteSpace(temp))
-                Debug.Log(temp);
-        }
-        catch { }
-        try
-        {
-            File.WriteAllText(Application.streamingAssetsPath + "/FpsRecord.txt", string.Empty, Encoding.UTF8);
-        }
-        catch { }
-        try
-        {
-            string ScreenShotPath = new DirectoryInfo(Application.dataPath).Parent.FullName + "/ScreenShot";
-            foreach (FileInfo file in RyuGiKen.GetFile.GetFileInfoAll(ScreenShotPath))
+            catch { }
+            try
             {
-                file.Delete();
+                File.WriteAllText(Application.streamingAssetsPath + "/FpsRecord.txt", string.Empty, Encoding.UTF8);
             }
-            new DirectoryInfo(ScreenShotPath).Delete();
+            catch { }
+            try
+            {
+                string ScreenShotPath = new DirectoryInfo(Application.dataPath).Parent.FullName + "/ScreenShot";
+                foreach (FileInfo file in GetFile.GetFileInfoAll(ScreenShotPath))
+                {
+                    file.Delete();
+                }
+                new DirectoryInfo(ScreenShotPath).Delete();
+            }
+            catch { }
         }
-        catch { }
     }
 }
