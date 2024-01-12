@@ -39,6 +39,7 @@ namespace RyuGiKen.Tools
         internal static float autoAdjustQualityLevelTimer { get { return deltaTime; } }
         [Tooltip("帧率范围")] public ValueRange adjustFPSRange = new Vector2(24, 59);
         [Tooltip("限制帧率")] public int LockFrameRate = 60;
+        internal static long BuildSize = 0;
         /// <summary>
         /// 切换画质
         /// </summary>
@@ -63,13 +64,25 @@ namespace RyuGiKen.Tools
                 else if (xmlData.ContainIgnoreCase("False") || xmlData.ContainIgnoreCase("No") || xmlData == "0")
                     autoAdjustQualityLevel = false;
             }
+            /*xmlData = GetFile.LoadXmlData("BuildSize", Application.dataPath + "/BuildData.xml", "Root", true);
+            if (!string.IsNullOrWhiteSpace(xmlData))
+            {
+                int size = xmlData.ToInteger(-1);
+                if (size > 0)
+                    BuildSize = size;
+            }*/
             xmlData = GetFile.LoadXmlData("AutoAdjustQualityLevelTime", Application.streamingAssetsPath + "/Setting.xml", "Data", true);
-            if (!string.IsNullOrEmpty(xmlData))
+            if (!string.IsNullOrWhiteSpace(xmlData))
             {
                 int time = xmlData.ToInteger(-1);
                 if (time > 0)
                     autoAdjustQualityLevelTime = time;
             }
+            /*else if (!Application.isEditor && BuildSize > 0)
+            {
+                ValueAdjust.ConvertSize(BuildSize, 2, out double size, out string unit);
+                autoAdjustQualityLevelTime = (20 + (size / 10f).ToInteger()).Clamp(30);
+            }*/
             if (autoAdjustQualityLevel)
             {
                 xmlData = GetFile.LoadXmlData("AutoAdjustQualityLevelRange", Application.streamingAssetsPath + "/Setting.xml", "Data", true);

@@ -69,13 +69,13 @@ namespace RyuGiKen.TrackArrow
             curPos = new Vector2(Mathf.Clamp(curPos.x, -1, 1), Mathf.Clamp(curPos.y, -1, 1));
             m_SliderX.value = curPos.x;
             m_SliderY.value = curPos.y;
-            GameParameter.ControlXY = (curPos + lastPosM) / (lastPos.Length + 1);
+            GameParameter.m_BiaxValue.Value = (curPos + lastPosM) / (lastPos.Length + 1);
 
             CrossBow.gameObject.SetActive(true);
-            CrossBow.transform.localEulerAngles = new Vector3(-GameParameter.ControlXY.y * 12f, GameParameter.ControlXY.x * 45f, 0);
-            CrossBow.transform.position = CrossBowStartPos;// + new Vector3(0, 0, 3.3f) * GameParameter.ControlXY.x;
-            CameraParent.transform.localEulerAngles = new Vector3(-GameParameter.ControlXY.y * 10f, GameParameter.ControlXY.x * 40f, 0);
-            CameraParent.transform.position = CrossBowStartPos;// + new Vector3(0, 0, 3f) * GameParameter.ControlXY.x;
+            CrossBow.transform.localEulerAngles = new Vector3(-GameParameter.m_BiaxValue.y * 12f, GameParameter.m_BiaxValue.x * 45f, 0);
+            CrossBow.transform.position = CrossBowStartPos;// + new Vector3(0, 0, 3.3f) * GameParameter.m_BiaxValue.x;
+            CameraParent.transform.localEulerAngles = new Vector3(-GameParameter.m_BiaxValue.y * 10f, GameParameter.m_BiaxValue.x * 40f, 0);
+            CameraParent.transform.position = CrossBowStartPos;// + new Vector3(0, 0, 3f) * GameParameter.m_BiaxValue.x;
             if (CrossBow.Fire)
                 Camera.main.fieldOfView = ValueAdjust.Lerp(Camera.main.fieldOfView, 20, Time.deltaTime, 10);
             else
@@ -105,7 +105,7 @@ namespace RyuGiKen.TrackArrow
             if (testCanvas.activeInHierarchy)
             {
                 m_Text[0].text = "目标：" + (hitInfo.transform && hitInfo.transform.GetComponent<EnemyBody>() && !hitInfo.transform.GetComponent<EnemyBody>().enemy.isDie ? hitInfo.transform.GetComponent<EnemyBody>().enemy.name : "");
-                m_Text[1].text = "ControlXY：" + GameParameter.ControlXY.ToString("F3");
+                m_Text[1].text = "ControlXY：" + GameParameter.m_BiaxValue.Value.ToString("F3");
             }
         }
         /// <summary>

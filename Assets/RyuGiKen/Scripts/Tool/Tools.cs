@@ -2429,6 +2429,36 @@ namespace RyuGiKen
             }
             return null;
         }
+        /// <summary>
+        /// 获取UI.Outline
+        /// </summary>
+        /// <param name="graphic"></param>
+        /// <returns></returns>
+        public static Outline GetOutline(this Graphic graphic)
+        {
+            if (!graphic)
+                return null;
+            return graphic.GetComponent<Outline>();
+        }
+        /// <summary>
+        /// 获取UI.Shadow
+        /// </summary>
+        /// <param name="graphic"></param>
+        /// <returns></returns>
+        public static Shadow GetShadow(this Graphic graphic)
+        {
+            if (!graphic)
+                return null;
+            Shadow[] temp = graphic.GetComponents<Shadow>();
+            for (int i = 0; i < temp.Length; i++)
+            {
+                if (temp[i] && temp[i].GetType().Equals(typeof(Shadow)))
+                {
+                    return temp[i];
+                }
+            }
+            return null;
+        }
 #endif
     }
     /// <summary>
@@ -3390,34 +3420,68 @@ namespace RyuGiKen
         {
             int byteConversion = 1024;
             double bytes = Convert.ToDouble(length);
-
-            if (bytes >= Math.Pow(byteConversion, 6)) // EB
+            double size = 0;
+            string unit = "";
+            for (int i = 6; i >= 0; i--)
             {
-                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 6), 2), " EB");
+                double temp = Math.Pow(byteConversion, i);
+                if (bytes >= temp) // EB
+                {
+                    ConvertSize(bytes, i, out size, out unit);
+                    return string.Format("{0} {1}", Math.Round(size, 2), unit);
+                }
             }
-            if (bytes >= Math.Pow(byteConversion, 5)) // PB
+            ConvertSize(bytes, 0, out size, out unit);
+            return string.Format("{0} {1}", Math.Round(size, 2), unit);
+        }
+        /// <summary>
+        /// 转换字节大小、长度, 单位
+        /// </summary>
+        /// <param name="length"></param>
+        /// <param name="pow"></param>
+        /// <param name="size"></param>
+        /// <param name="unit"></param>
+        public static void ConvertSize(long length, int pow, out double size, out string unit)
+        {
+            ConvertSize(Convert.ToDouble(length), pow, out size, out unit);
+        }
+        /// <summary>
+        /// 转换字节大小、长度, 单位
+        /// </summary>
+        /// <param name="length"></param>
+        /// <param name="pow"></param>
+        /// <param name="size"></param>
+        /// <param name="unit"></param>
+        public static void ConvertSize(double length, int pow, out double size, out string unit)
+        {
+            double temp = 1;
+            if (pow.InRange(1, 6))
+                temp = Math.Pow(1024, pow);
+            size = length / temp;
+            switch (pow)
             {
-                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 5), 2), " PB");
-            }
-            else if (bytes >= Math.Pow(byteConversion, 4)) // TB
-            {
-                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 4), 2), " TB");
-            }
-            else if (bytes >= Math.Pow(byteConversion, 3)) // GB
-            {
-                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 3), 2), " GB");
-            }
-            else if (bytes >= Math.Pow(byteConversion, 2)) // MB
-            {
-                return string.Concat(Math.Round(bytes / Math.Pow(byteConversion, 2), 2), " MB");
-            }
-            else if (bytes >= byteConversion) // KB
-            {
-                return string.Concat(Math.Round(bytes / byteConversion, 2), " KB");
-            }
-            else // Bytes
-            {
-                return string.Concat(bytes, " Bytes");
+                default:
+                case 0:
+                    unit = "Bytes";
+                    break;
+                case 1:
+                    unit = "KB";
+                    break;
+                case 2:
+                    unit = "MB";
+                    break;
+                case 3:
+                    unit = "GB";
+                    break;
+                case 4:
+                    unit = "TB";
+                    break;
+                case 5:
+                    unit = "PB";
+                    break;
+                case 6:
+                    unit = "EB";
+                    break;
             }
         }
 #if UNITY_EDITOR || UNITY_STANDALONE
@@ -3512,6 +3576,26 @@ namespace RyuGiKen
             if (float.IsNaN(SpeedFactor) || SpeedFactor <= 0)
                 return 0;
             return AngleSpeed / (6f / SpeedFactor);
+        }
+        /// <summary>
+        /// 角速度转线速度
+        /// </summary>
+        /// <param name="AngularSpeed">弧度制角速度</param>
+        /// <param name="Radius">半径</param>
+        /// <returns>线速度</returns>
+        public static float AngularSpeedToLinearSpeed(float AngularSpeed, float Radius)
+        {
+            return AngularSpeed * Radius;
+        }
+        /// <summary>
+        /// 角速度转线速度
+        /// </summary>
+        /// <param name="LinearSpeed">线速度</param>
+        /// <param name="Radius">半径</param>
+        /// <returns>弧度制角速度</returns>
+        public static float LinearSpeedToAngularSpeed(float LinearSpeed, float Radius)
+        {
+            return LinearSpeed * 1f / Radius;
         }
         /// <summary>
         /// 转换速度
@@ -7186,6 +7270,56 @@ namespace RyuGiKen
             if (str == "1")
                 return true;
             return (str.ContainIgnoreCase("True") || str.ContainIgnoreCase("Yes")) && !str.ContainIgnoreCase("No") && !str.ContainIgnoreCase("不");
+        }
+        /// <summary>
+        /// 二进制字符串转字节数组
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static byte[] BinaryStringToBytes(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return null;
+            try
+            {
+                int length = str.Length / 8;
+                byte[] result = new byte[length];
+                for (int i = 0; i < length; i++)
+                {
+                    string temp = str.Substring(i * 8, 8);
+                    if (i * 8 + 8 <= length)
+                    {
+                        temp = str.Substring(i * 8, 8);
+                    }
+                    else
+                    {
+                        temp = str.Substring(i * 8).PadLeft(8, '0');
+                    }
+                    result[i] = Convert.ToByte(temp, 2);
+                }
+                return result;
+            }
+            catch
+            {
+                Debug.Log("转换失败");
+                return null;
+            }
+        }
+        /// <summary>
+        /// 字节数组转二进制字符串
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string BytesToBinaryString(byte[] bytes)
+        {
+            if (!bytes.CheckArrayLength(1))
+                return null;
+            StringBuilder str = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                str.Append(Convert.ToString(bytes[i], 2).PadLeft(8, '0'));
+            }
+            return str.ToString();
         }
         /// <summary>
         /// 字符串转浮点数，失败为0
@@ -11658,6 +11792,34 @@ namespace RyuGiKen
         public static Color ToColor(Vector4 value)
         {
             return new Color(value.x, value.y, value.z, value.w);
+        }
+        /// <summary>
+        /// 颜色格式转换
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static Color ToColor(this Color32 c)
+        {
+            return new Color(
+                r: c.r / 255f,
+                g: c.g / 255f,
+                b: c.b / 255f,
+                a: c.a / 255f
+            );
+        }
+        /// <summary>
+        /// 颜色格式转换
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public static Color32 ToColor32(this Color c)
+        {
+            return new Color32(
+                r: (byte)Mathf.Round(Mathf.Clamp01(c.r) * 255f),
+                g: (byte)Mathf.Round(Mathf.Clamp01(c.g) * 255f),
+                b: (byte)Mathf.Round(Mathf.Clamp01(c.b) * 255f),
+                a: (byte)Mathf.Round(Mathf.Clamp01(c.a) * 255f)
+            );
         }
 #endif
         /// <summary>

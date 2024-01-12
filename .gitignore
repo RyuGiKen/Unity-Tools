@@ -8,7 +8,7 @@
 [Uu]serSettings/
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
-# [Aa]ssets/AssetStoreTools*
+[Aa]ssets/AssetStoreTools*
 
 # Visual Studio cache directory
 .vs/
@@ -40,12 +40,18 @@ ExportedObj/
 *.pdb.meta
 *.mdb.meta
 
-# Unity3D generated file on crash reports
+# Unity3D Generated File On Crash Reports
 sysinfo.txt
 
 # Builds
 *.apk
 *.unitypackage
+MemoryCaptures
+SerializedBuildInfo
+SwitchIL2CPP*
+.DS_Store
+mono_crash*
+ShaderVariants*
 
 # Crashlytics generated file
 crashlytics-build.properties

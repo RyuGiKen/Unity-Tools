@@ -23,15 +23,20 @@ namespace RyuGiKenEditor.Tools
         }
         public void OnPostprocessBuild(BuildReport report)
         {
+            LogVersion(report.summary);
+        }
+        void LogVersion(BuildSummary summary)
+        {
             var endTime = DateTime.Now;
             var deltaTime = endTime - m_startTime;
             Debug.LogFormat("构建耗时：{0}:{1}:{2}:{3}", deltaTime.Hours.ToString("D2"), deltaTime.Minutes.ToString("D2"), deltaTime.Seconds.ToString("D2"), deltaTime.Milliseconds.ToString("D3"));
 
-            FileInfo outputExe = new FileInfo(report.summary.outputPath);
+            FileInfo outputExe = new FileInfo(summary.outputPath);
             string xmlPath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data\\BuildData.xml";
             GetFile.CreateXmlFile(xmlPath, "Root",
-                GetFile.CreateXElement("BuildDate", report.summary.buildEndedAt.ToLocalTime().ToString("yyyy_MM_dd")),
-                GetFile.CreateXElement("BuildTime", report.summary.buildEndedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")),
+                GetFile.CreateXElement("BuildDate", summary.buildEndedAt.ToLocalTime().ToString("yyyy_MM_dd")),
+                GetFile.CreateXElement("BuildTime", summary.buildEndedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")),
+                GetFile.CreateXElement("BuildSize", summary.totalSize.ToString()),
                 GetFile.CreateXElement("BuildUnityVersion", RyuGiKen.Tools.Version.GetProgramUnityVersion())
             );
             string VersionFilePath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data\\StreamingAssets";
