@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -805,7 +805,7 @@ namespace RyuGiKen
             }
         }
     }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
     [Serializable]
     public class MultiArrayVector2 : MultiArrayExtension<Vector2>
     {
@@ -1365,7 +1365,7 @@ namespace RyuGiKen
             }
         }
     }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
     [Serializable]
     public class MultiArrayObject : MultiArrayExtension<Object>
     {

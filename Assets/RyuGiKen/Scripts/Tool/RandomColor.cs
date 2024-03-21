@@ -40,7 +40,7 @@ namespace RyuGiKen.Tools
             if (SwitchColorTime > 0 && renderers.Count > 0)
             {
                 time += direction * Time.deltaTime;
-                if (time <= 0)//(renderers[0].material.color == color)
+                if (time < 0)//(renderers[0].material.color == color)
                 {
                     time = 0;
                     if (randomColour)
@@ -50,7 +50,7 @@ namespace RyuGiKen.Tools
                     //if (!BackToBlack)
                     direction = 1;
                 }
-                else if (time >= SwitchColorTime)//(renderers[0].material.color == color2)
+                else if (time > SwitchColorTime)//(renderers[0].material.color == color2)
                 {
                     time = SwitchColorTime;
                     if (randomColour)

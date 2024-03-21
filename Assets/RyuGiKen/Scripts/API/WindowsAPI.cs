@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 namespace WindowsAPI
 {
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
     /// <summary>
     /// 这里是引入 user32.dll 库， 这个库是windows系统自带的。
     /// </summary>
@@ -433,4 +434,5 @@ namespace WindowsAPI
         [DllImport("user32.dll")] public static extern int ToAscii(int uVirtKey, int uScanCode, byte[] lpbKeyState, byte[] lpwTransKey, int fuState);
         #endregion
     }
+#endif
 }

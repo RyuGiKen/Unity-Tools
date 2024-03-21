@@ -89,15 +89,19 @@ namespace RyuGiKen.Tools
         }
         private void OnEnable()
         {
+#if UNITY_STANDALONE_WIN
             if (th_SetMouse != null)
                 th_SetMouse.Abort();
             th_SetMouse = new Thread(new ThreadStart(SetMousePos));
             th_SetMouse.Start();
+#endif
         }
         private void OnDisable()
         {
+#if UNITY_STANDALONE_WIN
             if (th_SetMouse != null)
                 th_SetMouse.Abort();
+#endif
         }
         void Start()
         {
@@ -134,7 +138,11 @@ namespace RyuGiKen.Tools
         /// </summary>
         public void UpdateToSecondScreen()
         {
+#if UNITY_STANDALONE_WIN
             if (!canRefreshSecondScreen || IsInvoking(nameof(TestRight)) || IsInvoking(nameof(TestLeft)) || IsInvoking(nameof(TestUp)) || IsInvoking(nameof(TestDown)))
+#else
+            if (!canRefreshSecondScreen)
+#endif
                 return;
             canRefreshSecondScreen = false;
             state.WindowWidth = Display.displays[1].systemWidth;
@@ -146,12 +154,13 @@ namespace RyuGiKen.Tools
             TestMousePos[1] = new Vector2Int(-Display.displays[1].systemWidth / 2, Display.displays[1].systemHeight / 2);
             TestMousePos[2] = new Vector2Int(Display.displays[0].systemWidth / 2, -Display.displays[1].systemHeight / 2);
             TestMousePos[3] = new Vector2Int(Display.displays[0].systemWidth / 2, Display.displays[0].systemHeight + Display.displays[1].systemHeight / 2);
-            User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
 #if UNITY_STANDALONE_WIN
+            User32.SetWindowPos(HWndIntPtr, 0, 0, 0, 0, 0, 1);
             SetOverrideMousePos(TestMousePos[0].x, TestMousePos[0].y, true);
             Invoke(nameof(TestRight), 0.2f);//判定右
 #endif
         }
+#if UNITY_STANDALONE_WIN
         private void SetMousePos()
         {
             while (true)
@@ -163,6 +172,7 @@ namespace RyuGiKen.Tools
                 Thread.Sleep(50);
             }
         }
+#endif
         void LateUpdate()
         {
             Camera.FieldOfViewAxis axis = CheckScreenAxis();
@@ -214,6 +224,7 @@ namespace RyuGiKen.Tools
                 SetResolution(0.5f);
             }
         }
+#if UNITY_STANDALONE_WIN
         void SetOverrideMousePos(float X, float Y, bool Override)
         {
             OverrideMouse = Override;
@@ -327,6 +338,7 @@ namespace RyuGiKen.Tools
             canRefreshSecondScreen = true;
             DebugL.Log("副屏设置" + result);
         }
+#endif
         /// <summary>
         /// 窗口置顶
         /// </summary>
@@ -352,6 +364,7 @@ namespace RyuGiKen.Tools
             }
 #endif
         }
+#if UNITY_STANDALONE_WIN
         /// <summary>
         /// 获取当前窗体句柄
         /// </summary>
@@ -377,6 +390,7 @@ namespace RyuGiKen.Tools
             }), pid);
             return (!bResult && Marshal.GetLastWin32Error() == 0) ? ptrWnd : IntPtr.Zero;
         }
+#endif
         /// <summary>
         /// 切换屏幕模式
         /// <para>1仅电脑屏幕</para>

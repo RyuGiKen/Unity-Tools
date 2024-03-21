@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -213,7 +213,7 @@ namespace RyuGiKen
         public ReorderableListString(string[] array) { this.items = array != null ? array.ToList() : new List<string>(); }
         public ReorderableListString(List<string> list) { this.items = list; }
     }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
     [System.Serializable]
     public class ReorderableListVector2 : ReorderableList<Vector2>
     {
@@ -278,7 +278,7 @@ namespace RyuGiKen
         public ReorderableListHSVColor(HSVColor[] array) { this.items = array != null ? array.ToList() : new List<HSVColor>(); }
         public ReorderableListHSVColor(List<HSVColor> list) { this.items = list; }
     }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
     [System.Serializable]
     public class ReorderableListObject : ReorderableList<Object>
     {

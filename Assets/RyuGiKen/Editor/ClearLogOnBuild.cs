@@ -17,6 +17,8 @@ namespace RyuGiKenEditor.Tools
         public int callbackOrder { get; private set; }
         public void OnPreprocessBuild(BuildReport report)
         {
+            if (report.summary.platformGroup != BuildTargetGroup.Standalone)
+                return;
             Debug.Log("构建时清空日志");
             if (!Directory.Exists(Application.streamingAssetsPath))
                 Directory.CreateDirectory(Application.streamingAssetsPath);

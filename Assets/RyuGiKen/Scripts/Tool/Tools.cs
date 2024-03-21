@@ -12,7 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -32,6 +32,7 @@ using RyuGiKen;
 namespace RyuGiKen
 {
     public delegate void MyEvent();
+#if UNITY_5_3_OR_NEWER
     /// <summary>
     /// 屏幕信息
     /// </summary>
@@ -50,6 +51,7 @@ namespace RyuGiKen
                 return string.Format("{0} x {1}", Screen.width, Screen.height);
         }
     }
+#endif
     /// <summary>
     /// 获取文件
     /// </summary>
@@ -1558,7 +1560,7 @@ namespace RyuGiKen
         {
             return thread != null && thread.IsAlive && (thread.ThreadState.HasFlag(ThreadState.Running) || thread.ThreadState.HasFlag(ThreadState.WaitSleepJoin));
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 获取行间隔为1时的preferredHeight
         /// </summary>
@@ -2500,7 +2502,7 @@ namespace RyuGiKen
             return result;
         }
     }
-#if !UNITY_EDITOR && !UNITY_STANDALONE
+#if !UNITY_5_3_OR_NEWER
     public static class Random
     {
         static int RandomSeed { set; get; }
@@ -2618,6 +2620,17 @@ namespace RyuGiKen
         {
             return (int)Math.Ceiling(value);
         }
+        /// <summary>
+        /// 线性差值%
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="t">[0,1]</param>
+        /// <returns></returns>
+        public static float Lerp(float a, float b, float t)
+        {
+            return a + (b - a) * Clamp01(t);
+        }
     }
     public struct Color
     {
@@ -2648,10 +2661,44 @@ namespace RyuGiKen
             this.x = X;
             this.y = Y;
         }
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() ^ (y.GetHashCode() << 2);
+        }
+        public override bool Equals(object other)
+        {
+            if (!(other is Vector2))
+            {
+                return false;
+            }
+            return Equals((Vector2)other);
+        }
+        public bool Equals(Vector2 other)
+        {
+            return x == other.x && y == other.y;
+        }
+        public override string ToString()
+        {
+            return ToString("F2");
+        }
+        public string ToString(string format)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                format = "F2";
+            }
+            return string.Format("({0}, {1})", x.ToString(format), y.ToString(format));
+        }
         public static implicit operator Vector3(Vector2 v) { return new Vector3(v.x, v.y, 0); }
         public static Vector2 operator +(Vector2 a, Vector2 b) { return new Vector2(a.x + b.x, a.y + b.y); }
         public static Vector2 operator -(Vector2 a, Vector2 b) { return new Vector2(a.x - b.x, a.y - b.y); }
-        public readonly static Vector2 up = new Vector2(0, 1);
+        public static Vector2 operator *(Vector2 a, float b) { return new Vector2(a.x * b, a.y * b); }
+        public static Vector2 operator *(float a, Vector2 b) { return new Vector2(a * b.x, a * b.y); }
+        public static Vector2 operator *(Vector2 a, Vector2 b) { return new Vector2(a.x * b.x, a.y * b.y); }
+        public static Vector2 operator /(Vector2 a, float b) { return new Vector2(a.x / b, a.y / b); }
+        public static Vector2 operator /(Vector2 a, Vector2 b) { return new Vector2(a.x / b.x, a.y / b.y); }
+        public static bool operator ==(Vector2 lhs, Vector2 rhs) { return lhs.Equals(rhs); }
+        public static bool operator !=(Vector2 lhs, Vector2 rhs) { return !lhs.Equals(rhs); }
     }
     public struct Vector3
     {
@@ -2666,9 +2713,43 @@ namespace RyuGiKen
             this.y = Y;
             this.z = Z;
         }
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() ^ (y.GetHashCode() << 2) ^ (z.GetHashCode() >> 2);
+        }
+        public override bool Equals(object other)
+        {
+            if (!(other is Vector3))
+            {
+                return false;
+            }
+
+            return Equals((Vector3)other);
+        }
+        public bool Equals(Vector3 other)
+        {
+            return x == other.x && y == other.y && z == other.z;
+        }
+        public override string ToString()
+        {
+            return ToString("F2");
+        }
+        public string ToString(string format)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                format = "F2";
+            }
+            return string.Format("({0}, {1}, {2})", x.ToString(format), y.ToString(format), z.ToString(format));
+        }
         public static implicit operator Vector2(Vector3 v) { return new Vector2(v.x, v.y); }
         public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z); }
         public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.x - b.x, a.y - b.y, a.z + b.z); }
+        public static Vector3 operator *(Vector3 a, float b) { return new Vector3(a.x * b, a.y * b, a.z * b); }
+        public static Vector3 operator *(float a, Vector3 b) { return new Vector3(a * b.x, a * b.y, a * b.z); }
+        public static Vector3 operator /(Vector3 a, float b) { return new Vector3(a.x / b, a.y / b, a.z / b); }
+        public static bool operator ==(Vector3 lhs, Vector3 rhs) { return lhs.Equals(rhs); }
+        public static bool operator !=(Vector3 lhs, Vector3 rhs) { return !lhs.Equals(rhs); }
     }
     public struct Vector4
     {
@@ -2741,7 +2822,6 @@ namespace RyuGiKen
         /// </summary>
         Right = 6
     }
-#if UNITY_EDITOR || UNITY_STANDALONE
     /// <summary>
     /// 范围
     /// </summary>
@@ -2764,7 +2844,9 @@ namespace RyuGiKen
         /// <summary>
         /// 范围
         /// </summary>
+#if UNITY_5_3_OR_NEWER
         [SerializeField]
+#endif
         private Vector2 range;
         /// <summary>
         /// 范围
@@ -2859,7 +2941,9 @@ namespace RyuGiKen
         public static bool operator ==(ValueRange lhs, ValueRange rhs) { return lhs.range == rhs.range; }
         public static bool operator !=(ValueRange lhs, Vector2 rhs) { return !(lhs == rhs); }
         public static bool operator !=(ValueRange lhs, ValueRange rhs) { return !(lhs == rhs); }
+#if UNITY_5_3_OR_NEWER
         public static implicit operator ValueRange(Vector2Int value) { return new ValueRange(value); }
+#endif
     }
     /// <summary>
     /// 限位值
@@ -2867,12 +2951,16 @@ namespace RyuGiKen
     [Serializable]
     public struct ValueInRange
     {
+#if UNITY_5_3_OR_NEWER
         [SerializeField]
+#endif
         private float value;
         /// <summary>
         /// 范围
         /// </summary>
+#if UNITY_5_3_OR_NEWER
         [SerializeField]
+#endif
         private Vector2 range;
         /// <summary>
         /// 锁定范围
@@ -2908,7 +2996,11 @@ namespace RyuGiKen
         {
             set
             {
+#if UNITY_5_3_OR_NEWER
                 float temp = ValueAdjust.MappingRange(value, Vector2.up, range);
+#else
+                float temp = ValueAdjust.MappingRange(value, 0, 1, range.x, range.y);
+#endif
                 if (!temp.IsNaN())
                     this.value = temp;
             }
@@ -3094,12 +3186,16 @@ namespace RyuGiKen
     [Serializable]
     public struct ValueWithRange
     {
+#if UNITY_5_3_OR_NEWER
         [SerializeField]
+#endif
         private float value;
         /// <summary>
         /// 范围
         /// </summary>
+#if UNITY_5_3_OR_NEWER
         [SerializeField]
+#endif
         private ValueRange range;
         /// <summary>
         /// 锁定范围
@@ -3293,7 +3389,9 @@ namespace RyuGiKen
     [Serializable]
     public struct BiaxValue
     {
+#if UNITY_5_3_OR_NEWER
         [SerializeField]
+#endif
         private Vector2 value;
         /// <summary>
         /// 整数
@@ -3343,10 +3441,12 @@ namespace RyuGiKen
         {
             return Value.ToString();
         }
+#if UNITY_5_3_OR_NEWER
         public Vector2Int ToInteger()
         {
             return new Vector2Int(value.x.ToInteger(), value.y.ToInteger());
         }
+#endif
         public BiaxValue(bool wholeNumbers = false)
         {
             value = new Vector2();
@@ -3399,7 +3499,6 @@ namespace RyuGiKen
         public static bool operator !=(BiaxValue lhs, Vector2 rhs) { return !(lhs == rhs); }
         public static bool operator !=(BiaxValue lhs, BiaxValue rhs) { return !(lhs == rhs); }
     }
-#endif
     public enum RotationAxis
     {
         XYZ,
@@ -3484,7 +3583,7 @@ namespace RyuGiKen
                     break;
             }
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 富文本颜色调整
         /// </summary>
@@ -3826,7 +3925,7 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 四元数转四维坐标
         /// </summary>
@@ -3836,6 +3935,7 @@ namespace RyuGiKen
         {
             return new Vector4(value.x, value.y, value.z, value.w);
         }
+#endif
         /// <summary>
         /// 二维坐标转四维坐标
         /// </summary>
@@ -3906,7 +4006,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#endif
         /// <summary>
         /// 二维坐标转三维坐标
         /// </summary>
@@ -3992,6 +4091,7 @@ namespace RyuGiKen
         {
             return string.Format("({0}，{1})", value.x.ToString(format), value.y.ToString(format));
         }
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 转字符串（无空格）
         /// </summary>
@@ -4000,6 +4100,7 @@ namespace RyuGiKen
         {
             return string.Format("({0}，{1})", value.x.ToString(format), value.y.ToString(format));
         }
+#endif
         /// <summary>
         /// 转字符串（无空格）
         /// </summary>
@@ -4118,7 +4219,7 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 转元组
         /// </summary>
@@ -4509,7 +4610,7 @@ namespace RyuGiKen
                 item02[i] = array[i].Item2;
             }
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 重复项置空
         /// </summary>
@@ -4650,7 +4751,7 @@ namespace RyuGiKen
             }
             return result.ToArray();
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 清空空项
         /// </summary>
@@ -4662,15 +4763,13 @@ namespace RyuGiKen
         {
             if (list == null || list.Count < 1)
                 return null;
-            List<T> result = new List<T>(list.Count);
             if (!changeSelf)
             {
+                List<T> result = new List<T>();
                 for (int i = 0; i < list.Count; i++)
-                    result[i] = list[i];
-                for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    if (result[i] == null)
-                        result.RemoveAt(i);
+                    if (list[i] != null)
+                        result.Add(list[i]);
                 }
                 return result;
             }
@@ -4986,7 +5085,6 @@ namespace RyuGiKen
             result = temp2.ListAddition().ToArray().ClearNullItem<string>();
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 检查路径输入
         /// </summary>
@@ -4996,9 +5094,13 @@ namespace RyuGiKen
         /// <returns>输出</returns>
         public static string CheckFilePath(string path, string fileType, bool createPath)
         {
+#if UNITY_5_3_OR_NEWER
             return CheckPathInAssets(path, fileType, createPath, out string OutputPath, out string OutputFileName);
-        }
+#else
+            return CheckFilePath(path, fileType, createPath, out string OutputPath, out string OutputFileName);
 #endif
+        }
+#if UNITY_EDITOR || UNITY_STANDALONE || WINDOWS
         /// <summary>
         /// 检查路径输入
         /// </summary>
@@ -5043,7 +5145,8 @@ namespace RyuGiKen
 
             return OutputFullName;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#endif
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 检查路径输入（工程根目录）
         /// </summary>
@@ -5896,7 +5999,6 @@ namespace RyuGiKen
             }
             return str;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 打印数组元素
         /// </summary>
@@ -5947,7 +6049,6 @@ namespace RyuGiKen
             }
             return str;
         }
-#endif
         /// <summary>
         /// 打印数组元素
         /// </summary>
@@ -6070,7 +6171,7 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 生成序列
         /// </summary>
@@ -6915,7 +7016,7 @@ namespace RyuGiKen
                 return false;
             return (source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0);
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，速度/s）
         /// </summary>
@@ -7087,7 +7188,6 @@ namespace RyuGiKen
                 A = B;
             return A;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         ///  A向B渐变（当前值，目标值，步长(Time.deltaTime或Time.unscaledDeltaTime)，(点，速度/s)）
         /// </summary>
@@ -7160,7 +7260,6 @@ namespace RyuGiKen
                 A = B;
             return A;
         }
-#endif
         /// <summary>
         /// 输出y=(k*（x + b）^2) + a；
         /// </summary>
@@ -7184,13 +7283,13 @@ namespace RyuGiKen
         {
             return (float)Math.Sqrt(Math.Abs((X + b) / k));
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 获取抛物线位置
         /// </summary>
         /// <param name="StartPos">起点</param>
         /// <param name="Speed">速度</param>
-        /// <param name="time">事件</param>
+        /// <param name="time">时间</param>
         /// <returns></returns>
         public static Vector3 GetParabolaPositionByTime(Vector3 StartPos, Vector3 Speed, float time)
         {
@@ -7301,7 +7400,9 @@ namespace RyuGiKen
             }
             catch
             {
+#if UNITY_5_3_OR_NEWER
                 Debug.Log("转换失败");
+#endif
                 return null;
             }
         }
@@ -7329,9 +7430,10 @@ namespace RyuGiKen
         /// <returns></returns>
         public static double ToDouble(this string num, double FailValue = 0)
         {
-            double result = FailValue;
-            double.TryParse(num, out result);
-            return result;
+            if (double.TryParse(num, out double result))
+                return result;
+            else
+                return FailValue;
         }
         /// <summary>
         /// 转双精度浮点数
@@ -7483,9 +7585,10 @@ namespace RyuGiKen
         /// <returns></returns>
         public static decimal ToDecimal(this string num, decimal FailValue = 0)
         {
-            decimal result = FailValue;
-            decimal.TryParse(num, out result);
-            return result;
+            if (decimal.TryParse(num, out decimal result))
+                return result;
+            else
+                return FailValue;
         }
         /// <summary>
         /// 转高精度浮点数
@@ -7637,9 +7740,10 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float ToFloat(this string num, float FailValue = 0)
         {
-            float result = FailValue;
-            float.TryParse(num, out result);
-            return result;
+            if (float.TryParse(num, out float result))
+                return result;
+            else
+                return FailValue;
         }
         /// <summary>
         /// 转单精度浮点数
@@ -7799,9 +7903,10 @@ namespace RyuGiKen
         /// <returns></returns>
         public static int ToInteger(this string num, int FailValue = 0)
         {
-            int result = FailValue;
-            int.TryParse(num, out result);
-            return result;
+            if (int.TryParse(num, out int result))
+                return result;
+            else
+                return FailValue;
         }
         /// <summary>
         /// 转整数
@@ -7832,7 +7937,7 @@ namespace RyuGiKen
         {
             return (int)Round(num);
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 转整数
         /// </summary>
@@ -7927,9 +8032,10 @@ namespace RyuGiKen
         /// <returns></returns>
         public static uint ToUInteger(this string num, uint FailValue = 0)
         {
-            uint result = FailValue;
-            uint.TryParse(num, out result);
-            return result;
+            if (uint.TryParse(num, out uint result))
+                return result;
+            else
+                return FailValue;
         }
         /// <summary>
         /// 转整数
@@ -8085,9 +8191,10 @@ namespace RyuGiKen
         /// <returns></returns>
         public static long ToInteger64(this string num, long FailValue = 0)
         {
-            long result = FailValue;
-            long.TryParse(num, out result);
-            return result;
+            if (long.TryParse(num, out long result))
+                return result;
+            else
+                return FailValue;
         }
         /// <summary>
         /// 转整数
@@ -8416,7 +8523,6 @@ namespace RyuGiKen
                 result = value;
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 限位。
         /// </summary>
@@ -8429,7 +8535,6 @@ namespace RyuGiKen
                 return value;
             return Clamp(value, range.MinValue, range.MaxValue);
         }
-#endif
         /// <summary>
         /// 限位。
         /// </summary>
@@ -8440,7 +8545,7 @@ namespace RyuGiKen
         {
             return Clamp(value, range.x, range.y);
         }
-#if UNITY_STANDALONE || UNITY_EDITOR
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 限位。
         /// </summary>
@@ -8451,6 +8556,7 @@ namespace RyuGiKen
         {
             return Clamp(value, range.x, range.y);
         }
+#endif
         /// <summary>
         /// 限位。返回不小于min的值
         /// </summary>
@@ -8495,7 +8601,6 @@ namespace RyuGiKen
             result = new Vector3(value.x.Clamp(min.x, max.x), value.y.Clamp(min.y, max.y), value.z.Clamp(min.z, max.z));
             return result;
         }
-#endif
         /// <summary>
         /// 限位。返回不小于min且不大于max的值
         /// </summary>
@@ -8841,7 +8946,7 @@ namespace RyuGiKen
                     max = list[i];
             }
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 找出最大最小值
         /// </summary>
@@ -8880,7 +8985,6 @@ namespace RyuGiKen
             return result;
         }
 #endif
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 找出最大最小值
         /// </summary>
@@ -8899,6 +9003,7 @@ namespace RyuGiKen
             }
             return result;
         }
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 找出最大最小值
         /// </summary>
@@ -8937,7 +9042,6 @@ namespace RyuGiKen
             return result;
         }
 #endif
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 找出最大最小值
         /// </summary>
@@ -8956,7 +9060,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#endif
         /// <summary>
         /// 判定是否在范围内
         /// </summary>
@@ -8972,7 +9075,6 @@ namespace RyuGiKen
             }
             return CurrentValue >= MinValue && CurrentValue <= MaxValue;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 判定是否在范围内
         /// </summary>
@@ -8985,7 +9087,6 @@ namespace RyuGiKen
                 return false;
             return CurrentValue >= Range.MinValue && CurrentValue <= Range.MaxValue;
         }
-#endif
         /// <summary>
         /// 判定是否在范围内
         /// </summary>
@@ -9094,7 +9195,6 @@ namespace RyuGiKen
             else
                 return false;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 等比缩放
         /// </summary>
@@ -9113,6 +9213,7 @@ namespace RyuGiKen
                 result = value * range.x / value.x;
             return result;
         }
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 点到直线距离
         /// </summary>
@@ -9358,7 +9459,6 @@ namespace RyuGiKen
             }
             return numAdjusted;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 调整循环范围(当前值，最小值，最大值，循环周期)
         /// </summary>
@@ -9394,7 +9494,6 @@ namespace RyuGiKen
                 return SetRange(num, min, max, max - min);
             }
         }
-#endif
         /// <summary>
         /// 反循环
         /// </summary>
@@ -9439,7 +9538,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 反循环
         /// </summary>
@@ -9453,7 +9551,6 @@ namespace RyuGiKen
                 return curValue;
             return UnLoop(curValue, lastValue, Range.MinValue, Range.MaxValue);
         }
-#endif
         /// <summary>
         /// 直角坐标转换成极坐标系 Vector2(角度（0，360）, 距离)
         /// </summary>
@@ -9609,10 +9706,8 @@ namespace RyuGiKen
         /// <returns></returns>
         public static float RandomValueInRange(Vector2 Range, IntersperseMode type = IntersperseMode.Average)
         {
-#if UNITY_EDITOR || UNITY_STANDALONE
             if (Range == null)
                 return float.NaN;
-#endif
             if (Range.x == Range.y)
                 return Range.x;
             return RandomValueInRange(Range.x, Range.y, type);
@@ -9701,7 +9796,7 @@ namespace RyuGiKen
             result.z = RandomValueInRange(RangeZ, type);
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 获取相对画布坐标的矩形区域
         /// </summary>
@@ -10005,7 +10100,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 取平均值
         /// </summary>
@@ -10049,7 +10143,6 @@ namespace RyuGiKen
             }
             return Max * 1f / (endIndex + 1 - startIndex);
         }
-#endif
         /// <summary>
         /// 按权重映射
         /// </summary>
@@ -10303,7 +10396,6 @@ namespace RyuGiKen
                 return double.NaN;
             return list.ToArray().Sum(startIndex, endIndex);
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
@@ -10338,7 +10430,6 @@ namespace RyuGiKen
         {
             return ToPercent01(value, range, n, limit) * 2 - 1;
         }
-#endif
         /// <summary>
         /// x在[a，b]范围输出[-1，1]
         /// </summary>
@@ -10365,7 +10456,6 @@ namespace RyuGiKen
         {
             return ToPercent01(value, min, max, n, limit) * 2 - 1;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
         /// </summary>
@@ -10412,7 +10502,6 @@ namespace RyuGiKen
                 return 0;
             return ToPercent01(value, range.MinValue, range.MaxValue, n, limit);
         }
-#endif
         /// <summary>
         /// x在[a，b]范围输出[0，1]，n=1为递增，n=-1为递减
         /// </summary>
@@ -10517,7 +10606,6 @@ namespace RyuGiKen
             }
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 输出在范围内的等比变化数组
         /// </summary>
@@ -10587,7 +10675,6 @@ namespace RyuGiKen
                 return float.NaN;
             return MappingRange(value, range, OutputRange.MinValue, OutputRange.MaxValue, n, limit);
         }
-#endif
         /// <summary>
         /// 映射
         /// </summary>
@@ -10717,7 +10804,6 @@ namespace RyuGiKen
                 result = percent * (OutputMax - OutputMin) + OutputMin;
             return result;
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 映射
         /// </summary>
@@ -10788,7 +10874,6 @@ namespace RyuGiKen
                 result = percent * (OutputMax - OutputMin) + OutputMin;
             return result;
         }
-#endif
         /// <summary>
         /// 不对称范围映射
         /// </summary>
@@ -10842,7 +10927,6 @@ namespace RyuGiKen
                     return MappingRange(value, middle, max, OutputMiddle, OutputMax, n, limit);
             }
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
         /// <summary>
         /// 不对称范围映射
         /// </summary>
@@ -10901,7 +10985,6 @@ namespace RyuGiKen
         {
             return MappingAsymmetryRange(value, min, middle, max, OutputRange.MinValue, OutputRange.MiddleValue, OutputRange.MaxValue, n, limit);
         }
-#endif
         /// <summary>
         /// 不对称范围映射
         /// </summary>
@@ -11470,7 +11553,7 @@ namespace RyuGiKen
             }
             else
             {
-                if (color.Hue <= 5 || color.Hue >= 330 && color.Saturation > 0.1f && color.Saturation <= 0.5f)
+                if ((color.Hue <= 5 || color.Hue >= 320) && color.Saturation > 0.1f && color.Saturation <= 0.5f)
                     result = "粉红";
                 else if (color.Hue <= 10 || color.Hue >= 340)
                     result = "红";
@@ -11562,7 +11645,7 @@ namespace RyuGiKen
         {
             return new Vector3(Hue, Saturation, Value);
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         public Vector4 ToVector4()
         {
             return new Vector4(Hue, Saturation, Value, alpha);
@@ -11570,7 +11653,7 @@ namespace RyuGiKen
 #endif
         public override string ToString()
         {
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
             return ToVector4().ToString();
 #else
             return ("(" + Hue + "," + Saturation + "," + Value + "," + alpha + ")");
@@ -11783,7 +11866,7 @@ namespace RyuGiKen
         {
             return new Color(value.x, value.y, value.z);
         }
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_5_3_OR_NEWER
         /// <summary>
         /// 四维坐标转颜色
         /// </summary>
