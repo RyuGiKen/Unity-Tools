@@ -4340,6 +4340,19 @@ namespace RyuGiKen
             //return Quaternion.AngleAxis(Angle.x, Vector3.right) * Quaternion.AngleAxis(Angle.y, Vector3.up) * Vector3.forward;
         }
         /// <summary>
+        /// 四元数除法，lhs抵消rhs旋转
+        /// </summary>
+        /// <param name="lhs"></param>
+        /// <param name="rhs"></param>
+        /// <returns></returns>
+        public static Quaternion Division(Quaternion lhs, Quaternion rhs)
+        {
+            float pow = Mathf.Pow(lhs.x, 2) + Mathf.Pow(lhs.y, 2) + Mathf.Pow(lhs.z, 2) + Mathf.Pow(lhs.w, 2);
+            Quaternion crhs = new Quaternion(-rhs.x, -rhs.y, -rhs.z, rhs.w);
+            Vector4 temp = (lhs * crhs).ToVector4() / pow;
+            return new Quaternion(temp.x, temp.y, temp.z, temp.w);
+        }
+        /// <summary>
         /// 直线旋转球形插值
         /// </summary>
         /// <param name="a"></param>
@@ -11037,6 +11050,15 @@ namespace RyuGiKen
                 else
                     return MappingRange(value, middle, max, OutputMiddle, OutputMax, n, limit);
             }
+        }
+        /// <summary>
+        /// 范围内镜像翻转
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static ValueInRange Inverse(this ValueInRange value)
+        {
+            return new ValueInRange(MappingRange(value, value.Range, -1), value.Range);
         }
         /// <summary>
         /// 输出"00:00:00"

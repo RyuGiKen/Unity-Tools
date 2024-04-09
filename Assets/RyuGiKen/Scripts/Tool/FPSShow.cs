@@ -151,14 +151,17 @@ namespace RyuGiKen.Tools
             if (Input.GetKeyUp(KeyCode.F3))//按F3限制帧数为30;
             {
                 RefreshTargetFPS(30);
+                QualitySettings.vSyncCount = 2;
             }
             if (Input.GetKeyUp(KeyCode.F4))//按F4限制帧数为60;
             {
                 RefreshTargetFPS(60);
+                QualitySettings.vSyncCount = 1;
             }
             if (Input.GetKeyUp(KeyCode.F5))//按F5不限制帧数;
             {
                 Application.targetFrameRate = -1;
+                QualitySettings.vSyncCount = 0;
             }
             if (FPSText)
             {
