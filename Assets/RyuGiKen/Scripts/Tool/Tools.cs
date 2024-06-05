@@ -18,6 +18,7 @@ using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 using Debug = UnityEngine.Debug;
+
 #endif
 #if UNITY_EDITOR 
 using UnityEditor;
@@ -3687,7 +3688,7 @@ namespace RyuGiKen
             return AngularSpeed * Radius;
         }
         /// <summary>
-        /// 角速度转线速度
+        /// 线速度转角速度
         /// </summary>
         /// <param name="LinearSpeed">线速度</param>
         /// <param name="Radius">半径</param>
@@ -5637,6 +5638,20 @@ namespace RyuGiKen
                 return array;
             else
                 return result;
+        }
+        /// <summary>
+        /// 检查数组长度，否则重建
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="targetLength"></param>
+        /// <returns></returns>
+        public static void CheckArrayLengthReBuild<T>(ref T[] array, int targetLength)
+        {
+            if (array == null || array.Length != targetLength)
+            {
+                array = new T[targetLength];
+            }
         }
         /// <summary>
         /// 检查数组长度
@@ -8400,6 +8415,53 @@ namespace RyuGiKen
         {
             return Math.Abs(value);
         }
+#if UNITY_5_3_OR_NEWER
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector2 Abs(this Vector2 value)
+        {
+            return new Vector2(value.x.Abs(), value.y.Abs());
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector2Int Abs(this Vector2Int value)
+        {
+            return new Vector2Int(value.x.Abs(), value.y.Abs());
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3 Abs(this Vector3 value)
+        {
+            return new Vector3(value.x.Abs(), value.y.Abs(), value.z.Abs());
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3Int Abs(this Vector3Int value)
+        {
+            return new Vector3Int(value.x.Abs(), value.y.Abs(), value.z.Abs());
+        }
+        /// <summary>
+        /// 取绝对值
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector4 Abs(this Vector4 value)
+        {
+            return new Vector4(value.x.Abs(), value.y.Abs(), value.z.Abs(), value.w.Abs());
+        }
+#endif
         /// <summary>
         /// 限位。返回[0，1]
         /// </summary>
@@ -10010,6 +10072,57 @@ namespace RyuGiKen
                 }
             }
         }
+#if UNITY_5_3_OR_NEWER
+        /// <summary>
+        /// 曲线Y正负翻转
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public static AnimationCurve FlipY(this AnimationCurve curve)
+        {
+            if (curve == null || curve.keys.Length <= 0)
+                return curve;
+
+            AnimationCurve result = new AnimationCurve();
+            for (int i = 0; i < curve.keys.Length; i++)
+            {
+                Keyframe key = curve.keys[i];
+                key.value *= -1;
+
+                if (float.IsInfinity(key.inTangent) || float.IsNegativeInfinity(key.inTangent)) { }
+                else
+                    key.inTangent *= -1;
+
+                if (float.IsInfinity(key.outTangent) || float.IsNegativeInfinity(key.outTangent)) { }
+                else
+                    key.outTangent *= -1;
+
+                result.AddKey(key);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 曲线平移
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public static AnimationCurve Translate(this AnimationCurve curve, Vector2 offset)
+        {
+            if (curve == null || curve.keys.Length <= 0)
+                return curve;
+
+            AnimationCurve result = new AnimationCurve();
+            for (int i = 0; i < curve.keys.Length; i++)
+            {
+                Keyframe key = curve.keys[i];
+                key.time += offset.x;
+                key.value += offset.y;
+                result.AddKey(key);
+            }
+            return result;
+        }
+#endif
         /// <summary>
         /// 交换AB值
         /// </summary>
