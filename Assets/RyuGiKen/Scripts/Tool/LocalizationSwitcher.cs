@@ -60,6 +60,7 @@ namespace RyuGiKen.Localization
             }
             return result;
         }
+        [ContextMenu("刷新")]
         public virtual void UpdateLanguage()
         {
             if (language == GamesLanguage.Auto)

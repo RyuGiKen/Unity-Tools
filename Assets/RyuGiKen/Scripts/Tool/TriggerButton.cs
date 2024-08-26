@@ -68,6 +68,7 @@ namespace RyuGiKen.Tools
         /// 区分Button禁用显示状态
         /// </summary>
         public bool interactable = true;
+        public bool canClick = true;
         [Tooltip("通常图形")] public Sprite NormalSprite;
         [Tooltip("高亮图形")] public Sprite HighlightedSprite;
         [Tooltip("禁用图形")] public Sprite ForbiddenSprite;
@@ -112,7 +113,7 @@ namespace RyuGiKen.Tools
             }
             else if (pointer)
             {
-                bool hightlight = pointer.TriggerObj == this;
+                bool hightlight = pointer.canTriggerObj && pointer.TriggerObj == this;
                 if (pointer.TriggerByTime)
                 {
                     this.hightlight = hightlight;
@@ -176,7 +177,7 @@ namespace RyuGiKen.Tools
         /// </summary>
         public void OnClickEvent()
         {
-            if (interactable)
+            if (interactable && canClick)
                 OnClick();
         }
         /// <summary>

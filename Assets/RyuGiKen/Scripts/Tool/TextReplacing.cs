@@ -83,12 +83,12 @@ namespace RyuGiKenEditor.Tools
             string temp = TempString.stringValue;
             string from = (target as TextReplacing).from;
             string to = (target as TextReplacing).to;
-            if (GUILayout.Button(string.Format(Names[2], "from", "to")) && string.IsNullOrEmpty(from))
+            if (GUILayout.Button(string.Format(Names[2], "from", "to")) && !string.IsNullOrEmpty(from))
             {
                 temp = temp.Replace(from, to);
                 SetText(m_Text, temp);
             }
-            if (GUILayout.Button(string.Format(Names[2], "to", "from")) && string.IsNullOrEmpty(to))
+            if (GUILayout.Button(string.Format(Names[2], "to", "from")) && !string.IsNullOrEmpty(to))
             {
                 temp = temp.Replace(to, from);
                 SetText(m_Text, temp);

@@ -79,12 +79,14 @@ namespace RyuGiKenEditor.Tools
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.Vector3Field("bounds.min", collider.bounds.min);
+                    EditorGUILayout.Vector3Field("bounds.center", collider.bounds.center);
                     EditorGUILayout.Vector3Field("bounds.max", collider.bounds.max);
                 }
                 else if (transform.TryGetComponent(out Collider2D collider2D))
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.Vector3Field("bounds.min", collider2D.bounds.min);
+                    EditorGUILayout.Vector3Field("bounds.center", collider2D.bounds.center);
                     EditorGUILayout.Vector3Field("bounds.max", collider2D.bounds.max);
                 }
             }

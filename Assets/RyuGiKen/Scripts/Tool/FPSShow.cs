@@ -57,7 +57,7 @@ namespace RyuGiKen.Tools
             OnChangeQualityLevel = ChangeQualityLevel;
 
             string xmlData = GetFile.LoadXmlData("AutoAdjustQualityLevel", Application.streamingAssetsPath + "/Setting.xml", "Data", true);
-            if (!string.IsNullOrEmpty(xmlData))
+            if (!string.IsNullOrWhiteSpace(xmlData))
             {
                 if (xmlData.ToBoolean())
                     autoAdjustQualityLevel = true;
@@ -86,7 +86,7 @@ namespace RyuGiKen.Tools
             if (autoAdjustQualityLevel)
             {
                 xmlData = GetFile.LoadXmlData("AutoAdjustQualityLevelRange", Application.streamingAssetsPath + "/Setting.xml", "Data", true);
-                if (!string.IsNullOrEmpty(xmlData))
+                if (!string.IsNullOrWhiteSpace(xmlData))
                 {
                     ValueRange range = xmlData.ToVector2();
                     if (range.Length > 1)

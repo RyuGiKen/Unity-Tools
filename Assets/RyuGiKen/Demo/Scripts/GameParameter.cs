@@ -32,5 +32,5 @@ public enum ControlType
     /// <summary>
     /// 摇杆
     /// </summary>
-    Joystick
+    Joystick,
 }

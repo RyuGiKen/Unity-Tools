@@ -63,6 +63,10 @@ namespace RyuGiKen.Tools
             SamePrefixAndOnlyDebugPostfix,
         }
         public string versionNumber = "b1.0.0";
+        /// <summary>
+        /// 外部配置覆盖显示
+        /// </summary>
+        public static string LoadOutSizeVersion = null;
         protected virtual void Awake()
         {
             if (Application.isPlaying)
@@ -71,9 +75,22 @@ namespace RyuGiKen.Tools
             }
             BuildDate = GetFile.LoadXmlData("BuildDate", Application.dataPath + "/BuildData.xml", "Root", true);
             BuildTime = GetFile.LoadXmlData("BuildTime", Application.dataPath + "/BuildData.xml", "Root", true);
+
+            string xmlData = GetFile.LoadXmlData("Version", Application.streamingAssetsPath + "/Setting.xml", "Data", true);
+            if (!string.IsNullOrWhiteSpace(xmlData))
+            {
+                LoadOutSizeVersion = SetVersionNumber(xmlData);
+                //this.GetComponent<Text>().text = LoadOutSizeVersion;
+            }
         }
         protected virtual void LateUpdate()
         {
+            if (!string.IsNullOrEmpty(LoadOutSizeVersion))
+            {
+                this.GetComponent<Text>().text = LoadOutSizeVersion;
+                return;
+            }
+
             if (versionNumber != Application.version || this.GetComponent<Text>().text != Application.version)
                 UpdateVersionNumber();
         }
@@ -247,7 +264,19 @@ namespace RyuGiKen.Tools
         public static string GetProgramVersion(bool includeBuildTime, out string version)
         {
             version = SetVersionNumber(Application.version);
-            return version + (includeBuildTime && !string.IsNullOrWhiteSpace(BuildDate) ? ("_" + BuildDate) : "");
+            if (includeBuildTime)
+                return AddBuildTime(version);
+            else
+                return version;
+        }
+        /// <summary>
+        /// 版本号后追加日期
+        /// </summary>
+        /// <param name="version"></param>
+        /// <returns></returns>
+        public static string AddBuildTime(string version)
+        {
+            return version + (!string.IsNullOrWhiteSpace(BuildDate) ? ("_" + BuildDate) : "");
         }
         /// <summary>
         /// 获取程序名称，发布版本号

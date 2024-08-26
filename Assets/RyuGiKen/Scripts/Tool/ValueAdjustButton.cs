@@ -18,6 +18,16 @@ namespace RyuGiKen.Tools
     [AddComponentMenu("RyuGiKen/数值调整按钮")]
     public class ValueAdjustButton : MonoBehaviour
     {
+        [SerializeField] bool m_Interactable = true;
+        public bool interactable
+        {
+            get { return m_Interactable; }
+            set
+            {
+                m_Interactable = value;
+                UpdateInteractable();
+            }
+        }
         [Tooltip("减少按钮")] public Button DecreaseButton;
         [Tooltip("增加按钮")] public Button IncreaseButton;
         [Tooltip("输入框")] public InputField m_InputField;
@@ -129,6 +139,7 @@ namespace RyuGiKen.Tools
         }
         void Start()
         {
+            UpdateInteractable();
             HideInputField();
             UpdateText();
         }
@@ -151,6 +162,23 @@ namespace RyuGiKen.Tools
             {
                 m_InputField.textComponent.SetActive(false);
                 m_Text.transform.parent.SetActive(true);
+            }
+        }
+        public void SetInteractable(bool value)
+        {
+            interactable = value;
+        }
+        public void UpdateInteractable()
+        {
+            List<Selectable> selectables = this.GetComponentsInChildren<Selectable>(true).ToList();
+            selectables.Add(DecreaseButton);
+            selectables.Add(IncreaseButton);
+            selectables.Add(m_InputField);
+            selectables.ClearRepeatingItem();
+            for (int i = 0; i < selectables.Count; i++)
+            {
+                if (selectables[i])
+                    selectables[i].interactable = interactable;
             }
         }
         /// <summary>
@@ -358,61 +386,26 @@ namespace RyuGiKenEditor.Tools
     [CustomEditor(typeof(ValueAdjustButton), true)]
     public class ValueAdjustButtonEditor : Editor
     {
-        SerializedProperty value;
-        SerializedProperty digit;
-        SerializedProperty limitValue;
-        SerializedProperty valueRange;
-        void OnEnable()
-        {
-            value = serializedObject.FindProperty("value");
-            digit = serializedObject.FindProperty("digit");
-            limitValue = serializedObject.FindProperty("limitValue");
-            valueRange = serializedObject.FindProperty("valueRange");
-        }
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            string[] Name = new string[5];
+            string[] Name = new string[1];
             switch (Application.systemLanguage)
             {
                 case SystemLanguage.Chinese:
                 case SystemLanguage.ChineseSimplified:
                 case SystemLanguage.ChineseTraditional:
-                    Name[0] = "限制";
-                    Name[1] = "值";
-                    Name[2] = "范围";
-                    Name[3] = "精度";
-                    Name[4] = "输出结果：";
+                    Name[0] = "输出结果：";
                     break;
                 default:
-                    Name[0] = "Limit Range";
-                    Name[1] = "Value";
-                    Name[2] = "Range";
-                    Name[3] = "Digit";
-                    Name[4] = "Output：";
+                    Name[0] = "Output：";
                     break;
             }
-            //serializedObject.Update();
-
             ValueAdjustButton button = target as ValueAdjustButton;
-            limitValue.boolValue = EditorGUILayout.ToggleLeft(Name[0], limitValue.boolValue);
-            if (button.LimitValue)
-            {
-                value.floatValue = EditorGUILayout.Slider(Name[1], value.floatValue, button.m_ValueRange.MinValue, button.m_ValueRange.MaxValue);
-                valueRange.vector2Value = EditorGUILayout.Vector2Field(Name[1], valueRange.vector2Value);
-            }
-            else
-            {
-                value.floatValue = EditorGUILayout.FloatField(Name[1], value.floatValue);
-            }
             EditorGUILayout.Space();
-            digit.intValue = EditorGUILayout.IntSlider(Name[3], digit.intValue, 0, 8);
-            EditorGUILayout.Space();
-            string temp = EditorGUILayout.TextField(Name[4], button.OutPut);
+            string temp = EditorGUILayout.TextField(Name[0], button.OutPut);
             if (button.m_Text && button.m_Text.text != temp)
                 button.UpdateText();
-
-            serializedObject.ApplyModifiedProperties();
         }
     }
 #endif

@@ -14,6 +14,8 @@ namespace RyuGiKen.Tools
     public class AutoSetTextSpacing : MonoBehaviour
     {
         public Text m_Text;
+        [Header("同尺寸其他文本框")]
+        [SerializeField] protected Text[] OtherTexts_SameGroup;
         //public ValueRange lineSpacingRange = new ValueRange(1, 2);
         void Awake()
         {
@@ -26,7 +28,15 @@ namespace RyuGiKen.Tools
         }
         void LateUpdate()
         {
-            AdjustSpacing(m_Text, new ValueRange(1.2f, 2f));
+            float lineSpacing = AdjustSpacing(m_Text, new ValueRange(1.2f, 2f));
+            if (OtherTexts_SameGroup.CheckArrayLength(1))
+            {
+                for (int i = 0; i < OtherTexts_SameGroup.Length; i++)
+                {
+                    if (OtherTexts_SameGroup[i])
+                        OtherTexts_SameGroup[i].lineSpacing = lineSpacing;
+                }
+            }
         }
         /// <summary>
         /// 自动间隔
@@ -41,11 +51,12 @@ namespace RyuGiKen.Tools
         /// </summary>
         /// <param name="text"></param>
         /// <param name="preferredHeightRange"></param>
-        public static void AdjustSpacing(Text text, ValueRange preferredHeightRange)
+        public static float AdjustSpacing(Text text, ValueRange preferredHeightRange)
         {
+            float result = -1;
             if (text)
             {
-                float result = 1;
+                result = 1;
                 if (text.cachedTextGenerator.lineCount <= 1)
                 {
                     result = 1;
@@ -58,6 +69,7 @@ namespace RyuGiKen.Tools
                 if (!Mathf.Approximately(text.lineSpacing, result))
                     text.lineSpacing = result;
             }
+            return result;
         }
     }
 }

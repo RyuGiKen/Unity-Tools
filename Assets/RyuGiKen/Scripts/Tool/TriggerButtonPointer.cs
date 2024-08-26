@@ -30,6 +30,7 @@ namespace RyuGiKen.Tools
         public Collider2D collider;
         public GraphicRaycaster graphicRaycaster;
         public Vector2Int ListCount = Vector2Int.zero;
+        public bool canTriggerObj = true;
         public TriggerButton TriggerObj;
         public TriggerButton LastClickObj;
         public List<RaycastResult> RaycastList = new List<RaycastResult>();

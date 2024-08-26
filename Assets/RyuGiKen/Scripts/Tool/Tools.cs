@@ -451,6 +451,8 @@ namespace RyuGiKen
                     reader = XmlReader.Create(filePath, settings);
                     xmlDoc.Load(reader);
                     XmlNodeList node = xmlDoc.SelectSingleNode(RootNodeName).ChildNodes;
+
+                    bool breakLoop = false;
                     foreach (XmlElement x1 in node)
                     {
                         foreach (string nodeName in NodeName)
@@ -458,9 +460,12 @@ namespace RyuGiKen
                             if (!string.IsNullOrWhiteSpace(nodeName) && (x1.Name == nodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(nodeName))))
                             {
                                 result = x1.InnerText;
+                                breakLoop = true;
                                 break;
                             }
                         }
+                        if (breakLoop)
+                            break;
                     }
                 }
             }
@@ -1577,8 +1582,9 @@ namespace RyuGiKen
         /// 获取布局子项
         /// </summary>
         /// <param name="layoutGroup"></param>
+        /// <param name="activeInHierarchy"></param>
         /// <returns></returns>
-        public static RectTransform[] GetChildrenInLayout(this LayoutGroup layoutGroup)
+        public static RectTransform[] GetChildrenInLayout(this LayoutGroup layoutGroup, bool activeInHierarchy = true)
         {
             if (!layoutGroup)
                 return null;
@@ -1590,10 +1596,10 @@ namespace RyuGiKen
                 {
                     if (rectTransform.TryGetComponent(out LayoutElement layoutElement) && layoutElement.enabled && layoutElement.ignoreLayout)
                         continue;
-                    if (rectTransform.gameObject.activeInHierarchy)
+                    if (activeInHierarchy ? rectTransform.gameObject.activeInHierarchy : rectTransform.gameObject.activeSelf)
                         children.Add(rect);
                 }*/
-                if (rectTransform == null || !rectTransform.gameObject.activeInHierarchy)
+                if (rectTransform == null || !(activeInHierarchy ? rectTransform.gameObject.activeInHierarchy : rectTransform.gameObject.activeSelf))
                 {
                     continue;
                 }
@@ -1615,6 +1621,74 @@ namespace RyuGiKen
                 }
             }
             return children.ToArray();
+        }
+        /// <summary>
+        /// 获取活动项
+        /// </summary>
+        public static GameObject[] GetActiveSelf(this GameObject[] GO)
+        {
+            if (GO == null || GO.Length < 1)
+                return null;
+            List<GameObject> result = new List<GameObject>();
+            foreach (var item in GO)
+            {
+                if (item && item.activeSelf)
+                {
+                    result.Add(item);
+                }
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 获取活动项
+        /// </summary>
+        public static T[] GetActiveSelf<T>(this T[] GO) where T : Component
+        {
+            if (GO == null || GO.Length < 1)
+                return null;
+            List<T> result = new List<T>();
+            foreach (var item in GO)
+            {
+                if (item && item.gameObject.activeSelf)
+                {
+                    result.Add(item);
+                }
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 获取活动项
+        /// </summary>
+        public static GameObject[] GetActiveInHierarchy(this GameObject[] GO)
+        {
+            if (GO == null || GO.Length < 1)
+                return null;
+            List<GameObject> result = new List<GameObject>();
+            foreach (var item in GO)
+            {
+                if (item && item.activeInHierarchy)
+                {
+                    result.Add(item);
+                }
+            }
+            return result.ToArray();
+        }
+        /// <summary>
+        /// 获取活动项
+        /// </summary>
+        public static T[] GetActiveInHierarchy<T>(this T[] GO) where T : Component
+        {
+            if (GO == null || GO.Length < 1)
+                return null;
+            List<T> result = new List<T>();
+            foreach (var item in GO)
+            {
+                if (item && item.gameObject.activeInHierarchy)
+                {
+                    result.Add(item);
+                }
+            }
+            return result.ToArray();
         }
         /// <summary>
         /// 获取活动项
@@ -5320,6 +5394,126 @@ namespace RyuGiKen
             }
         }
         /// <summary>
+        /// 省略显示
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
+        public static string Omit(this string str, int maxLength = -1)
+        {
+            if (maxLength <= 0)
+                return str;
+            if (string.IsNullOrEmpty(str))
+                return str;
+
+            string result = str.Length > (maxLength - 3) ? (str.Substring(0, maxLength - 3) + "...") : str;
+            return result;
+        }
+        /// <summary>
+        /// 省略显示
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
+        public static string OmitCareWidth(this string str, int maxLength = -1)
+        {
+            if (maxLength <= 0)
+                return str;
+            if (string.IsNullOrEmpty(str))
+                return str;
+            int length = str.GetTextLength();
+            string result = "";
+            if (length > maxLength - 3)
+            {
+                int count = 0;
+                for (int i = 0; i < str.Length; i++)
+                {
+                    if (str[i].IsChineseCharacter() || str[i].IsFullWidthCharacter())
+                        count += 2;
+                    else
+                        count++;
+                    if (count <= maxLength - 3)
+                        result += str[i];
+                    else
+                        break;
+                }
+                result += "...";
+            }
+            else
+                result = str;
+            return result;
+        }
+        /// <summary>
+        /// 字符串长度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int GetStringLength(this string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return 0;
+            return str.Length;
+        }
+        /// <summary>
+        /// 字符串组最大长度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int GetStringLength(params string[] str)
+        {
+            if (!str.CheckArrayLength(1))
+                return 0;
+            int maxLength = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (string.IsNullOrEmpty(str[i]))
+                    continue;
+                if (str[i].Length > maxLength)
+                    maxLength = str[i].Length;
+            }
+            return maxLength;
+        }
+        /// <summary>
+        /// 从两侧填充字符串使满足长度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="targetLength">目标长度</param>
+        /// <param name="paddingChar">填充字符</param>
+        /// <returns></returns>
+        public static string PadTwoSide(this string str, int targetLength, char paddingChar = ' ')
+        {
+            int length = str.GetStringLength();
+            if (length < 1)
+                return string.Empty.PadLeft(targetLength, paddingChar);
+
+            int offset = targetLength - length;
+            if (offset <= 0)
+                return str;
+            int leftCount = offset / 2;
+            //int rightCount = offset - leftCount;
+
+            string result = str.PadLeft(length + leftCount, paddingChar).PadRight(targetLength, paddingChar);
+            return result;
+        }
+        /// <summary>
+        /// 从两侧填充字符串使满足长度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="targetLength">目标长度</param>
+        /// <param name="paddingChar">填充字符</param>
+        /// <returns></returns>
+        public static string PadTwoSideCareWidth(this string str, int targetLength, char paddingChar = ' ')
+        {
+            int length = str.GetStringLength();
+            if (length < 1)
+                return string.Empty.PadLeft(targetLength, paddingChar);
+
+            int offset = str.GetTextLength() - length;
+            //int offset = str.CountChineseCharacter() + str.CountFullWidthCharacter();
+            string result = str.PadTwoSide(targetLength - offset, paddingChar);
+            return result;
+        }
+        /// <summary>
         /// 列表相加。
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -5886,15 +6080,16 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
         /// <param name="newline">换行</param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray<T>(this T[] array, bool newline = false)
+        public static string PrintArray<T>(this T[] array, bool newline = false, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 if (array[i] != null)
                 {
                     str += array[i].ToString();
@@ -5910,15 +6105,16 @@ namespace RyuGiKen
         /// <param name="array"></param>
         /// <param name="format"></param>
         /// <param name="newline">换行</param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray(this float[] array, string format = null, bool newline = false)
+        public static string PrintArray(this float[] array, string format = null, bool newline = false, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 string temp = "";
                 try
                 {
@@ -5940,15 +6136,16 @@ namespace RyuGiKen
         /// <param name="array"></param>
         /// <param name="format"></param>
         /// <param name="newline">换行</param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray(this float?[] array, string format = null, bool newline = false)
+        public static string PrintArray(this float?[] array, string format = null, bool newline = false, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 if (array[i] != null)
                 {
                     string temp = "";
@@ -5973,15 +6170,16 @@ namespace RyuGiKen
         /// <param name="array"></param>
         /// <param name="format"></param>
         /// <param name="newline">换行</param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray(this double[] array, string format = null, bool newline = false)
+        public static string PrintArray(this double[] array, string format = null, bool newline = false, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 string temp = "";
                 try
                 {
@@ -6003,15 +6201,16 @@ namespace RyuGiKen
         /// <param name="array"></param>
         /// <param name="format"></param>
         /// <param name="newline">换行</param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray(this decimal[] array, string format = null, bool newline = false)
+        public static string PrintArray(this decimal[] array, string format = null, bool newline = false, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 string temp = "";
                 try
                 {
@@ -6034,15 +6233,16 @@ namespace RyuGiKen
         /// <param name="includeRange">包含范围</param>
         /// <param name="newline">换行</param>
         /// <param name="format"></param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray(this ValueInRange[] array, bool includeRange, bool newline = false, string format = null)
+        public static string PrintArray(this ValueInRange[] array, bool includeRange, bool newline = false, string format = null, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 if (array[i] != null)
                 {
                     str += array[i].ToString(format, includeRange);
@@ -6059,15 +6259,16 @@ namespace RyuGiKen
         /// <param name="includeRange">包含范围</param>
         /// <param name="newline">换行</param>
         /// <param name="format"></param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray(this ValueWithRange[] array, bool includeRange, bool newline = false, string format = null)
+        public static string PrintArray(this ValueWithRange[] array, bool includeRange, bool newline = false, string format = null, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
             string str = "";
             for (int i = 0; i < array.Length; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 if (array[i] != null)
                 {
                     str += array[i].ToString(format, includeRange);
@@ -6082,8 +6283,9 @@ namespace RyuGiKen
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray<T>(this T[,] array)
+        public static string PrintArray<T>(this T[,] array, bool index = true)
         {
             if (array == null || array.Length < 1)
                 return "";
@@ -6092,7 +6294,7 @@ namespace RyuGiKen
             {
                 for (int j = 0; j < array.GetLength(1); j++)
                 {
-                    str += "  [" + i + "][" + j + "] ";
+                    str += index ? string.Format("  [{0}][{1}] ", i, j) : " ";
                     if (array[i, j] != null)
                         str += array[i, j].ToString();
                 }
@@ -6106,15 +6308,16 @@ namespace RyuGiKen
         /// <typeparam name="T"></typeparam>
         /// <param name="list"></param>
         /// <param name="newline">换行</param>
+        /// <param name="index"></param>
         /// <returns></returns>
-        public static string PrintArray<T>(this List<T> list, bool newline = false)
+        public static string PrintArray<T>(this List<T> list, bool newline = false, bool index = true)
         {
             if (list == null || list.Count < 1)
                 return "";
             string str = "";
             for (int i = 0; i < list.Count; i++)
             {
-                str += "  [" + i + "] ";
+                str += index ? string.Format("  [{0}] ", i) : " ";
                 if (list[i] != null)
                     str += list[i].ToString();
                 if (newline)
@@ -6330,6 +6533,42 @@ namespace RyuGiKen
                 builder.Append(temp);
             }
             return builder.ToString();
+        }
+        /// <summary>
+        /// 全角字符计数
+        /// </summary>
+        /// <param name="input">任意字符</param>
+        /// <returns></returns>
+        public static int CountFullWidthCharacter(this string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return 0;
+
+            int result = 0;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (IsFullWidthCharacter(input[i]))
+                    result++;
+            }
+            return result;
+        }
+        /// <summary>
+        /// 全角字符
+        /// </summary>
+        /// <param name="input">任意字符</param>
+        /// <returns></returns>
+        public static bool IsFullWidthCharacter(this char input)
+        {
+            return (input > 65280 && input < 65375) || input == 12288;
+        }
+        /// <summary>
+        /// 半角字符
+        /// </summary>
+        /// <param name="input">任意字符</param>
+        /// <returns></returns>
+        public static bool IsHalfWidthCharacters(this char input)
+        {
+            return input < 127 && input >= 32;
         }
         /// <summary>
         /// 转全角字符
@@ -6654,6 +6893,35 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 统计字符串中特定字符串个数
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static void CountStringInString(string str, string tar, out int[] index)
+        {
+            if (string.IsNullOrWhiteSpace(str) || string.IsNullOrEmpty(tar))
+            {
+                index = null;
+                return;
+            }
+            List<int> result = new List<int>();
+            int startIndex = -1;
+            do
+            {
+                int i = str.IndexOf(tar, startIndex + 1);
+                if (i < 0)
+                    break;
+                else
+                {
+                    startIndex = i;
+                    result.Add(i);
+                }
+
+            }
+            while (startIndex != -1);
+            index = result.ToArray();
+        }
+        /// <summary>
         /// 统计字符串中连续特定字符个数
         /// </summary>
         /// <param name="str"></param>
@@ -6938,6 +7206,24 @@ namespace RyuGiKen
             return -1;
         }
         /// <summary>
+        /// 汉字计数
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static int CountChineseCharacter(this string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return 0;
+
+            int result = 0;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (IsChineseCharacter(input[i]))
+                    result++;
+            }
+            return result;
+        }
+        /// <summary>
         /// 是否汉字
         /// </summary>
         /// <param name="c"></param>
@@ -6955,17 +7241,60 @@ namespace RyuGiKen
         /// <param name="str"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public static int GetTextLength(this string str, int size)
+        public static int GetTextLength(this string str, int size = 1)
         {
+            if (string.IsNullOrEmpty(str))
+                return 0;
             int result = 0;
             for (int i = 0; i < str.Length; i++)
             {
-                if (str[i].IsChineseCharacter())
-                    result += 2 * size;
+                if (str[i].IsChineseCharacter() || str[i].IsFullWidthCharacter())
+                    result += 2;
                 else
-                    result += size;
+                    result++;
             }
-            return result;
+            return result * size;
+        }
+        /// <summary>
+        /// 文本最大占位宽度
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int GetTextLength(params string[] str)
+        {
+            if (!str.CheckArrayLength(1))
+                return 0;
+            int maxLength = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (string.IsNullOrEmpty(str[i]))
+                    continue;
+                int length = str[i].GetTextLength();
+                if (length > maxLength)
+                    maxLength = length;
+            }
+            return maxLength;
+        }
+        /// <summary>
+        /// 文本最大占位宽度
+        /// </summary>
+        /// <param name="size"></param>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static int GetTextLength(int size, params string[] str)
+        {
+            if (!str.CheckArrayLength(1))
+                return 0;
+            int maxLength = 0;
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (string.IsNullOrEmpty(str[i]))
+                    continue;
+                int length = str[i].GetTextLength(1);
+                if (length > maxLength)
+                    maxLength = length;
+            }
+            return maxLength;
         }
         /// <summary>
         /// 移除富文本所有标签
@@ -10122,7 +10451,140 @@ namespace RyuGiKen
             }
             return result;
         }
+        /// <summary>
+        /// 曲线克隆
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public static AnimationCurve Clone(this AnimationCurve curve)
+        {
+            AnimationCurve result = new AnimationCurve();
+            for (int i = 0; i < curve.length; i++)
+            {
+                Keyframe key = curve.keys[i];
+                result.AddKey(key);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 曲线转线性折线
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public static AnimationCurve ToLinear(this AnimationCurve curve)
+        {
+            AnimationCurve result = new AnimationCurve();
+//#if UNITY_EDITOR
+            //for (int i = 0; i < curve.length; i++)
+            //{
+            //    AnimationUtility.SetKeyLeftTangentMode(result, i, AnimationUtility.TangentMode.Linear);
+            //    AnimationUtility.SetKeyRightTangentMode(result, i, AnimationUtility.TangentMode.Linear);
+            //}
+            //return result;
+//#endif
+            Keyframe[] keys = curve.keys;
+            for (int i = 0; i < curve.length; i++)
+            {
+                Keyframe key = new Keyframe();
+                key.time = keys[i].time;
+                key.value = keys[i].value;
+                if (i > 0)
+                    key.inTangent = (keys[i].value - keys[i - 1].value) / (keys[i].time - keys[i - 1].time);
+                if (i < keys.Length - 1)
+                    key.outTangent = (keys[i + 1].value - keys[i].value) / (keys[i + 1].time - keys[i].time);
+                result.AddKey(key);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 获取曲线关节点
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <returns></returns>
+        public static Keyframe[] GetAnimationCurveKeys(this AnimationCurve curve)
+        {
+            if (curve == null || curve.length < 1)
+                return null;
+            return curve.keys;
+        }
+        /// <summary>
+        /// 曲线关节点转二维坐标
+        /// </summary>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        public static Vector2[] ToVector2(this Keyframe[] keys)
+        {
+            if (!keys.CheckArrayLength(1))
+                return null;
+            Vector2[] result = new Vector2[keys.Length];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                result[i] = new Vector2(keys[i].time, keys[i].value);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 关键点转JSON字符串
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static string ToJson(this Keyframe key)
+        {
+            return "{" +
+                "\"time\":" + key.time + "," +
+                "\"value\":" + key.value + "," +
+                "\"inTangent\":" + key.inTangent + "," +
+                "\"outTangent\":" + key.outTangent + "," +
+                "\"inWeight\":" + key.inWeight + "," +
+                "\"outWeight\":" + key.outWeight + "," +
+                "\"weightedMode\":" + (int)key.weightedMode + "," +
+                "\"tangentMode\":" + key.tangentMode + "}";
+        }
 #endif
+        /// <summary>
+        /// 拼接JSON字符串
+        /// </summary>
+        /// <param name="str">（属性名，数值）</param>
+        /// <returns></returns>
+        public static string ConcatToJson(string[][] str)
+        {
+            if (str == null)
+                return null;
+            string result = "{";
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i].CheckArrayLength(2))
+                {
+                    result += "\"" + str[i][0] + "\":" + str[i][1];
+                    if (i < str.GetLength(0) - 1)
+                        result += ",";
+                }
+            }
+            result += "}";
+            return result;
+        }
+        /// <summary>
+        /// 拼接JSON字符串
+        /// </summary>
+        /// <param name="str">（属性名，数值）</param>
+        /// <returns></returns>
+        public static string ConcatToJson(string[,] str)
+        {
+            if (str == null)
+                return null;
+            string result = "{";
+            for (int i = 0; i < str.GetLength(0); i++)
+            {
+                if (str.GetLength(1) >= 2)
+                {
+                    result += "\"" + str[i, 0] + "\":" + str[i, 1];
+                    if (i < str.GetLength(0) - 1)
+                        result += ",";
+                }
+            }
+            result += "}";
+            return result;
+        }
         /// <summary>
         /// 交换AB值
         /// </summary>
@@ -12264,6 +12726,18 @@ namespace RyuGiKen
         {
             Color RGB = ConvertHsvToRgb(HSV.Hue, HSV.Saturation, HSV.Value, HSV.alpha);
             return RGB;
+        }
+        /// <summary>
+        /// 灰度化
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public static Color Graying(this Color color)
+        {
+            float gray1 = 0.299f * color.r + 0.587f * color.g + 0.114f * color.b;
+            float gray2 = color.g;
+            float gray = (gray1 + gray2 * 2) / 3f;
+            return new Color(gray, gray, gray, color.a);
         }
     }
     /// <summary>
