@@ -31,6 +31,10 @@ namespace RyuGiKen.Tools
         public event MyEvent OnClick;
         [Tooltip("选择的进度百分比")][Range(0, 1)] public float SelectProgress;
         /// <summary>
+        /// 选择速度（倍数）
+        /// </summary>
+        public float SelectSpeedMultiple = 1;
+        /// <summary>
         /// 选择速度（不相等时变速）
         /// </summary>
         public Vector2 SelectSpeedRange = new Vector2(0.05f, 0.25f);//约10s
@@ -147,7 +151,7 @@ namespace RyuGiKen.Tools
         public virtual void UpdateProgress()
         {
             if (hightlight && canSelect)
-                SelectProgress += Time.deltaTime * ValueAdjust.MappingRange(SelectProgress, Vector2.up, SelectSpeedRange);
+                SelectProgress += Time.deltaTime * ValueAdjust.MappingRange(SelectProgress, Vector2.up, SelectSpeedRange) * SelectSpeedMultiple;
             else if (Mathf.Approximately(UnSelectSpeed, 0))
                 SelectProgress = 0;
             else if (SelectProgress > 1)

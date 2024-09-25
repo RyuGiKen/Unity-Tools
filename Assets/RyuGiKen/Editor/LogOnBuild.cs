@@ -33,20 +33,23 @@ namespace RyuGiKenEditor.Tools
             if (summary.platformGroup != BuildTargetGroup.Standalone)
                 return;
             FileInfo outputExe = new FileInfo(summary.outputPath);
-            string xmlPath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data\\BuildData.xml";
+            string dataPath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data";
+            string xmlPath = dataPath + "\\BuildData.xml";
             GetFile.CreateXmlFile(xmlPath, "Root",
                 GetFile.CreateXElement("BuildDate", summary.buildEndedAt.ToLocalTime().ToString("yyyy_MM_dd")),
                 GetFile.CreateXElement("BuildTime", summary.buildEndedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")),
                 GetFile.CreateXElement("BuildSize", summary.totalSize.ToString()),
                 GetFile.CreateXElement("BuildUnityVersion", RyuGiKen.Tools.Version.GetProgramUnityVersion())
             );
-            string VersionFilePath = outputExe.Directory.FullName + "\\" + outputExe.GetFileNameWithOutType() + "_Data\\StreamingAssets";
+            string VersionFilePath = dataPath + "\\StreamingAssets";
             if (!Directory.Exists(VersionFilePath))
                 Directory.CreateDirectory(VersionFilePath);
             VersionFilePath += "\\Version.txt";
             FileStream file = new FileStream(VersionFilePath, FileMode.OpenOrCreate);
             file.Close();
             File.WriteAllText(VersionFilePath, RyuGiKen.Tools.Version.LogVersionDate(), Encoding.UTF8);
+            DirectoryInfo dataDirectoryInfo = new DirectoryInfo(dataPath);
+            dataDirectoryInfo.LastWriteTime = DateTime.Now;//刷新输出文件夹的修改时间
         }
     }
 }

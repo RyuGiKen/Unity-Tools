@@ -90,33 +90,61 @@ namespace RyuGiKen.Localization
                         if (i < (configuration as LocalizationConfiguration).configurations.items.Count)
                         {
                             Localization objects = (configuration as LocalizationConfiguration).configurations.items[i];
+                            LocalizationItem item = objects.Find(language);
 
                             if (components[i].TryGetComponent(out Text text))
-                                text.text = objects.Find(language);
+                            {
+                                if (objects.type == ObjectType.OtherObject && item.otherObject is Font)
+                                    text.font = item.otherObject as Font;
+                                else
+                                    text.text = item;
+                            }
                             else if (components[i].TryGetComponent(out InputField input))
-                                input.text = objects.Find(language);
+                            {
+                                if (objects.type == ObjectType.OtherObject && item.otherObject is Font)
+                                    input.textComponent.font = item.otherObject as Font;
+                                else
+                                    input.text = item;
+                            }
+                            else if (components[i].TryGetComponent(out TextMesh textMesh))
+                            {
+                                if (objects.type == ObjectType.OtherObject && item.otherObject is Font)
+                                    textMesh.font = item.otherObject as Font;
+                                else
+                                    textMesh.text = item;
+                            }
                             else if (components[i].TryGetComponent(out AudioSource audio))
-                                audio.clip = objects.Find(language);
+                                audio.clip = item;
                             else if (components[i].TryGetComponent(out Image image))
                             {
-                                Sprite sprite = objects.Find(language);
+                                Sprite sprite = item;
                                 image.sprite = sprite;
                                 if (SetColorClearWhenNoSprite && !sprite)
                                     image.color = Color.clear;
                             }
                             else if (components[i].TryGetComponent(out RawImage rawImage))
-                                rawImage.texture = objects.Find(language);
+                                rawImage.texture = item;
                             else if (components[i].TryGetComponent(out SpriteRenderer spriteRenderer))
                             {
-                                Sprite sprite = objects.Find(language);
+                                Sprite sprite = item;
                                 spriteRenderer.sprite = sprite;
                                 if (SetColorClearWhenNoSprite && !sprite)
                                     spriteRenderer.color = Color.clear;
                             }
                             else if (components[i].TryGetComponent(out MeshRenderer meshRenderer))
-                                meshRenderer.material.mainTexture = objects.Find(language);
+                            {
+                                if (objects.type == ObjectType.OtherObject && item.otherObject is Material)
+                                    meshRenderer.material = item.otherObject as Material;
+                                else
+                                    meshRenderer.material.mainTexture = item;
+                            }
                             else if (components[i].TryGetComponent(out SkinnedMeshRenderer skinnedMeshRenderer))
-                                skinnedMeshRenderer.material.mainTexture = objects.Find(language);
+                            {
+                                if (objects.type == ObjectType.OtherObject && item.otherObject is Material)
+                                    skinnedMeshRenderer.material = item.otherObject as Material;
+                                else
+                                    skinnedMeshRenderer.material.mainTexture = item;
+                            }
                         }
                     }
                     else if (configuration is LocalizationStringConfiguration)
@@ -124,11 +152,14 @@ namespace RyuGiKen.Localization
                         if (i < (configuration as LocalizationStringConfiguration).configurations.items.Count)
                         {
                             LocalizationString objects2 = (configuration as LocalizationStringConfiguration).configurations.items[i];
+                            LocalizationStringItem item = objects2.Find(language);
 
                             if (components[i].TryGetComponent(out Text text))
-                                text.text = objects2.Find(language);
+                                text.text = item;
                             else if (components[i].TryGetComponent(out InputField input))
-                                input.text = objects2.Find(language);
+                                input.text = item;
+                            else if (components[i].TryGetComponent(out TextMesh textMesh))
+                                textMesh.text = item;
                         }
                     }
                 }
