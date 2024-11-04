@@ -6,6 +6,7 @@ using UnityEditor;
 #endif
 using RyuGiKen;
 using RyuGiKen.Tools;
+using UnityEngine.UI;
 namespace RyuGiKen.Tools
 {
     /// <summary>
@@ -74,6 +75,12 @@ namespace RyuGiKenEditor.Tools
                     EditorGUILayout.Vector2Field("anchorMax", rectTransform.anchorMax);
                     //EditorGUILayout.Vector4Field("rect：", new Vector4(rectTransform.rect.x, rectTransform.rect.y, rectTransform.rect.width, rectTransform.rect.height));
                     EditorGUILayout.RectField("rect：", rectTransform.rect);
+                }
+                if (transform.TryGetComponent(out LayoutGroup layoutGroup))
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.Vector2Field("flexible", new Vector2(layoutGroup.flexibleWidth, layoutGroup.flexibleHeight));
+                    EditorGUILayout.Vector2Field("preferred", new Vector2(layoutGroup.preferredWidth, layoutGroup.preferredHeight));
                 }
                 if (transform.TryGetComponent(out Collider collider))
                 {

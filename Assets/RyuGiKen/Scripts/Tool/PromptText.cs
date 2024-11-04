@@ -17,6 +17,8 @@ namespace RyuGiKen.Tools
         public Text m_Text;
         public RectTransform ShowPos;
         public RectTransform HidePos;
+        public float LerpSpeed = 1;
+        public Vector2 LerpMoveLimit = new Vector2(2, 2);
         protected virtual void Reset()
         {
             m_Text = this.GetComponentInChildren<Text>();
@@ -59,12 +61,23 @@ namespace RyuGiKen.Tools
 
             if (ConText && ShowPos && HidePos)
             {
-                ConText.rectTransform.anchoredPosition = Vector2.Lerp(ConText.rectTransform.anchoredPosition, show ? ShowPos.anchoredPosition : HidePos.anchoredPosition, Time.unscaledDeltaTime);
+                Vector2 tarPos = show ? ShowPos.anchoredPosition : HidePos.anchoredPosition;
+                Vector2 newPos = tarPos;
+                if (LerpSpeed > 0)
+                {
+                    newPos = Vector2.Lerp(ConText.rectTransform.anchoredPosition, tarPos, Time.unscaledDeltaTime * LerpSpeed);
+
+                    if (newPos.x.JudgeRange(tarPos.x, LerpMoveLimit.x))
+                        newPos.x = tarPos.x;
+                    if (newPos.y.JudgeRange(tarPos.y, LerpMoveLimit.y))
+                        newPos.y = tarPos.y;
+                }
+                ConText.rectTransform.anchoredPosition = newPos;
             }
         }
         protected virtual void UpdateText(string str)
         {
-            m_Text.text = str;
+            m_Text.SetText(str);
         }
         public virtual void Show()
         {

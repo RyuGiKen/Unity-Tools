@@ -9,14 +9,14 @@ namespace RyuGiKen.Tools
     /// </summary>
     [ExecuteAlways]
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(Text))]
-    public class StyleText : MonoBehaviour
+    //[RequireComponent(typeof(Text))]
+    public class StyleText : MonoBehaviour, ISetColorStyle
     {
         public bool AutoSetTextColor;
         [SerializeField] protected ColorStyle BackgroundStyle;
         [SerializeField] protected ColorStyle TextStyle;
         public Graphic TextBackground;
-        public Text m_Text;
+        public Graphic m_Text;
         public bool ShowTestGrayData;
         [Range(0, 1)] public float TestGrayData;
         public const float GrayValue = 0.71f;
@@ -87,9 +87,13 @@ namespace RyuGiKen.Tools
         /// </summary>
         Dark,
     }
+    public interface ISetColorStyle
+    {
+        public void SetStyle(ColorStyle colorStyle);
+    }
     public static partial class Extension
     {
-        public static void SetTextStyle(this Text text, ColorStyle style)
+        public static void SetTextStyle(this Graphic text, ColorStyle style)
         {
             if (text)
             {

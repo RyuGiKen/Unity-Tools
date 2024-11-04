@@ -31,15 +31,20 @@ namespace RyuGiKen.Tools
         }
         protected void Start()
         {
-            Refresh(toggle.isOn);
+            Refresh();
         }
         public void Refresh(bool value)
         {
+            if (toggle.isOn != value)
+                toggle.isOn = value;
+
             panels?.SetActive(value);
-            //if (SetToggleCheckmarkActive)
-            //    toggle.graphic.SetActive(value);
             SetToggleCheckmarkObjectsActive.SetActive(value);
             SetToggleCheckmarkObjectsInactive.SetActive(!value);
+        }
+        public void Refresh()
+        {
+            Refresh(toggle.isOn);
         }
     }
 }
