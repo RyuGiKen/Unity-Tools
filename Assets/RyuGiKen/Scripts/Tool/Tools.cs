@@ -457,7 +457,7 @@ namespace RyuGiKen
                     {
                         foreach (string nodeName in NodeName)
                         {
-                            if (!string.IsNullOrWhiteSpace(nodeName) && (x1.Name == nodeName || (IgnoreCase && x1.Name.ContainIgnoreCase(nodeName))))
+                            if (!string.IsNullOrWhiteSpace(nodeName) && (x1.Name == nodeName || (IgnoreCase && x1.Name.ToLower().CompareTo(nodeName.ToLower()) == 0)))
                             {
                                 result = x1.InnerText;
                                 breakLoop = true;
@@ -2536,6 +2536,172 @@ namespace RyuGiKen
             }
             return null;
         }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="pos"></param>
+        /// <param name="loop">循环线</param>
+        public static void DrawLineList(this LineRenderer line, List<Vector2> pos, bool loop)
+        {
+            if (!line)
+                return;
+            if (pos.CheckListLength(2))
+            {
+                DrawLine(line, pos.ToArray(), loop);
+            }
+            else
+            {
+                line.positionCount = 0;
+            }
+        }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="pos"></param>
+        /// <param name="loop">循环线</param>
+        public static void DrawLineList(this LineRenderer line, List<Vector3> pos, bool loop)
+        {
+            if (!line)
+                return;
+            if (pos.CheckListLength(2))
+            {
+                DrawLine(line, pos.ToArray(), loop);
+            }
+            else
+            {
+                line.positionCount = 0;
+            }
+        }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="pos"></param>
+        /// <param name="loop">循环线</param>
+        public static void DrawLine(this LineRenderer line, Vector2[] pos, bool loop)
+        {
+            if (!line)
+                return;
+
+            if (pos.CheckArrayLength(2))
+            {
+                if (loop)
+                {
+                    line.positionCount = pos.Length + 1;
+                    for (int i = 0; i < pos.Length; i++)
+                        line.SetPosition(i, pos[i]);
+                    line.SetPosition(pos.Length, pos.First());
+                }
+                else
+                {
+                    line.positionCount = pos.Length;
+                    for (int i = 0; i < pos.Length; i++)
+                        line.SetPosition(i, pos[i]);
+                }
+            }
+            else
+            {
+                line.positionCount = 0;
+            }
+        }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="pos"></param>
+        /// <param name="loop">循环线</param>
+        public static void DrawLine(this LineRenderer line, Vector3[] pos, bool loop)
+        {
+            if (!line)
+                return;
+
+            if (pos.CheckArrayLength(2))
+            {
+                if (loop)
+                {
+                    line.positionCount = pos.Length + 1;
+                    line.SetPositions(pos);
+                    line.SetPosition(pos.Length, pos.First());
+                }
+                else
+                {
+                    line.positionCount = pos.Length;
+                    line.SetPositions(pos);
+                }
+            }
+            else
+            {
+                line.positionCount = 0;
+            }
+        }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="loop"></param>
+        public static void DrawGizmosLineList(List<Vector2> points, bool loop)
+        {
+            if (!Application.isEditor)
+                return;
+            if (!points.CheckListLength(2))
+                return;
+            DrawGizmosLine(points.ToArray(), loop);
+        }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="loop"></param>
+        public static void DrawGizmosLineList(List<Vector3> points, bool loop)
+        {
+            if (!Application.isEditor)
+                return;
+            if (!points.CheckListLength(2))
+                return;
+            DrawGizmosLine(points.ToArray(), loop);
+        }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="loop"></param>
+        public static void DrawGizmosLine(Vector2[] points, bool loop)
+        {
+            if (!Application.isEditor)
+                return;
+            if (!points.CheckArrayLength(2))
+                return;
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                Gizmos.DrawLine(points[i], points[i + 1]);
+            }
+            if (loop && points.Length > 2)
+            {
+                Gizmos.DrawLine(points.First(), points.Last());
+            }
+        }
+        /// <summary>
+        /// 绘制曲线
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="loop"></param>
+        public static void DrawGizmosLine(Vector3[] points, bool loop)
+        {
+            if (!Application.isEditor)
+                return;
+            if (!points.CheckArrayLength(2))
+                return;
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                Gizmos.DrawLine(points[i], points[i + 1]);
+            }
+            if (loop && points.Length > 2)
+            {
+                Gizmos.DrawLine(points.First(), points.Last());
+            }
+        }
 #endif
     }
     /// <summary>
@@ -4119,6 +4285,34 @@ namespace RyuGiKen
             return result;
         }
         /// <summary>
+        /// 四维坐标数组转三维坐标数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Vector3[] ToVector3(this Vector4[] value)
+        {
+            Vector3[] result = new Vector3[value.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = value[i];
+            }
+            return result;
+        }
+        /// <summary>
+        /// 四维坐标数组转三维坐标数组
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static List<Vector3> ToVector3(this List<Vector4> value)
+        {
+            List<Vector3> result = new List<Vector3>();
+            for (int i = 0; i < value.Count; i++)
+            {
+                result.Add(value[i]);
+            }
+            return result;
+        }
+        /// <summary>
         /// x,y,z数组转三维坐标数组
         /// </summary>
         /// <param name="x"></param>
@@ -4697,6 +4891,34 @@ namespace RyuGiKen
                 item01[i] = array[i].Item1;
                 item02[i] = array[i].Item2;
             }
+        }
+        /// <summary>
+        /// 转值数组
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static float[] GetValues(this ValueWithRange[] values)
+        {
+            if (!values.CheckArrayLength(1))
+                return null;
+            float[] result = new float[values.Length];
+            for (int i = 0; i < values.Length; i++)
+                result[i] = values[i];
+            return result;
+        }
+        /// <summary>
+        /// 转值数组
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static float[] GetValues(this ValueInRange[] values)
+        {
+            if (!values.CheckArrayLength(1))
+                return null;
+            float[] result = new float[values.Length];
+            for (int i = 0; i < values.Length; i++)
+                result[i] = values[i];
+            return result;
         }
 #if UNITY_5_3_OR_NEWER
         /// <summary>
@@ -9600,6 +9822,30 @@ namespace RyuGiKen
                 return false;
         }
         /// <summary>
+        /// 两数组数值上是否相等
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array1"></param>
+        /// <param name="array2"></param>
+        /// <returns></returns>
+        public static bool CompareArray<T>(this T[] array1, T[] array2) where T : IComparable<T>
+        {
+            if (array1 == null && array2 == null)
+                return true;
+            else if (array1 == null || array2 == null)
+                return false;
+            if (array1.Length == array2.Length)
+            {
+                for (int i = 0; i < array1.Length; i++)
+                {
+                    if (array1[i].CompareTo(array2[i]) != 0)
+                        return false;
+                }
+                return true;
+            }
+            return false;
+        }
+        /// <summary>
         /// 等比缩放
         /// </summary>
         /// <param name="value"></param>
@@ -9772,6 +10018,16 @@ namespace RyuGiKen
             return (float)Math.Round(value, digits);
             //return (float)(Math.Round(value * Math.Pow(10, digits)) * Math.Pow(0.1f, digits));
             //return float.Parse(value.ToString("f" + digits));
+        }
+        /// <summary>
+        /// 精确到小数点后几位（值，位数）
+        /// </summary>
+        /// <param name="value">值</param>
+        /// <param name="digits">位数</param>
+        /// <returns></returns>
+        public static float RoundByString(this float value, int digits = 0)
+        {
+            return float.Parse(value.ToString("f" + digits));
         }
         /// <summary>
         /// 精确到小数点后几位（值，位数）
@@ -10285,8 +10541,9 @@ namespace RyuGiKen
         /// <param name="type">类型</param>
         /// <param name="size">平滑范围</param>
         /// <param name="iterations">插值倍数（1为原数量）</param>
+        /// <param name="outputIteration">输出插值扩充后的数据</param>
         /// <returns></returns>
-        public static Vector2[] Smoothing(this Vector2[] array, Vector2 type, int size = 1, int iterations = 1)
+        public static Vector2[] Smoothing(this Vector2[] array, Vector2 type, int size = 1, int iterations = 1, bool outputIteration = true)
         {
             if (array == null || array.Length < 2)
                 return null;
@@ -10294,8 +10551,8 @@ namespace RyuGiKen
                 type = Vector2.up;
 
             float[][] temp = new float[2][];
-            temp[0] = type.x != 0 ? array.GetVectorValue("X").Smoothing(size, iterations, true) : null;
-            temp[1] = type.y != 0 ? array.GetVectorValue("Y").Smoothing(size, iterations, true) : null;
+            temp[0] = type.x != 0 ? array.GetVectorValue("X").Smoothing(size, iterations, outputIteration) : null;
+            temp[1] = type.y != 0 ? array.GetVectorValue("Y").Smoothing(size, iterations, outputIteration) : null;
             Vector2[] result = new Vector2[(array.Length - 1) * iterations + 1];
             for (int i = 0; i < result.Length; i++)
             {
@@ -10312,8 +10569,9 @@ namespace RyuGiKen
         /// <param name="type">类型</param>
         /// <param name="size">平滑范围</param>
         /// <param name="iterations">插值倍数（1为原数量）</param>
+        /// <param name="outputIteration">输出插值扩充后的数据</param>
         /// <returns></returns>
-        public static Vector3[] Smoothing(this Vector3[] array, Vector3 type, int size = 1, int iterations = 1)
+        public static Vector3[] Smoothing(this Vector3[] array, Vector3 type, int size = 1, int iterations = 1, bool outputIteration = true)
         {
             if (array == null || array.Length < 2)
                 return null;
@@ -10321,9 +10579,9 @@ namespace RyuGiKen
                 type = Vector3.up;
 
             float[][] temp = new float[3][];
-            temp[0] = type.x != 0 ? array.GetVectorValue("X").Smoothing(size, iterations, true) : null;
-            temp[1] = type.y != 0 ? array.GetVectorValue("Y").Smoothing(size, iterations, true) : null;
-            temp[2] = type.z != 0 ? array.GetVectorValue("Z").Smoothing(size, iterations, true) : null;
+            temp[0] = type.x != 0 ? array.GetVectorValue("X").Smoothing(size, iterations, outputIteration) : null;
+            temp[1] = type.y != 0 ? array.GetVectorValue("Y").Smoothing(size, iterations, outputIteration) : null;
+            temp[2] = type.z != 0 ? array.GetVectorValue("Z").Smoothing(size, iterations, outputIteration) : null;
             Vector3[] result = new Vector3[(array.Length - 1) * iterations + 1];
             for (int i = 0; i < result.Length; i++)
             {
@@ -10350,7 +10608,7 @@ namespace RyuGiKen
             int count = (array.Length - 1) * iterations + 1;//扩充后数组长度
             float[] result = new float[array.Length];
             float[] resultLong = new float[count];
-            if (iterations == 1)
+            if (iterations <= 1)
             {
                 for (int i = 0; i < result.Length; i++)
                 {
@@ -10730,6 +10988,43 @@ namespace RyuGiKen
                 Max += array[i];
             }
             return Max * 1f / (endIndex + 1 - startIndex);
+        }
+        /// <summary>
+        /// 方差
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static float Variance(float[] array)
+        {
+            if (!array.CheckArrayLength(1))
+                return 0;
+            float sum = array.Sum();
+            float average = sum / array.Length.Clamp(1);
+            double temp = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                temp += Math.Pow(array[i] - average, 2);
+            }
+            return temp.ToFloat();
+        }
+        /// <summary>
+        /// 标准差
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static float StandardDeviation(float[] array)
+        {
+            if (!array.CheckArrayLength(1))
+                return 0;
+
+            float sum = array.Sum();
+            float average = sum / array.Length.Clamp(1);
+            double temp = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                temp += Math.Pow(array[i] - average, 2);
+            }
+            return Math.Sqrt(temp / array.Length.Clamp(1)).ToFloat();
         }
         /// <summary>
         /// 按权重映射
